@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "386634993075",
+    "project_id": "login1-78a38",
+    "storage_bucket": "login1-78a38.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:386634993075:android:91e624d4ecd255d4abcfc6",
+        "android_client_info": {
+          "package_name": "com.mayancombat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbQpq6rXN-X1j3mC9pffzjhawxMxiQa5E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

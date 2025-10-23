@@ -1,0 +1,559 @@
+fileFormatVersion: 2
+guid: da012b04ffac13449a5fcb2ae1ebbe9e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7039975200540589410
+    second: IXQUIC_0
+  - first:
+      213: -3579116799909083862
+    second: IXQUIC_1
+  - first:
+      213: 8701176092789323970
+    second: IXQUIC_2
+  - first:
+      213: 6636466791649212915
+    second: IXQUIC_3
+  - first:
+      213: 3592741631771131795
+    second: IXQUIC_4
+  - first:
+      213: 8659238433173049737
+    second: IXQUIC_5
+  - first:
+      213: -5389093085810651467
+    second: IXQUIC_6
+  - first:
+      213: -5830964571429527634
+    second: IXQUIC_7
+  - first:
+      213: -2367182037803020784
+    second: IXQUIC_8
+  - first:
+      213: 9012805655537405972
+    second: IXQUIC_9
+  - first:
+      213: 3544825912269893164
+    second: IXQUIC_10
+  - first:
+      213: -7109135480434851839
+    second: IXQUIC_11
+  - first:
+      213: 3883040230336016791
+    second: IXQUIC_12
+  - first:
+      213: -4106958770883279540
+    second: IXQUIC_13
+  - first:
+      213: 709135677064086179
+    second: IXQUIC_14
+  - first:
+      213: 4486485606861605580
+    second: IXQUIC_15
+  - first:
+      213: 8236044019590291361
+    second: IXQUIC_16
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: IXQUIC_0
+      rect:
+        serializedVersion: 2
+        x: 284
+        y: 1
+        width: 119
+        height: 254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e920830cadbfc4e90800000000000000
+      internalID: -7039975200540589410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_1
+      rect:
+        serializedVersion: 2
+        x: 425
+        y: 1
+        width: 121
+        height: 254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2549c3cb3c645ec0800000000000000
+      internalID: -3579116799909083862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_2
+      rect:
+        serializedVersion: 2
+        x: 563
+        y: 1
+        width: 120
+        height: 254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c834da3e89c0c870800000000000000
+      internalID: 8701176092789323970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_3
+      rect:
+        serializedVersion: 2
+        x: 699
+        y: 1
+        width: 119
+        height: 254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f97defa267791c50800000000000000
+      internalID: 6636466791649212915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_4
+      rect:
+        serializedVersion: 2
+        x: 945
+        y: 1
+        width: 121
+        height: 254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39fb97b9a7bfbd130800000000000000
+      internalID: 3592741631771131795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_5
+      rect:
+        serializedVersion: 2
+        x: 1138
+        y: 4
+        width: 123
+        height: 251
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98190b2f97bcb2870800000000000000
+      internalID: 8659238433173049737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_6
+      rect:
+        serializedVersion: 2
+        x: 1322
+        y: 1
+        width: 120
+        height: 254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5be0ebe14681635b0800000000000000
+      internalID: -5389093085810651467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_7
+      rect:
+        serializedVersion: 2
+        x: 1517
+        y: 3
+        width: 122
+        height: 252
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eaf1e06bd90441fa0800000000000000
+      internalID: -5830964571429527634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_8
+      rect:
+        serializedVersion: 2
+        x: 1773
+        y: 1
+        width: 118
+        height: 254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01ec01e7a74162fd0800000000000000
+      internalID: -2367182037803020784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_9
+      rect:
+        serializedVersion: 2
+        x: 1939
+        y: 0
+        width: 129
+        height: 235
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41050f7edfae31d70800000000000000
+      internalID: 9012805655537405972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_10
+      rect:
+        serializedVersion: 2
+        x: 2122
+        y: 22
+        width: 189
+        height: 234
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c2e627bc260c13130800000000000000
+      internalID: 3544825912269893164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_11
+      rect:
+        serializedVersion: 2
+        x: 2340
+        y: 1
+        width: 124
+        height: 226
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1000e8442f6475d90800000000000000
+      internalID: -7109135480434851839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_12
+      rect:
+        serializedVersion: 2
+        x: 2571
+        y: 0
+        width: 118
+        height: 253
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 791bab9248453e530800000000000000
+      internalID: 3883040230336016791
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_13
+      rect:
+        serializedVersion: 2
+        x: 2730
+        y: 0
+        width: 180
+        height: 223
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c45c35ae1c62107c0800000000000000
+      internalID: -4106958770883279540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_14
+      rect:
+        serializedVersion: 2
+        x: 2916
+        y: 0
+        width: 174
+        height: 255
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a206f0242b57d900800000000000000
+      internalID: 709135677064086179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_15
+      rect:
+        serializedVersion: 2
+        x: 3134
+        y: 0
+        width: 188
+        height: 227
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cca83e693e2334e30800000000000000
+      internalID: 4486485606861605580
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIC_16
+      rect:
+        serializedVersion: 2
+        x: 3361
+        y: 1
+        width: 348
+        height: 184
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1afd82e366e4c4270800000000000000
+      internalID: 8236044019590291361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      IXQUIC_0: -7039975200540589410
+      IXQUIC_1: -3579116799909083862
+      IXQUIC_10: 3544825912269893164
+      IXQUIC_11: -7109135480434851839
+      IXQUIC_12: 3883040230336016791
+      IXQUIC_13: -4106958770883279540
+      IXQUIC_14: 709135677064086179
+      IXQUIC_15: 4486485606861605580
+      IXQUIC_16: 8236044019590291361
+      IXQUIC_2: 8701176092789323970
+      IXQUIC_3: 6636466791649212915
+      IXQUIC_4: 3592741631771131795
+      IXQUIC_5: 8659238433173049737
+      IXQUIC_6: -5389093085810651467
+      IXQUIC_7: -5830964571429527634
+      IXQUIC_8: -2367182037803020784
+      IXQUIC_9: 9012805655537405972
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
