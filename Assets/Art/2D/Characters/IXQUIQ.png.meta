@@ -1,0 +1,1261 @@
+fileFormatVersion: 2
+guid: 1e8efa32a11a8b44f8fc0bd32b1e2336
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1337678260068957320
+    second: IXQUIQ_0
+  - first:
+      213: 6230428201053056734
+    second: IXQUIQ_1
+  - first:
+      213: 8545902081502945983
+    second: IXQUIQ_2
+  - first:
+      213: -6412671456756908954
+    second: IXQUIQ_3
+  - first:
+      213: -7566654339758951471
+    second: IXQUIQ_4
+  - first:
+      213: -4390471723225160326
+    second: IXQUIQ_5
+  - first:
+      213: 8352439033816550832
+    second: IXQUIQ_6
+  - first:
+      213: -4003226646405311605
+    second: IXQUIQ_7
+  - first:
+      213: -3020340904287646527
+    second: IXQUIQ_8
+  - first:
+      213: -5726223006451323776
+    second: IXQUIQ_9
+  - first:
+      213: 6821455931775975794
+    second: IXQUIQ_10
+  - first:
+      213: 7191716109998120867
+    second: IXQUIQ_11
+  - first:
+      213: -5569755095709457954
+    second: IXQUIQ_12
+  - first:
+      213: -5343683128377232263
+    second: IXQUIQ_13
+  - first:
+      213: 1187609515360773156
+    second: IXQUIQ_14
+  - first:
+      213: 3668836998263753616
+    second: IXQUIQ_15
+  - first:
+      213: -8107677963477593066
+    second: IXQUIQ_16
+  - first:
+      213: 3540367704153039029
+    second: IXQUIQ_17
+  - first:
+      213: -8081544455415171067
+    second: IXQUIQ_18
+  - first:
+      213: 5944713506825036275
+    second: IXQUIQ_19
+  - first:
+      213: -2271578335771296061
+    second: IXQUIQ_20
+  - first:
+      213: -6801545349695190749
+    second: IXQUIQ_21
+  - first:
+      213: 6888464376825984305
+    second: IXQUIQ_22
+  - first:
+      213: 2993418590151524542
+    second: IXQUIQ_23
+  - first:
+      213: -1244350104213615853
+    second: IXQUIQ_24
+  - first:
+      213: -7051828981586278892
+    second: IXQUIQ_25
+  - first:
+      213: 8151037212498094315
+    second: IXQUIQ_26
+  - first:
+      213: 8443488902356821452
+    second: IXQUIQ_27
+  - first:
+      213: 653558155430293393
+    second: IXQUIQ_28
+  - first:
+      213: -1552108968728596732
+    second: IXQUIQ_29
+  - first:
+      213: 8440605748589229605
+    second: IXQUIQ_30
+  - first:
+      213: -8330359741395434472
+    second: IXQUIQ_31
+  - first:
+      213: -4331535636412466982
+    second: IXQUIQ_32
+  - first:
+      213: 6582149928467055115
+    second: IXQUIQ_33
+  - first:
+      213: 4937458723709559123
+    second: IXQUIQ_34
+  - first:
+      213: -8853774225791519757
+    second: IXQUIQ_35
+  - first:
+      213: -544541613623452909
+    second: IXQUIQ_36
+  - first:
+      213: -1047823752596003740
+    second: IXQUIQ_37
+  - first:
+      213: -772343008083182201
+    second: IXQUIQ_38
+  - first:
+      213: 9019236871232842732
+    second: IXQUIQ_39
+  - first:
+      213: 5954153507385529479
+    second: IXQUIQ_40
+  - first:
+      213: 7273652743373106486
+    second: IXQUIQ_41
+  - first:
+      213: -6815909925218111309
+    second: IXQUIQ_42
+  - first:
+      213: -3156628981828807225
+    second: IXQUIQ_43
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: IXQUIQ_0
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 631
+        width: 112
+        height: 242
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 873c3d4b5bc9f6de0800000000000000
+      internalID: -1337678260068957320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_1
+      rect:
+        serializedVersion: 2
+        x: 503
+        y: 633
+        width: 116
+        height: 240
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edee75a407de67650800000000000000
+      internalID: 6230428201053056734
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_2
+      rect:
+        serializedVersion: 2
+        x: 697
+        y: 635
+        width: 110
+        height: 237
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb2214d3aa4299670800000000000000
+      internalID: 8545902081502945983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_3
+      rect:
+        serializedVersion: 2
+        x: 898
+        y: 631
+        width: 108
+        height: 241
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66cb7be294d9107a0800000000000000
+      internalID: -6412671456756908954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_4
+      rect:
+        serializedVersion: 2
+        x: 1068
+        y: 632
+        width: 119
+        height: 238
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d3ff74c7f7ddf690800000000000000
+      internalID: -7566654339758951471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_5
+      rect:
+        serializedVersion: 2
+        x: 1255
+        y: 632
+        width: 125
+        height: 242
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7564ccba39e113c0800000000000000
+      internalID: -4390471723225160326
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_6
+      rect:
+        serializedVersion: 2
+        x: 1445
+        y: 631
+        width: 112
+        height: 244
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bd0eb25c03d9e370800000000000000
+      internalID: 8352439033816550832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_7
+      rect:
+        serializedVersion: 2
+        x: 1636
+        y: 632
+        width: 106
+        height: 242
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8312a9339ea178c0800000000000000
+      internalID: -4003226646405311605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_8
+      rect:
+        serializedVersion: 2
+        x: 1819
+        y: 631
+        width: 115
+        height: 269
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1cc4a5333f79516d0800000000000000
+      internalID: -3020340904287646527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_9
+      rect:
+        serializedVersion: 2
+        x: 1985
+        y: 630
+        width: 111
+        height: 246
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08cacc3b38e5880b0800000000000000
+      internalID: -5726223006451323776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_10
+      rect:
+        serializedVersion: 2
+        x: 2164
+        y: 630
+        width: 120
+        height: 244
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2710d70470eaaae50800000000000000
+      internalID: 6821455931775975794
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_11
+      rect:
+        serializedVersion: 2
+        x: 2355
+        y: 632
+        width: 128
+        height: 242
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3af54edd2bb1ec360800000000000000
+      internalID: 7191716109998120867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_12
+      rect:
+        serializedVersion: 2
+        x: 2546
+        y: 632
+        width: 119
+        height: 240
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed1e052104144b2b0800000000000000
+      internalID: -5569755095709457954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_13
+      rect:
+        serializedVersion: 2
+        x: 2724
+        y: 630
+        width: 113
+        height: 241
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 974b3dcb18c67d5b0800000000000000
+      internalID: -5343683128377232263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_14
+      rect:
+        serializedVersion: 2
+        x: 2900
+        y: 632
+        width: 110
+        height: 243
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 424e3fedf8c3b7010800000000000000
+      internalID: 1187609515360773156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_15
+      rect:
+        serializedVersion: 2
+        x: 3080
+        y: 633
+        width: 110
+        height: 239
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09b4254cfc35ae230800000000000000
+      internalID: 3668836998263753616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_16
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 321
+        width: 115
+        height: 243
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 614d7a939ddbb7f80800000000000000
+      internalID: -8107677963477593066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_17
+      rect:
+        serializedVersion: 2
+        x: 238
+        y: 320
+        width: 125
+        height: 244
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b0ae445ba9e12130800000000000000
+      internalID: 3540367704153039029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_18
+      rect:
+        serializedVersion: 2
+        x: 420
+        y: 320
+        width: 127
+        height: 245
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 508737ab22698df80800000000000000
+      internalID: -8081544455415171067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_19
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 319
+        width: 129
+        height: 246
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f1e5c1207ddf7250800000000000000
+      internalID: 5944713506825036275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_20
+      rect:
+        serializedVersion: 2
+        x: 779
+        y: 319
+        width: 127
+        height: 246
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3cef0e8f98bb970e0800000000000000
+      internalID: -2271578335771296061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_21
+      rect:
+        serializedVersion: 2
+        x: 947
+        y: 324
+        width: 141
+        height: 245
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32945b36a8e0c91a0800000000000000
+      internalID: -6801545349695190749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_22
+      rect:
+        serializedVersion: 2
+        x: 1129
+        y: 325
+        width: 141
+        height: 245
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13535a4aaddb89f50800000000000000
+      internalID: 6888464376825984305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_23
+      rect:
+        serializedVersion: 2
+        x: 1311
+        y: 320
+        width: 138
+        height: 246
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb048021952ca8920800000000000000
+      internalID: 2993418590151524542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_24
+      rect:
+        serializedVersion: 2
+        x: 1494
+        y: 323
+        width: 141
+        height: 249
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31b802e4c2e2bbee0800000000000000
+      internalID: -1244350104213615853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_25
+      rect:
+        serializedVersion: 2
+        x: 1677
+        y: 319
+        width: 138
+        height: 247
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 416ceb747eed22e90800000000000000
+      internalID: -7051828981586278892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_26
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 324
+        width: 141
+        height: 250
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be860f1a82d4e1170800000000000000
+      internalID: 8151037212498094315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_27
+      rect:
+        serializedVersion: 2
+        x: 2039
+        y: 325
+        width: 141
+        height: 254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc56ee1db6c4d2570800000000000000
+      internalID: 8443488902356821452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_28
+      rect:
+        serializedVersion: 2
+        x: 2224
+        y: 325
+        width: 141
+        height: 254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19f6b7efda7e11900800000000000000
+      internalID: 653558155430293393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_29
+      rect:
+        serializedVersion: 2
+        x: 2408
+        y: 324
+        width: 143
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40feb3acd1dc57ae0800000000000000
+      internalID: -1552108968728596732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_30
+      rect:
+        serializedVersion: 2
+        x: 2594
+        y: 319
+        width: 143
+        height: 260
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 526f7c5453e032570800000000000000
+      internalID: 8440605748589229605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_31
+      rect:
+        serializedVersion: 2
+        x: 2780
+        y: 324
+        width: 143
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81409ea83fd946c80800000000000000
+      internalID: -8330359741395434472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_32
+      rect:
+        serializedVersion: 2
+        x: 2965
+        y: 323
+        width: 138
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad870b3c94b43e3c0800000000000000
+      internalID: -4331535636412466982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_33
+      rect:
+        serializedVersion: 2
+        x: 3148
+        y: 325
+        width: 128
+        height: 251
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0244a87c7e785b50800000000000000
+      internalID: 6582149928467055115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_34
+      rect:
+        serializedVersion: 2
+        x: 3332
+        y: 321
+        width: 118
+        height: 248
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 351acd7ac80658440800000000000000
+      internalID: 4937458723709559123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_35
+      rect:
+        serializedVersion: 2
+        x: 904
+        y: 20
+        width: 121
+        height: 228
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f3ff2e3043112580800000000000000
+      internalID: -8853774225791519757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_36
+      rect:
+        serializedVersion: 2
+        x: 1076
+        y: 43
+        width: 185
+        height: 226
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31b5e8a99466178f0800000000000000
+      internalID: -544541613623452909
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_37
+      rect:
+        serializedVersion: 2
+        x: 1288
+        y: 22
+        width: 120
+        height: 218
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4646c4f39d16571f0800000000000000
+      internalID: -1047823752596003740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_38
+      rect:
+        serializedVersion: 2
+        x: 1510
+        y: 11
+        width: 114
+        height: 245
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78df17e40261845f0800000000000000
+      internalID: -772343008083182201
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_39
+      rect:
+        serializedVersion: 2
+        x: 1663
+        y: 8
+        width: 174
+        height: 214
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ceb60fef524ca2d70800000000000000
+      internalID: 9019236871232842732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_40
+      rect:
+        serializedVersion: 2
+        x: 1876
+        y: 9
+        width: 167
+        height: 245
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7845cd9811761a250800000000000000
+      internalID: 5954153507385529479
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_41
+      rect:
+        serializedVersion: 2
+        x: 2086
+        y: 8
+        width: 182
+        height: 219
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63dac44f1a431f460800000000000000
+      internalID: 7273652743373106486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_42
+      rect:
+        serializedVersion: 2
+        x: 2312
+        y: 8
+        width: 326
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b0b05609060961a0800000000000000
+      internalID: -6815909925218111309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IXQUIQ_43
+      rect:
+        serializedVersion: 2
+        x: 1668
+        y: 10
+        width: 10
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c514626aa66134d0800000000000000
+      internalID: -3156628981828807225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      IXQUIQ_0: -1337678260068957320
+      IXQUIQ_1: 6230428201053056734
+      IXQUIQ_10: 6821455931775975794
+      IXQUIQ_11: 7191716109998120867
+      IXQUIQ_12: -5569755095709457954
+      IXQUIQ_13: -5343683128377232263
+      IXQUIQ_14: 1187609515360773156
+      IXQUIQ_15: 3668836998263753616
+      IXQUIQ_16: -8107677963477593066
+      IXQUIQ_17: 3540367704153039029
+      IXQUIQ_18: -8081544455415171067
+      IXQUIQ_19: 5944713506825036275
+      IXQUIQ_2: 8545902081502945983
+      IXQUIQ_20: -2271578335771296061
+      IXQUIQ_21: -6801545349695190749
+      IXQUIQ_22: 6888464376825984305
+      IXQUIQ_23: 2993418590151524542
+      IXQUIQ_24: -1244350104213615853
+      IXQUIQ_25: -7051828981586278892
+      IXQUIQ_26: 8151037212498094315
+      IXQUIQ_27: 8443488902356821452
+      IXQUIQ_28: 653558155430293393
+      IXQUIQ_29: -1552108968728596732
+      IXQUIQ_3: -6412671456756908954
+      IXQUIQ_30: 8440605748589229605
+      IXQUIQ_31: -8330359741395434472
+      IXQUIQ_32: -4331535636412466982
+      IXQUIQ_33: 6582149928467055115
+      IXQUIQ_34: 4937458723709559123
+      IXQUIQ_35: -8853774225791519757
+      IXQUIQ_36: -544541613623452909
+      IXQUIQ_37: -1047823752596003740
+      IXQUIQ_38: -772343008083182201
+      IXQUIQ_39: 9019236871232842732
+      IXQUIQ_4: -7566654339758951471
+      IXQUIQ_40: 5954153507385529479
+      IXQUIQ_41: 7273652743373106486
+      IXQUIQ_42: -6815909925218111309
+      IXQUIQ_43: -3156628981828807225
+      IXQUIQ_5: -4390471723225160326
+      IXQUIQ_6: 8352439033816550832
+      IXQUIQ_7: -4003226646405311605
+      IXQUIQ_8: -3020340904287646527
+      IXQUIQ_9: -5726223006451323776
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

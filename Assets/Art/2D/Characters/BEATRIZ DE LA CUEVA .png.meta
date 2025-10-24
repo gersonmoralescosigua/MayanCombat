@@ -1,0 +1,1209 @@
+fileFormatVersion: 2
+guid: 9576a6efaf56e51478e995894e905a11
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3890692091401425981
+    second: BEATRIZ DE LA CUEVA _0
+  - first:
+      213: -3516982472891293899
+    second: BEATRIZ DE LA CUEVA _1
+  - first:
+      213: -4868607922449408830
+    second: BEATRIZ DE LA CUEVA _2
+  - first:
+      213: 6030943773434997950
+    second: BEATRIZ DE LA CUEVA _3
+  - first:
+      213: 6689716008967531419
+    second: BEATRIZ DE LA CUEVA _4
+  - first:
+      213: -730896998609478078
+    second: BEATRIZ DE LA CUEVA _5
+  - first:
+      213: -7315106188817568335
+    second: BEATRIZ DE LA CUEVA _6
+  - first:
+      213: -8375153007063619945
+    second: BEATRIZ DE LA CUEVA _7
+  - first:
+      213: 6723445126268419869
+    second: BEATRIZ DE LA CUEVA _8
+  - first:
+      213: 4867232606806892191
+    second: BEATRIZ DE LA CUEVA _9
+  - first:
+      213: 4245522768593906673
+    second: BEATRIZ DE LA CUEVA _10
+  - first:
+      213: 5499558857063979339
+    second: BEATRIZ DE LA CUEVA _11
+  - first:
+      213: -1642714538906635719
+    second: BEATRIZ DE LA CUEVA _12
+  - first:
+      213: 7142959908095135207
+    second: BEATRIZ DE LA CUEVA _13
+  - first:
+      213: -8605607782444282081
+    second: BEATRIZ DE LA CUEVA _14
+  - first:
+      213: 5152076059757190535
+    second: BEATRIZ DE LA CUEVA _15
+  - first:
+      213: 6108723499569945988
+    second: BEATRIZ DE LA CUEVA _16
+  - first:
+      213: 1454552131113277005
+    second: BEATRIZ DE LA CUEVA _17
+  - first:
+      213: 1372745325476236555
+    second: BEATRIZ DE LA CUEVA _18
+  - first:
+      213: -7698997271576482257
+    second: BEATRIZ DE LA CUEVA _19
+  - first:
+      213: 2737305689424029792
+    second: BEATRIZ DE LA CUEVA _20
+  - first:
+      213: -508804641029075233
+    second: BEATRIZ DE LA CUEVA _21
+  - first:
+      213: -3108281217518727350
+    second: BEATRIZ DE LA CUEVA _22
+  - first:
+      213: 3154292333329233360
+    second: BEATRIZ DE LA CUEVA _23
+  - first:
+      213: -7385990341466556280
+    second: BEATRIZ DE LA CUEVA _24
+  - first:
+      213: -8304954740273109521
+    second: BEATRIZ DE LA CUEVA _25
+  - first:
+      213: -5486817092666008058
+    second: BEATRIZ DE LA CUEVA _26
+  - first:
+      213: -8428777879857422865
+    second: BEATRIZ DE LA CUEVA _27
+  - first:
+      213: -1125213212364276551
+    second: BEATRIZ DE LA CUEVA _28
+  - first:
+      213: -5715447858537987951
+    second: BEATRIZ DE LA CUEVA _29
+  - first:
+      213: -1347564402078166473
+    second: BEATRIZ DE LA CUEVA _30
+  - first:
+      213: 7477155344905713315
+    second: BEATRIZ DE LA CUEVA _31
+  - first:
+      213: 2754012717045478233
+    second: BEATRIZ DE LA CUEVA _32
+  - first:
+      213: -121435377792597957
+    second: BEATRIZ DE LA CUEVA _33
+  - first:
+      213: 4609780361856759073
+    second: BEATRIZ DE LA CUEVA _34
+  - first:
+      213: -953562033709968644
+    second: BEATRIZ DE LA CUEVA _35
+  - first:
+      213: -6421163664834263972
+    second: BEATRIZ DE LA CUEVA _36
+  - first:
+      213: -8393081653107529969
+    second: BEATRIZ DE LA CUEVA _37
+  - first:
+      213: -2867577658306035396
+    second: BEATRIZ DE LA CUEVA _38
+  - first:
+      213: -7928232355360195854
+    second: BEATRIZ DE LA CUEVA _39
+  - first:
+      213: -4543495897543464090
+    second: BEATRIZ DE LA CUEVA _40
+  - first:
+      213: -4040131521547429910
+    second: BEATRIZ DE LA CUEVA _41
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _0
+      rect:
+        serializedVersion: 2
+        x: 268
+        y: 626
+        width: 93
+        height: 214
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3cba899182c710ac0800000000000000
+      internalID: -3890692091401425981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _1
+      rect:
+        serializedVersion: 2
+        x: 426
+        y: 618
+        width: 96
+        height: 220
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53f1a0e131b213fc0800000000000000
+      internalID: -3516982472891293899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _2
+      rect:
+        serializedVersion: 2
+        x: 579
+        y: 618
+        width: 93
+        height: 220
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2cc10c7b3ea3f6cb0800000000000000
+      internalID: -4868607922449408830
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _3
+      rect:
+        serializedVersion: 2
+        x: 708
+        y: 613
+        width: 124
+        height: 224
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebc62fb986732b350800000000000000
+      internalID: 6030943773434997950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _4
+      rect:
+        serializedVersion: 2
+        x: 901
+        y: 618
+        width: 107
+        height: 219
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9be0ca3445a6dc50800000000000000
+      internalID: 6689716008967531419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _5
+      rect:
+        serializedVersion: 2
+        x: 1091
+        y: 618
+        width: 87
+        height: 219
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24e9b7e5d055bd5f0800000000000000
+      internalID: -730896998609478078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _6
+      rect:
+        serializedVersion: 2
+        x: 1239
+        y: 619
+        width: 88
+        height: 218
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bd6449ada58b7a90800000000000000
+      internalID: -7315106188817568335
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _7
+      rect:
+        serializedVersion: 2
+        x: 1377
+        y: 619
+        width: 88
+        height: 218
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 796ad6aa6ba75cb80800000000000000
+      internalID: -8375153007063619945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _8
+      rect:
+        serializedVersion: 2
+        x: 1499
+        y: 614
+        width: 124
+        height: 224
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1f7f0258b97e4d50800000000000000
+      internalID: 6723445126268419869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _9
+      rect:
+        serializedVersion: 2
+        x: 1649
+        y: 614
+        width: 125
+        height: 223
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9e5ce7a442eb8340800000000000000
+      internalID: 4867232606806892191
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _10
+      rect:
+        serializedVersion: 2
+        x: 1812
+        y: 614
+        width: 125
+        height: 223
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1fb6fdbd6702bea30800000000000000
+      internalID: 4245522768593906673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _11
+      rect:
+        serializedVersion: 2
+        x: 1959
+        y: 614
+        width: 125
+        height: 223
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b49d6a084ab525c40800000000000000
+      internalID: 5499558857063979339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _12
+      rect:
+        serializedVersion: 2
+        x: 2108
+        y: 614
+        width: 156
+        height: 223
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 932b91194d7e339e0800000000000000
+      internalID: -1642714538906635719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _13
+      rect:
+        serializedVersion: 2
+        x: 2292
+        y: 619
+        width: 92
+        height: 219
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ed0edef034e02360800000000000000
+      internalID: 7142959908095135207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _14
+      rect:
+        serializedVersion: 2
+        x: 2455
+        y: 619
+        width: 88
+        height: 218
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1f421bf05db29880800000000000000
+      internalID: -8605607782444282081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _15
+      rect:
+        serializedVersion: 2
+        x: 2610
+        y: 619
+        width: 88
+        height: 218
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78d1f9521e9df7740800000000000000
+      internalID: 5152076059757190535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _16
+      rect:
+        serializedVersion: 2
+        x: 2787
+        y: 617
+        width: 87
+        height: 219
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48d92fe48ab86c450800000000000000
+      internalID: 6108723499569945988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _17
+      rect:
+        serializedVersion: 2
+        x: 2946
+        y: 616
+        width: 107
+        height: 219
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d465b4ae47b9f2410800000000000000
+      internalID: 1454552131113277005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _18
+      rect:
+        serializedVersion: 2
+        x: 3108
+        y: 613
+        width: 125
+        height: 224
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0dc614b998fc0310800000000000000
+      internalID: 1372745325476236555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _19
+      rect:
+        serializedVersion: 2
+        x: 596
+        y: 330
+        width: 130
+        height: 211
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2e6bf4c5caa72590800000000000000
+      internalID: -7698997271576482257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _20
+      rect:
+        serializedVersion: 2
+        x: 756
+        y: 329
+        width: 125
+        height: 212
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06866cb850ddcf520800000000000000
+      internalID: 2737305689424029792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _21
+      rect:
+        serializedVersion: 2
+        x: 921
+        y: 329
+        width: 107
+        height: 213
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fde446fefdc50f8f0800000000000000
+      internalID: -508804641029075233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _22
+      rect:
+        serializedVersion: 2
+        x: 1073
+        y: 330
+        width: 96
+        height: 213
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4f07c773ba2dd4d0800000000000000
+      internalID: -3108281217518727350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _23
+      rect:
+        serializedVersion: 2
+        x: 1217
+        y: 327
+        width: 105
+        height: 216
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d5b3dd3a2c46cb20800000000000000
+      internalID: 3154292333329233360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _24
+      rect:
+        serializedVersion: 2
+        x: 1354
+        y: 327
+        width: 124
+        height: 216
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8887b66cae0bf7990800000000000000
+      internalID: -7385990341466556280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _25
+      rect:
+        serializedVersion: 2
+        x: 1507
+        y: 329
+        width: 143
+        height: 214
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe5235e4aafdebc80800000000000000
+      internalID: -8304954740273109521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _26
+      rect:
+        serializedVersion: 2
+        x: 1672
+        y: 329
+        width: 136
+        height: 214
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60ed914bce8ead3b0800000000000000
+      internalID: -5486817092666008058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _27
+      rect:
+        serializedVersion: 2
+        x: 1836
+        y: 329
+        width: 126
+        height: 214
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fed9d640d27f60b80800000000000000
+      internalID: -8428777879857422865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _28
+      rect:
+        serializedVersion: 2
+        x: 1996
+        y: 329
+        width: 108
+        height: 213
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9bc73748b807260f0800000000000000
+      internalID: -1125213212364276551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _29
+      rect:
+        serializedVersion: 2
+        x: 2155
+        y: 329
+        width: 97
+        height: 213
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19083935476aea0b0800000000000000
+      internalID: -5715447858537987951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _30
+      rect:
+        serializedVersion: 2
+        x: 2302
+        y: 328
+        width: 107
+        height: 214
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7325b26e05d7c4de0800000000000000
+      internalID: -1347564402078166473
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _31
+      rect:
+        serializedVersion: 2
+        x: 2451
+        y: 327
+        width: 122
+        height: 214
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a6b487ab2134c760800000000000000
+      internalID: 7477155344905713315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _32
+      rect:
+        serializedVersion: 2
+        x: 2606
+        y: 328
+        width: 126
+        height: 212
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 953776a89f7383620800000000000000
+      internalID: 2754012717045478233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _33
+      rect:
+        serializedVersion: 2
+        x: 855
+        y: 34
+        width: 130
+        height: 185
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b30c183da23905ef0800000000000000
+      internalID: -121435377792597957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _34
+      rect:
+        serializedVersion: 2
+        x: 1028
+        y: 34
+        width: 125
+        height: 152
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1253b01c0da39ff30800000000000000
+      internalID: 4609780361856759073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _35
+      rect:
+        serializedVersion: 2
+        x: 1199
+        y: 89
+        width: 202
+        height: 162
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf21b6de16444c2f0800000000000000
+      internalID: -953562033709968644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _36
+      rect:
+        serializedVersion: 2
+        x: 1405
+        y: 62
+        width: 182
+        height: 157
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5488e8eaa173e6a0800000000000000
+      internalID: -6421163664834263972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _37
+      rect:
+        serializedVersion: 2
+        x: 1717
+        y: 34
+        width: 134
+        height: 221
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f076da774b8c58b80800000000000000
+      internalID: -8393081653107529969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _38
+      rect:
+        serializedVersion: 2
+        x: 1857
+        y: 34
+        width: 190
+        height: 222
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3182d610515438d0800000000000000
+      internalID: -2867577658306035396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _39
+      rect:
+        serializedVersion: 2
+        x: 2045
+        y: 33
+        width: 198
+        height: 222
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fa3ff9ada249f190800000000000000
+      internalID: -7928232355360195854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _40
+      rect:
+        serializedVersion: 2
+        x: 2268
+        y: 33
+        width: 236
+        height: 224
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66b2a7cbd8242f0c0800000000000000
+      internalID: -4543495897543464090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BEATRIZ DE LA CUEVA _41
+      rect:
+        serializedVersion: 2
+        x: 2423
+        y: 31
+        width: 222
+        height: 166
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae79e4469c19ee7c0800000000000000
+      internalID: -4040131521547429910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      BEATRIZ DE LA CUEVA _0: -3890692091401425981
+      BEATRIZ DE LA CUEVA _1: -3516982472891293899
+      BEATRIZ DE LA CUEVA _10: 4245522768593906673
+      BEATRIZ DE LA CUEVA _11: 5499558857063979339
+      BEATRIZ DE LA CUEVA _12: -1642714538906635719
+      BEATRIZ DE LA CUEVA _13: 7142959908095135207
+      BEATRIZ DE LA CUEVA _14: -8605607782444282081
+      BEATRIZ DE LA CUEVA _15: 5152076059757190535
+      BEATRIZ DE LA CUEVA _16: 6108723499569945988
+      BEATRIZ DE LA CUEVA _17: 1454552131113277005
+      BEATRIZ DE LA CUEVA _18: 1372745325476236555
+      BEATRIZ DE LA CUEVA _19: -7698997271576482257
+      BEATRIZ DE LA CUEVA _2: -4868607922449408830
+      BEATRIZ DE LA CUEVA _20: 2737305689424029792
+      BEATRIZ DE LA CUEVA _21: -508804641029075233
+      BEATRIZ DE LA CUEVA _22: -3108281217518727350
+      BEATRIZ DE LA CUEVA _23: 3154292333329233360
+      BEATRIZ DE LA CUEVA _24: -7385990341466556280
+      BEATRIZ DE LA CUEVA _25: -8304954740273109521
+      BEATRIZ DE LA CUEVA _26: -5486817092666008058
+      BEATRIZ DE LA CUEVA _27: -8428777879857422865
+      BEATRIZ DE LA CUEVA _28: -1125213212364276551
+      BEATRIZ DE LA CUEVA _29: -5715447858537987951
+      BEATRIZ DE LA CUEVA _3: 6030943773434997950
+      BEATRIZ DE LA CUEVA _30: -1347564402078166473
+      BEATRIZ DE LA CUEVA _31: 7477155344905713315
+      BEATRIZ DE LA CUEVA _32: 2754012717045478233
+      BEATRIZ DE LA CUEVA _33: -121435377792597957
+      BEATRIZ DE LA CUEVA _34: 4609780361856759073
+      BEATRIZ DE LA CUEVA _35: -953562033709968644
+      BEATRIZ DE LA CUEVA _36: -6421163664834263972
+      BEATRIZ DE LA CUEVA _37: -8393081653107529969
+      BEATRIZ DE LA CUEVA _38: -2867577658306035396
+      BEATRIZ DE LA CUEVA _39: -7928232355360195854
+      BEATRIZ DE LA CUEVA _4: 6689716008967531419
+      BEATRIZ DE LA CUEVA _40: -4543495897543464090
+      BEATRIZ DE LA CUEVA _41: -4040131521547429910
+      BEATRIZ DE LA CUEVA _5: -730896998609478078
+      BEATRIZ DE LA CUEVA _6: -7315106188817568335
+      BEATRIZ DE LA CUEVA _7: -8375153007063619945
+      BEATRIZ DE LA CUEVA _8: 6723445126268419869
+      BEATRIZ DE LA CUEVA _9: 4867232606806892191
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

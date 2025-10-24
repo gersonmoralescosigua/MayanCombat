@@ -19,7 +19,7 @@ MonoBehaviour:
     AppVersion: 
     UseNameServer: 1
     FixedRegion: 
-    Server: 
+    Server: us
     Port: 0
     ProxyServer: 
     Protocol: 0
