@@ -80,10 +80,20 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
         Debug.Log($"👤 Jugador conectado: {player}");
 
+        // Si soy server, aseguro que exista un MatchController spawnado (sólo 1)
         if (runner.IsServer)
         {
-            Vector3 spawnPos = new Vector3(Random.Range(-2, 2), 1, Random.Range(-2, 2));
-            runner.Spawn(Resources.Load<GameObject>("Prefabs/Characters/pf_player"), spawnPos, Quaternion.identity, player);
+            if (FindObjectOfType<MatchController>() == null)
+            {
+                var mcPrefab = Resources.Load<GameObject>("Network/MatchController"); // crea prefab en Resources
+                var mcObj = runner.Spawn(mcPrefab, Vector3.zero, Quaternion.identity, PlayerRef.None);
+                Debug.Log("[NetworkRunnerHandler] Spawned MatchController");
+            }
+
+            // Registra al jugador en el MatchController
+            var mc = FindObjectOfType<MatchController>();
+            if (mc != null)
+                mc.RegisterPlayer(player);
         }
     }
 

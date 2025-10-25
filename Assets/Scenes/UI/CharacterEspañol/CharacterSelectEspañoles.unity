@@ -131,8 +131,9 @@ GameObject:
   - component: {fileID: 267932985}
   - component: {fileID: 267932984}
   - component: {fileID: 267932983}
+  - component: {fileID: 267932986}
   m_Layer: 5
-  m_Name: Seleccionar (1)
+  m_Name: sprite_beatriz
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -239,6 +240,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 267932981}
   m_CullTransparentMesh: 1
+--- !u!114 &267932986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267932981}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a23c17208f5914cb82595bc38c8467, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterSelectUI
+  btnSelectCharacter: {fileID: 0}
+  characterId: 1
 --- !u!1 &302629162
 GameObject:
   m_ObjectHideFlags: 0

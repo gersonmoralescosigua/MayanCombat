@@ -139,4 +139,13 @@ public class SessionManager : MonoBehaviour
     }
 
     public bool HasActiveSession() => !string.IsNullOrEmpty(playerNickname);
+
+    public int currentTeam = -1; // 0 = Maya, 1 = Español
+
+    public void SetTeam(int team)
+    {
+        currentTeam = team;
+        Debug.Log($"[SessionManager] Team asignado: {(team == 0 ? "Maya" : "Español")}");
+    }
+
 }
