@@ -3,26 +3,25 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine;
 
 public class MatchmakingUI : MonoBehaviour
 {
     public TMP_Text txtStatus;
     public Button btnCancel;
 
-    private bool _isConnecting = false;
-
     void Start()
     {
-        txtStatus.text = "🔍 Buscando partida...";
-        btnCancel.onClick.AddListener(OnCancelClicked);
+        if (btnCancel != null)
+            btnCancel.onClick.AddListener(OnCancelClicked);
 
-        Invoke(nameof(StartFusionMatchmaking), 0.3f);
+        StartCoroutine(StartFusionConnection());
     }
 
-    async void StartFusionMatchmaking()
+    IEnumerator StartFusionConnection()
     {
-        if (_isConnecting) return;
-        _isConnecting = true;
+        yield return new WaitForSeconds(0.5f);
+        txtStatus?.SetText("🔗 Conectando con Photon Fusion...");
 
         if (NetworkRunnerHandler.Instance == null)
         {
@@ -30,17 +29,15 @@ public class MatchmakingUI : MonoBehaviour
             go.AddComponent<NetworkRunnerHandler>();
         }
 
-        txtStatus.text = "🔗 Conectando con Photon Fusion...";
         NetworkRunnerHandler.Instance.StartMatchmaking();
 
-        await System.Threading.Tasks.Task.Delay(3000);
-        txtStatus.text = "Esperando jugadores...";
-
-        _isConnecting = false;
+        yield return new WaitForSeconds(2f);
+        txtStatus?.SetText("⌛ Esperando jugadores...");
     }
 
     void OnCancelClicked()
     {
+        Debug.Log("❌ Cancelando matchmaking...");
         NetworkRunnerHandler.Instance?.Shutdown();
         UnityEngine.SceneManagement.SceneManager.LoadScene("Menu");
     }
