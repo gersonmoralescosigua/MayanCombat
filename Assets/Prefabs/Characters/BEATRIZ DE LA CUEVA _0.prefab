@@ -11,9 +11,10 @@ GameObject:
   - component: {fileID: 6683880426164401876}
   - component: {fileID: 2547215330132656068}
   - component: {fileID: 369483802363440233}
+  - component: {fileID: -4075577178852017358}
   m_Layer: 0
   m_Name: BEATRIZ DE LA CUEVA _0
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -113,3 +114,30 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-4075577178852017358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392798922818354650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 878e6296e6a0ec84ca206af40c532acf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  maxVel: 5
+  jumpForce: 7
+  leftKey: 97
+  rightKey: 100
+  jumpKey: 119
+  attackKey: 106
+  jadeStacks: 0
+  baseSpeed: 5
+  currentSpeed: 0
+  basePushForce: 5
+  isKnocked: 0
+  hasJade: 0
+  canMove: 1
+  isConfused: 0
+  isSlowed: 0

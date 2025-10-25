@@ -552,7 +552,6 @@ MonoBehaviour:
   emailField: {fileID: 1999714738}
   passwordField: {fileID: 1530562821}
   mensajeError: {fileID: 39962727}
-  loadingPanel: {fileID: 0}
 --- !u!4 &815142147
 Transform:
   m_ObjectHideFlags: 0
@@ -734,6 +733,10 @@ PrefabInstance:
       propertyPath: m_HorizontalAlignment
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 6119106385930715338, guid: 9f9fc626844abdf4ba54e92a7bc7193e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 3708872745148242894, guid: 19b1ebec7d6f4a14cad0edfaa75a752d, type: 3}
     - target: {fileID: 7236121639121745551, guid: 9f9fc626844abdf4ba54e92a7bc7193e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1057,6 +1060,10 @@ PrefabInstance:
       propertyPath: m_HorizontalAlignment
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 6119106385930715338, guid: 9f9fc626844abdf4ba54e92a7bc7193e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 3708872745148242894, guid: 19b1ebec7d6f4a14cad0edfaa75a752d, type: 3}
     - target: {fileID: 7236121639121745551, guid: 9f9fc626844abdf4ba54e92a7bc7193e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

@@ -1,0 +1,6 @@
+{
+    "name": "PlayModeTests.asmdef",
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}

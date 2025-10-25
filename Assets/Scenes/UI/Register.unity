@@ -279,7 +279,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 3708872745148242894, guid: c8d885f47dd354d4aa59d0ac140cfabc, type: 3}
+  m_Sprite: {fileID: 3708872745148242894, guid: 19b1ebec7d6f4a14cad0edfaa75a752d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -729,7 +729,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 3708872745148242894, guid: c8d885f47dd354d4aa59d0ac140cfabc, type: 3}
+  m_Sprite: {fileID: 3708872745148242894, guid: 19b1ebec7d6f4a14cad0edfaa75a752d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1836,7 +1836,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 4880578914743103274, guid: c8d885f47dd354d4aa59d0ac140cfabc, type: 3}
+  m_Sprite: {fileID: -245447817127338598, guid: 19b1ebec7d6f4a14cad0edfaa75a752d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2014,7 +2014,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 3708872745148242894, guid: c8d885f47dd354d4aa59d0ac140cfabc, type: 3}
+  m_Sprite: {fileID: 3708872745148242894, guid: 19b1ebec7d6f4a14cad0edfaa75a752d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2213,7 +2213,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 2558617226369908316, guid: c8d885f47dd354d4aa59d0ac140cfabc, type: 3}
+  m_Sprite: {fileID: 2558617226369908316, guid: 19b1ebec7d6f4a14cad0edfaa75a752d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2595,6 +2595,10 @@ PrefabInstance:
       propertyPath: m_HorizontalAlignment
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 6119106385930715338, guid: 9f9fc626844abdf4ba54e92a7bc7193e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 3708872745148242894, guid: 19b1ebec7d6f4a14cad0edfaa75a752d, type: 3}
     - target: {fileID: 7236121639121745551, guid: 9f9fc626844abdf4ba54e92a7bc7193e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
