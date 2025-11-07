@@ -9,6 +9,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 {
     public static NetworkRunnerHandler Instance;
 
+    public NetworkRunner Runner => _runner;
     private NetworkRunner _runner;
     private bool _isConnecting = false;
 
@@ -37,7 +38,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         _runner = gameObject.AddComponent<NetworkRunner>();
         _runner.ProvideInput = true;
 
-        var sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/Maps/{mapSceneName}.unity");
+        var sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/Maps/Tikal/{mapSceneName}.unity");
         if (sceneIndex < 0)
         {
             Debug.LogWarning($"No se encontró la escena {mapSceneName} en Build Settings, cargando por nombre...");
@@ -83,7 +84,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         // Si soy server, aseguro que exista un MatchController spawnado (sólo 1)
         if (runner.IsServer)
         {
-            if (FindObjectOfType<MatchController>() == null)
+            if (FindFirstObjectByType<MatchController>() == null)
             {
                 var mcPrefab = Resources.Load<GameObject>("Network/MatchController"); // crea prefab en Resources
                 var mcObj = runner.Spawn(mcPrefab, Vector3.zero, Quaternion.identity, PlayerRef.None);
@@ -91,7 +92,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             }
 
             // Registra al jugador en el MatchController
-            var mc = FindObjectOfType<MatchController>();
+            var mc = FindFirstObjectByType<MatchController>();
             if (mc != null)
                 mc.RegisterPlayer(player);
         }

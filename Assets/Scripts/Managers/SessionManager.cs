@@ -147,5 +147,4 @@ public class SessionManager : MonoBehaviour
         currentTeam = team;
         Debug.Log($"[SessionManager] Team asignado: {(team == 0 ? "Maya" : "Español")}");
     }
-
 }

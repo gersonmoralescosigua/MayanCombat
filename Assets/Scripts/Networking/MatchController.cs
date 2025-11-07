@@ -68,10 +68,7 @@ public class MatchController : NetworkBehaviour
             Debug.Log($"[RPC] Asignado team {team} en cliente local.");
             SessionManager.Instance?.SetTeam(team);
 
-            if (team == 0)
-                SceneManager.LoadScene("CharacterSelectMaya");
-            else
-                SceneManager.LoadScene("CharacterSelectEspañoles");
+            SceneManager.LoadScene("CharacterSelectWrapper");
         }
     }
 

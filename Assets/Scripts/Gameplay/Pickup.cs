@@ -1,42 +1,43 @@
 ﻿using UnityEngine;
+using Fusion;
 
-public class Pickup : MonoBehaviour
+public class Pickup : NetworkBehaviour
 {
-    public PickupType type; // Tipo de pickup: Maize, Jade, Cacao, Jaguar, Lava, Serpiente
+    public PickupType type;   // Tipo de pickup: Maize, Jade, Cacao, Jaguar, Lava, Serpiente
 
-    // Opcional: tiempo para reaparecer si quieres spawn repetido
-    public float respawnTime = 0f;
+    // Referencia al spawn point asignado por el spawner
+    [System.NonSerialized]
+    public Transform spawnPointUsed;
 
-    // ✅ Referencia al spawn point que usó este pickup
-    [System.NonSerialized] public Transform spawnPointUsed;
+    private PickupsSpawner spawner;
 
-    void OnTriggerEnter2D(Collider2D other)
+    private void Start()
     {
-        if (other.CompareTag("Player"))
-        {
-            PlayerController player = other.GetComponent<PlayerController>();
-            if (player != null)
-            {
-                player.CollectPickup(type);
-
-                // ✅ Notificar al spawner que fue recogido
-                PickupsSpawner spawner = FindObjectOfType<PickupsSpawner>();
-                if (spawner != null)
-                    spawner.OnPickupCollected(gameObject, spawnPointUsed);
-
-                gameObject.SetActive(false);
-
-                // Si quieres que reaparezca automáticamente
-                if (respawnTime > 0f)
-                {
-                    Invoke(nameof(Respawn), respawnTime);
-                }
-            }
-        }
+        // ✅ Obtiene el spawner una sola vez (sin FindObjectOfType repetido)
+        spawner = FindFirstObjectByType<PickupsSpawner>();
     }
 
-    void Respawn()
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        gameObject.SetActive(true);
+        if (!Object.HasStateAuthority)
+            return;
+        // Solo el HOST ejecuta lógica de despawn
+
+        if (!other.CompareTag("Player"))
+            return;
+
+        var player = other.GetComponent<PlayerController>();
+        if (player == null)
+            return;
+
+        // ✅ Aplicar efecto al jugador
+        player.CollectPickup(type);
+
+        // ✅ Notificar al spawner
+        if (spawner != null)
+        {
+            NetworkObject obj = GetComponent<NetworkObject>();
+            spawner.OnPickupCollected(obj, spawnPointUsed);
+        }
     }
 }
