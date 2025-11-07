@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 4485722155578720583}
   - component: {fileID: -4718514417879177468}
   - component: {fileID: 7330308487380942531}
+  - component: {fileID: 5991915825007856690}
+  - component: {fileID: 1863315345076499255}
   m_Layer: 0
   m_Name: jaguar Enemi_0
   m_TagString: Pickup
@@ -128,7 +130,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pickup
   type: 3
-  respawnTime: 0
 --- !u!61 &7330308487380942531
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -175,3 +176,40 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 7.6600003, y: 8.072705}
   m_EdgeRadius: 0
+--- !u!114 &5991915825007856690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2835731051845579642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
+  SortKey: 1271197378
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: -4718514417879177468}
+  - {fileID: 1863315345076499255}
+  ForceRemoteRenderTimeframe: 0
+--- !u!114 &1863315345076499255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2835731051845579642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkTransform
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0

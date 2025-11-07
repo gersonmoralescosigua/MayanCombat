@@ -97,8 +97,8 @@ public class PickupsSpawner : MonoBehaviour
 
         Vector3 pos = spawnPoint.position;
 
-        NetworkObject obj = runner.Spawn(prefab, pos, Quaternion.identity);
-        activePickups.Add(obj);
+            NetworkObject obj = runner.Spawn(prefab, pos, Quaternion.identity);
+            activePickups.Add(obj);
 
         spawnPointOccupied[spawnPoint] = true;
         StartCoroutine(AutoDestroyPickup(obj, spawnPoint));
