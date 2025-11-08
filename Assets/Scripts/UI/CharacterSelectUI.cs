@@ -20,7 +20,7 @@ public class CharacterSelectUI : MonoBehaviour
         if (selected) return;
         selected = true;
 
-        var mc = FindObjectOfType<MatchController>();
+        var mc = FindFirstObjectByType<MatchController>();
         if (mc == null)
         {
             Debug.LogError("❌ No se encontró MatchController en escena.");

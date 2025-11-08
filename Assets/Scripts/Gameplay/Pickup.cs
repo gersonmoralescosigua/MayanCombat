@@ -45,7 +45,7 @@ public class Pickup : MonoBehaviour
         }
 
         // si hay spawner, notificar
-        var spawner = FindObjectOfType<PickupsSpawner>();
+        var spawner = FindFirstObjectByType<PickupsSpawner>();
         if (spawner != null)
         {
             // Pass NetworkObject if you want to despawn via runner
