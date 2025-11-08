@@ -149,10 +149,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerNetwork
   _CharacterId: 0
-  _Team: -1
-  moveSpeed: 5
-  jumpForce: 5
-  availableSprites: []
 --- !u!50 &6817607467047038329
 Rigidbody2D:
   serializedVersion: 5

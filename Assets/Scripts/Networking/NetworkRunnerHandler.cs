@@ -34,12 +34,9 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         DontDestroyOnLoad(gameObject);
     }
 
-    // ✅ Matchmaking sin cargar mapa
     public async void StartMatchmaking()
     {
-        if (_isConnecting)
-            return;
-
+        if (_isConnecting) return;
         _isConnecting = true;
         Debug.Log("🔗 Conectando con Fusion...");
 
@@ -51,7 +48,8 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             GameMode = GameMode.AutoHostOrClient,
             SessionName = "MayanCombatRoom",
             Scene = SceneRef.None,
-            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
+            PlayerCount = maxPlayers
         });
 
         if (!result.Ok)
@@ -63,44 +61,33 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         Debug.Log("✅ Conectado a Fusion");
         LoadSelectCharacterScene();
-
         _isConnecting = false;
     }
 
-    // ✅ Cargar pantalla de selección
     public void LoadSelectCharacterScene()
     {
         SceneManager.LoadScene(characterSelectScene);
     }
 
-    // ✅ Guardar selección
     public void SetPlayerCharacter(PlayerRef player, int characterId)
     {
         SelectedCharacters[player] = characterId;
         Debug.Log($"✅ Player {player} eligió personaje {characterId}");
     }
 
-    // ✅ Ver si ya se puede iniciar partida
     public void TryStartGame()
     {
-        if (SelectedCharacters.Count < maxPlayers)
-            return;
-
-        if (_runner.IsServer)
-            StartGameOnServer();
+        if (SelectedCharacters.Count < maxPlayers) return;
+        if (_runner.IsServer) StartGameOnServer();
     }
 
-    // ✅ Cargar el mapa — LoadScene NO retorna nada en tu versión
     private async void StartGameOnServer()
     {
         Debug.Log($"🗺 Cargando mapa {mapSceneName}...");
-
         await _runner.LoadScene(mapSceneName);
-
         Debug.Log("✅ Mapa cargado");
     }
 
-    // ✅ Spawn del personaje seleccionado
     public void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
         if (!SelectedCharacters.ContainsKey(player))
@@ -111,39 +98,49 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         int charID = SelectedCharacters[player];
         GameObject prefab = Resources.Load<GameObject>($"Characters/Character_{charID}");
+        if (prefab == null)
+        {
+            // intentar rutas alternativas (compatibilidad con tu estructura)
+            prefab = Resources.Load<GameObject>($"Prefabs/Characters/pf_{(charID == 0 ? "ixquic" : "beatriz")}");
+        }
 
         if (prefab == null)
         {
-            Debug.LogError($"❌ Prefab no encontrado: Characters/Character_{charID}");
+            Debug.LogError($"❌ Prefab no encontrado para char {charID}");
             return;
         }
 
-        Vector3 spawnPos = new Vector3(Random.Range(-2f, 2f), 0, 0);
+        Vector3 spawnPos = new Vector3(Random.Range(-2f, 2f), 1f, 0f);
         runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
-
         Debug.Log($"✅ Spawn player {player} con personaje {charID}");
     }
 
-    // ✅ Fusion callbacks
+    // ---------- INetworkRunnerCallbacks ----------
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"👤 Player joined: {player}");
+
+        // si soy server, asegurar MatchController o usar SelectedCharacters
+        if (runner.IsServer)
+        {
+            var mc = FindObjectOfType<MatchController>();
+            if (mc == null)
+            {
+                var mcPrefab = Resources.Load<GameObject>("Network/MatchController");
+                if (mcPrefab != null)
+                    runner.Spawn(mcPrefab, Vector3.zero, Quaternion.identity, PlayerRef.None);
+            }
+        }
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"🚪 Player left: {player}");
+        if (SelectedCharacters.ContainsKey(player)) SelectedCharacters.Remove(player);
     }
 
-    public void OnConnectedToServer(NetworkRunner runner)
-    {
-        Debug.Log("🌐 Connected to server");
-    }
-
-    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
-    {
-        Debug.LogWarning($"❌ Disconnected: {reason}");
-    }
+    public void OnConnectedToServer(NetworkRunner runner) => Debug.Log("🌐 Connected to server");
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) => Debug.LogWarning($"❌ Disconnected: {reason}");
 
     public void OnSceneLoadDone(NetworkRunner runner)
     {
@@ -155,37 +152,34 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
                 SpawnPlayer(runner, p);
         }
     }
+    public void OnSceneLoadStart(NetworkRunner runner) => Debug.Log("📥 Fusion comenzó a cargar una escena...");
 
-    public void OnSceneLoadStart(NetworkRunner runner)
-    {
-        Debug.Log("📥 Fusion comenzó a cargar una escena...");
-    }
-
-    // ✅ Métodos obligatorios vacíos
+    // Métodos obligatorios vacíos
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
-    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
-    public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
+    public void OnSessionListUpdated(NetworkRunner runner, System.Collections.Generic.List<SessionInfo> sessionList) { }
+    public void OnCustomAuthenticationResponse(NetworkRunner runner, System.Collections.Generic.Dictionary<string, object> data) { }
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, System.ArraySegment<byte> data) { }
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
 
-    // ✅ Inputs
+    // Input (envía Dirección + salto)
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
         var data = new NetworkInputData();
-        data.direction.x = Input.GetAxis("Horizontal");
-        data.direction.y = Input.GetAxis("Vertical");
-        data.jump = Input.GetKey(KeyCode.Space);
+        data.move.x = Input.GetAxis("Horizontal");
+        data.move.y = Input.GetAxis("Vertical");
+        data.jumpPressed = Input.GetKey(KeyCode.Space);
+        data.attackPressed = Input.GetKey(KeyCode.J);
         input.Set(data);
     }
 
-    // ✅ Método que faltaba (para MatchmakingUI)
+    // Shutdown helper
     public void Shutdown()
     {
         if (_runner != null)

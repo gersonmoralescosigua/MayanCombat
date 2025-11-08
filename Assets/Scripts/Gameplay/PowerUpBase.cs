@@ -1,26 +1,28 @@
 using UnityEngine;
 
+/// <summary>
+/// PowerUpBase ahora envía la acción al PlayerNetwork (cliente objetivo)
+/// El Host (authority) es quien debe detectar colisión en pickups networked y llamar ApplyTo
+/// </summary>
 public abstract class PowerUpBase : MonoBehaviour
 {
-    public float duration = 5f;          // duración por defecto
-    public Sprite icon;                  // icono para HUD
+    public float duration = 5f;
+    public Sprite icon;
     public string powerUpName = "PowerUp";
 
-    // Cuando el jugador entra en el trigger
+    // Nota: este OnTrigger debe ejecutarse en la instancia que tiene autoridad sobre el pickup.
+    // Si los pickups son instanciados por el host/fusion runner, el host manejará esto.
     void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.CompareTag("Player"))
+        if (!col.CompareTag("Player")) return;
+
+        var pn = col.GetComponent<PlayerNetwork>();
+        if (pn != null)
         {
-            var player = col.GetComponent<PlayerController>(); // tu script de jugador
-            if (player != null)
-            {
-                ApplyTo(player);
-                // Destruye pickup o desactiva para respawn
-                Destroy(gameObject);
-            }
+            ApplyTo(pn);
+            Destroy(gameObject);
         }
     }
 
-    // Implementar en cada derivado
-    public abstract void ApplyTo(PlayerController player);
+    public abstract void ApplyTo(PlayerNetwork player);
 }

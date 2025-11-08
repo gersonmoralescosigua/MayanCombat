@@ -8,8 +8,15 @@ public class PowerUpCacao : PowerUpBase
 
     void Reset() { powerUpName = "Cacao"; duration = cacaoDuration; }
 
-    public override void ApplyTo(PlayerController player)
+    public override void ApplyTo(PlayerNetwork player)
     {
-        player.StartCoroutine(player.ApplyCacao(speedMultiplier, attackSpeedMultiplier, duration));
+        if (player.Object.HasStateAuthority)
+        {
+            player.ApplyCacao_Server(player.Runner.LocalPlayer, speedMultiplier, attackSpeedMultiplier, duration);
+        }
+        else
+        {
+            Debug.LogWarning("[PowerUpCacao] ApplyTo ejecutado en cliente no-host.");
+        }
     }
 }

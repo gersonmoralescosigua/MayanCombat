@@ -1,9 +1,4 @@
 using UnityEngine;
-
-/// <summary>
-/// Minimal HUDManager para evitar errores de compilación.
-/// Amplía estos métodos para que actualicen realmente los elementos del HUD.
-/// </summary>
 public class HUDManager : MonoBehaviour
 {
     public static HUDManager Instance { get; private set; }

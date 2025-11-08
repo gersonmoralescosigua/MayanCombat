@@ -2,10 +2,6 @@ using UnityEngine;
 using Firebase.Auth;
 using System;
 
-/// <summary>
-/// SessionManager mejorado: mantiene datos de sesión y sincroniza con FirebaseAuth si está disponible.
-/// Mantén este objeto en Splash.unity (DontDestroyOnLoad).
-/// </summary>
 public class SessionManager : MonoBehaviour
 {
     public static SessionManager Instance { get; private set; }

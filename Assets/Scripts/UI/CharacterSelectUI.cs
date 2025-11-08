@@ -7,7 +7,6 @@ public class CharacterSelectUI : MonoBehaviour
 {
     public Button btnSelectCharacter;
     public int characterId = 0;
-
     private bool selected = false;
 
     void Start()

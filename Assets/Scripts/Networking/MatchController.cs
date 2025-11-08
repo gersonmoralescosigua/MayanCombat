@@ -122,7 +122,7 @@ public class MatchController : NetworkBehaviour
             var pn = spawned.GetComponent<PlayerNetwork>();
             if (pn != null)
             {
-                pn.SetCharacterId_Server(charId);
+                //pn.SetCharacterId_Server(charId);
             }
         }
     }

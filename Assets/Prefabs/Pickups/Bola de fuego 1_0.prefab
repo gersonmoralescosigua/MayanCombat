@@ -132,6 +132,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pickup
   type: 4
+  respawnTime: 0
 --- !u!61 &6309555772840036720
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -195,9 +196,7 @@ MonoBehaviour:
   Flags: 262145
   NestedObjects: []
   NetworkedBehaviours:
-  - {fileID: -5556315089716567965}
   - {fileID: -9187412504492764750}
-  - {fileID: 1703740956890469217}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &-9187412504492764750
 MonoBehaviour:
@@ -275,3 +274,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pickup
   type: 0
+  respawnTime: 0
