@@ -123,7 +123,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         // si soy server, asegurar MatchController o usar SelectedCharacters
         if (runner.IsServer)
         {
-            var mc = FindObjectOfType<MatchController>();
+            var mc = FindFirstObjectByType<MatchController>();
             if (mc == null)
             {
                 var mcPrefab = Resources.Load<GameObject>("Network/MatchController");
