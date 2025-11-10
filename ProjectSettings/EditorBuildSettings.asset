@@ -39,6 +39,9 @@ EditorBuildSettings:
     path: Assets/Scenes/UI/Matchmaking.unity
     guid: 82057a8d39ba9e9489a32367013a6f56
   - enabled: 1
+    path: Assets/Scenes/UI/CharacterSelect/CharacterSelectWrapper.unity
+    guid: b0b0eecf13503ce4489758d0684096f6
+  - enabled: 1
     path: Assets/Scenes/UI/Login.unity
     guid: 6bf3624380b8f9a45a4633f9d5425ba5
   - enabled: 1
