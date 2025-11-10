@@ -1,6 +1,8 @@
 ﻿using System;
-using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using Fusion;
 using Fusion.Sockets;
 using UnityEngine.SceneManagement;
@@ -13,6 +15,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public NetworkRunner Runner => _runner;
 
     private bool _isConnecting = false;
+    private Coroutine selectionTimer;
 
     [Header("Scenes")]
     public string characterSelectScene = "CharacterSelectWrapper";
@@ -35,6 +38,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         DontDestroyOnLoad(gameObject);
     }
 
+    // 🔹 INICIO DE MATCHMAKING
     public async void StartMatchmaking()
     {
         if (_isConnecting) return;
@@ -50,7 +54,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         {
             GameMode = GameMode.AutoHostOrClient,
             SessionName = "MayanCombat_" + Guid.NewGuid().ToString("N"),
-            Scene = SceneRef.None,
+            Scene = SceneRef.FromIndex(SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/CharacterSelect/{characterSelectScene}.unity")),
             SceneManager = sceneManager,
             PlayerCount = maxPlayers
         });
@@ -63,47 +67,94 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
 
         Debug.Log("✅ Conectado a Fusion");
-
-        if (_runner.IsServer)
-            await _runner.LoadScene(characterSelectScene);
-        else
-            Debug.Log("[Client] Esperando al host para la escena...");
-
         _isConnecting = false;
     }
 
-    public async void LoadSelectCharacterScene()
+    // 🔹 CUANDO UN JUGADOR ENTRA
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        if (Runner.IsServer)
+        Debug.Log($"👤 Player joined: {player}");
+
+        if (runner.IsServer)
         {
-            Debug.Log($"🌀 Cargando escena de selección: {characterSelectScene}");
-            await Runner.LoadScene(characterSelectScene);
-        }
-        else
-        {
-            Debug.Log("[Client] Esperando que el host cambie de escena...");
+            int connected = runner.ActivePlayers.Count();
+            Debug.Log($"🧩 Jugadores conectados: {connected}/{maxPlayers}");
+
+            var mc = FindFirstObjectByType<MatchController>();
+            if (mc != null)
+            {
+                mc.RegisterPlayer(player);
+            }
+
+            if (connected == maxPlayers && mc == null)
+            {
+                Debug.Log("✅ Se encontraron ambos jugadores. Creando MatchController...");
+                var mcPrefab = Resources.Load<GameObject>("Network/MatchController");
+                if (mcPrefab != null)
+                {
+                    runner.Spawn(mcPrefab, Vector3.zero, Quaternion.identity);
+                    Debug.Log("✅ MatchController spawneado en red.");
+                }
+            }
         }
     }
 
+    // 🔹 CUANDO SE CARGA UNA ESCENA
+    public void OnSceneLoadDone(NetworkRunner runner)
+    {
+        string sceneName = SceneManager.GetActiveScene().name;
+        Debug.Log($"✅ Escena cargada (Fusion): {sceneName}");
+
+        if (sceneName == characterSelectScene && runner.IsServer)
+        {
+            Debug.Log("⏳ Dando 10 segundos para seleccionar personaje...");
+            if (selectionTimer != null) StopCoroutine(selectionTimer);
+            selectionTimer = StartCoroutine(SelectionCountdown());
+        }
+
+        if (sceneName == mapSceneName)
+        {
+            foreach (var p in runner.ActivePlayers)
+                SpawnPlayer(runner, p);
+        }
+    }
+
+    // 🔹 TEMPORIZADOR DE 10 SEGUNDOS PARA ELECCIÓN
+    private IEnumerator SelectionCountdown()
+    {
+        yield return new WaitForSeconds(10f);
+        Debug.Log("⏰ Tiempo de selección terminado. Iniciando partida...");
+        TryStartGame();
+    }
+
+    // 🔹 REGISTRA LA ELECCIÓN DE PERSONAJE (UI lo llama)
     public void SetPlayerCharacter(PlayerRef player, int characterId)
     {
-        SelectedCharacters[player] = characterId;
+        if (!SelectedCharacters.ContainsKey(player))
+            SelectedCharacters.Add(player, characterId);
+        else
+            SelectedCharacters[player] = characterId;
+
         Debug.Log($"✅ Player {player} eligió personaje {characterId}");
     }
 
+    // 🔹 INTENTA INICIAR EL JUEGO (solo host)
     public void TryStartGame()
     {
-        if (SelectedCharacters.Count < maxPlayers) return;
-        if (_runner.IsServer) StartGameOnServer();
+        if (SelectedCharacters.Count < maxPlayers)
+        {
+            Debug.Log("⌛ Esperando a que ambos elijan personaje...");
+            return;
+        }
+
+        if (_runner.IsServer)
+        {
+            Debug.Log($"🗺 Cargando mapa {mapSceneName}...");
+            _runner.LoadScene(mapSceneName);
+        }
     }
 
-    private async void StartGameOnServer()
-    {
-        Debug.Log($"🗺 Cargando mapa {mapSceneName}...");
-        await _runner.LoadScene(mapSceneName);
-        Debug.Log("✅ Mapa cargado");
-    }
-
+    // 🔹 SPAWN DE LOS PREFABS (pf_ixquic / pf_beatriz)
     public void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
         if (!SelectedCharacters.ContainsKey(player))
@@ -113,89 +164,21 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
 
         int charID = SelectedCharacters[player];
-        GameObject prefab = Resources.Load<GameObject>($"Characters/Character_{charID}");
-        if (prefab == null)
-        {
-            // intentar rutas alternativas (compatibilidad con tu estructura)
-            prefab = Resources.Load<GameObject>($"Prefabs/Characters/pf_{(charID == 0 ? "ixquic" : "beatriz")}");
-        }
+        string prefabPath = $"Prefabs/Characters/pf_{(charID == 0 ? "beatriz" : "ixquic")}";
 
+        GameObject prefab = Resources.Load<GameObject>(prefabPath);
         if (prefab == null)
         {
-            Debug.LogError($"❌ Prefab no encontrado para char {charID}");
+            Debug.LogError($"❌ Prefab no encontrado en {prefabPath}");
             return;
         }
 
         Vector3 spawnPos = new Vector3(UnityEngine.Random.Range(-2f, 2f), 1f, 0f);
         runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
-        Debug.Log($"✅ Spawn player {player} con personaje {charID}");
+        Debug.Log($"✅ Spawn player {player} ({(charID == 0 ? "Beatriz" : "Ixquic")})");
     }
 
-    // ---------- INetworkRunnerCallbacks ----------
-    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
-    {
-        Debug.Log($"👤 Player joined: {player}");
-
-        // si soy server, asegurar MatchController o usar SelectedCharacters
-        if (runner.IsServer)
-        {
-            var mc = FindFirstObjectByType<MatchController>();
-            if (mc == null)
-            {
-                var mcPrefab = Resources.Load<GameObject>("Network/MatchController");
-                if (mcPrefab != null)
-                    runner.Spawn(mcPrefab, Vector3.zero, Quaternion.identity, PlayerRef.None);
-            }
-        }
-    }
-
-    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
-    {
-        Debug.Log($"🚪 Player left: {player}");
-        if (SelectedCharacters.ContainsKey(player)) SelectedCharacters.Remove(player);
-    }
-
-    public void OnConnectedToServer(NetworkRunner runner) => Debug.Log("🌐 Connected to server");
-    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) => Debug.LogWarning($"❌ Disconnected: {reason}");
-
-    public void OnSceneLoadDone(NetworkRunner runner)
-    {
-        Debug.Log("✅ Escena cargada (Fusion)");
-
-        if (SceneManager.GetActiveScene().name == mapSceneName)
-        {
-            foreach (var p in runner.ActivePlayers)
-                SpawnPlayer(runner, p);
-        }
-    }
-    public void OnSceneLoadStart(NetworkRunner runner) => Debug.Log("📥 Fusion comenzó a cargar una escena...");
-
-    // Métodos obligatorios vacíos
-    public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
-    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
-    public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
-    public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
-    public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
-    public void OnSessionListUpdated(NetworkRunner runner, System.Collections.Generic.List<SessionInfo> sessionList) { }
-    public void OnCustomAuthenticationResponse(NetworkRunner runner, System.Collections.Generic.Dictionary<string, object> data) { }
-    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
-    public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, System.ArraySegment<byte> data) { }
-    public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
-    public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
-    public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
-
-    // Input (envía Dirección + salto)
-    public void OnInput(NetworkRunner runner, NetworkInput input)
-    {
-        var data = new NetworkInputData();
-        data.move.x = Input.GetAxis("Horizontal");
-        data.move.y = Input.GetAxis("Vertical");
-        data.jumpPressed = Input.GetKey(KeyCode.Space);
-        data.attackPressed = Input.GetKey(KeyCode.J);
-        input.Set(data);
-    }
-
-    // Shutdown helper
+    // 🔹 CIERRA SESIÓN / MATCHMAKING
     public void Shutdown()
     {
         if (_runner != null)
@@ -206,4 +189,39 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             Debug.Log("🔴 Fusion apagado.");
         }
     }
+
+    // ---------- INetworkRunnerCallbacks ----------
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        Debug.Log($"🚪 Player left: {player}");
+        if (SelectedCharacters.ContainsKey(player))
+            SelectedCharacters.Remove(player);
+    }
+
+    public void OnConnectedToServer(NetworkRunner runner) => Debug.Log("🌐 Connected to server");
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) => Debug.LogWarning($"❌ Disconnected: {reason}");
+    public void OnSceneLoadStart(NetworkRunner runner) => Debug.Log("📥 Fusion comenzó a cargar una escena...");
+
+    public void OnInput(NetworkRunner runner, NetworkInput input)
+    {
+        var data = new NetworkInputData();
+        data.move.x = Input.GetAxis("Horizontal");
+        data.move.y = Input.GetAxis("Vertical");
+        data.jumpPressed = Input.GetKey(KeyCode.Space);
+        data.attackPressed = Input.GetKey(KeyCode.J);
+        input.Set(data);
+    }
+
+    public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
+    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
+    public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
+    public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
+    public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
+    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
+    public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
+    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
+    public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
+    public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
+    public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
+    public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
 }

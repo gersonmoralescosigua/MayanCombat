@@ -15,10 +15,31 @@ public class CharacterSelectWrapper : MonoBehaviour
 
     void Start()
     {
-        // Obtener team asignado en el login/session
+        Debug.Log("[CharacterSelectWrapper] Iniciando selección de personaje...");
+
+        if (SessionManager.Instance == null)
+        {
+            Debug.LogWarning("[CharacterSelectWrapper] ⚠️ SessionManager no existe. Activando ambos paneles temporalmente para debug.");
+            panelMaya.SetActive(true);
+            panelEspanol.SetActive(true);
+            return;
+        }
+
         myTeam = SessionManager.Instance.currentTeam;
-        panelMaya.SetActive(myTeam == 0);
-        panelEspanol.SetActive(myTeam == 1);
+        Debug.Log($"[CharacterSelectWrapper] Mi equipo: {myTeam}");
+
+        if (myTeam == -1)
+        {
+            Debug.LogWarning("[CharacterSelectWrapper] ⚠️ No se asignó equipo. Mostrando ambos paneles.");
+            panelMaya.SetActive(true);
+            panelEspanol.SetActive(true);
+        }
+        else
+        {
+            panelMaya.SetActive(myTeam == 0);
+            panelEspanol.SetActive(myTeam == 1);
+        }
+
         btnSelectMaya?.onClick.AddListener(() => SelectCharacter(0));
         btnSelectEspanol?.onClick.AddListener(() => SelectCharacter(1));
     }

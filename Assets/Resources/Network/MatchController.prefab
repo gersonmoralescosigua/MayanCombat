@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6332986396684293837}
   - component: {fileID: 7698038593935461335}
   - component: {fileID: 5695257360344127357}
+  - component: {fileID: -1288414012810550882}
   m_Layer: 0
   m_Name: MatchController
   m_TagString: Untagged
@@ -65,4 +66,19 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 7698038593935461335}
+  - {fileID: -1288414012810550882}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &-1288414012810550882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8880403791193082415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b918fd95ba20f064b82474a19694e507, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MatchController
+  requiredPlayers: 2
+  mapSceneName: Map_Tikal_Base
