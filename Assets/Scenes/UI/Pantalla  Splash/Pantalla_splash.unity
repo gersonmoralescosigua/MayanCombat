@@ -240,6 +240,7 @@ MonoBehaviour:
   playerEmail: 
   playerNickname: 
   isGuest: 0
+  currentTeam: -1
 --- !u!4 &1228810299
 Transform:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
@@ -43,12 +44,14 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         _runner = gameObject.AddComponent<NetworkRunner>();
         _runner.ProvideInput = true;
 
+        var sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
+
         var result = await _runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
-            SessionName = "MayanCombatRoom",
+            SessionName = "MayanCombat_" + Guid.NewGuid().ToString("N"),
             Scene = SceneRef.None,
-            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>(),
+            SceneManager = sceneManager,
             PlayerCount = maxPlayers
         });
 
@@ -60,13 +63,26 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
 
         Debug.Log("✅ Conectado a Fusion");
-        LoadSelectCharacterScene();
+
+        if (_runner.IsServer)
+            await _runner.LoadScene(characterSelectScene);
+        else
+            Debug.Log("[Client] Esperando al host para la escena...");
+
         _isConnecting = false;
     }
 
-    public void LoadSelectCharacterScene()
+    public async void LoadSelectCharacterScene()
     {
-        SceneManager.LoadScene(characterSelectScene);
+        if (Runner.IsServer)
+        {
+            Debug.Log($"🌀 Cargando escena de selección: {characterSelectScene}");
+            await Runner.LoadScene(characterSelectScene);
+        }
+        else
+        {
+            Debug.Log("[Client] Esperando que el host cambie de escena...");
+        }
     }
 
     public void SetPlayerCharacter(PlayerRef player, int characterId)
@@ -110,7 +126,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
-        Vector3 spawnPos = new Vector3(Random.Range(-2f, 2f), 1f, 0f);
+        Vector3 spawnPos = new Vector3(UnityEngine.Random.Range(-2f, 2f), 1f, 0f);
         runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
         Debug.Log($"✅ Spawn player {player} con personaje {charID}");
     }
