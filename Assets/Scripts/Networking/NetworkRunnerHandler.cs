@@ -38,25 +38,27 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         DontDestroyOnLoad(gameObject);
     }
 
-    // 🔹 INICIO DE MATCHMAKING
+    // 🔹 INICIO DE MATCHMAKING (AutoHostOrClient)
     public async void StartMatchmaking()
     {
         if (_isConnecting) return;
         _isConnecting = true;
-        Debug.Log("🔗 Conectando con Fusion...");
+        Debug.Log("🔗 Buscando o creando sesión en Fusion...");
 
         _runner = gameObject.AddComponent<NetworkRunner>();
         _runner.ProvideInput = true;
 
         var sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
 
+        string sessionName = "MayanCombatRoom";
+
         var result = await _runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
-            SessionName = "MayanCombat_" + Guid.NewGuid().ToString("N"),
-            Scene = SceneRef.FromIndex(SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/CharacterSelect/{characterSelectScene}.unity")),
-            SceneManager = sceneManager,
-            PlayerCount = maxPlayers
+            SessionName = sessionName,
+            // ✅ FIX: usar la escena actual en vez de SceneRef.None
+            Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex),
+            SceneManager = sceneManager
         });
 
         if (!result.Ok)
@@ -66,7 +68,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
-        Debug.Log("✅ Conectado a Fusion");
+        Debug.Log("✅ Conectado a Fusion. Esperando jugadores...");
         _isConnecting = false;
     }
 
@@ -80,21 +82,11 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             int connected = runner.ActivePlayers.Count();
             Debug.Log($"🧩 Jugadores conectados: {connected}/{maxPlayers}");
 
-            var mc = FindFirstObjectByType<MatchController>();
-            if (mc != null)
+            // ✅ cuando haya 2 jugadores, carga la escena de selección
+            if (connected == maxPlayers)
             {
-                mc.RegisterPlayer(player);
-            }
-
-            if (connected == maxPlayers && mc == null)
-            {
-                Debug.Log("✅ Se encontraron ambos jugadores. Creando MatchController...");
-                var mcPrefab = Resources.Load<GameObject>("Network/MatchController");
-                if (mcPrefab != null)
-                {
-                    runner.Spawn(mcPrefab, Vector3.zero, Quaternion.identity);
-                    Debug.Log("✅ MatchController spawneado en red.");
-                }
+                Debug.Log("✅ Se encontraron ambos jugadores. Cargando CharacterSelectWrapper...");
+                runner.LoadScene(characterSelectScene);
             }
         }
     }
@@ -105,13 +97,31 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         string sceneName = SceneManager.GetActiveScene().name;
         Debug.Log($"✅ Escena cargada (Fusion): {sceneName}");
 
+        // Si estamos en selección y somos el host → arranca temporizador
         if (sceneName == characterSelectScene && runner.IsServer)
         {
-            Debug.Log("⏳ Dando 10 segundos para seleccionar personaje...");
+            // Spawnea MatchController si no existe
+            var mc = FindFirstObjectByType<MatchController>();
+            if (mc == null)
+            {
+                var prefab = Resources.Load<GameObject>("Network/MatchController");
+                if (prefab != null)
+                {
+                    runner.Spawn(prefab, Vector3.zero, Quaternion.identity);
+                    Debug.Log("✅ MatchController spawneado en red.");
+                }
+                else
+                {
+                    Debug.LogWarning("⚠️ No se encontró prefab Network/MatchController en Resources.");
+                }
+            }
+
+            Debug.Log("⏳ Dando 10 segundos para selección...");
             if (selectionTimer != null) StopCoroutine(selectionTimer);
             selectionTimer = StartCoroutine(SelectionCountdown());
         }
 
+        // Si ya estamos en el mapa → spawnear jugadores
         if (sceneName == mapSceneName)
         {
             foreach (var p in runner.ActivePlayers)
@@ -123,11 +133,11 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     private IEnumerator SelectionCountdown()
     {
         yield return new WaitForSeconds(10f);
-        Debug.Log("⏰ Tiempo de selección terminado. Iniciando partida...");
+        Debug.Log("⏰ Tiempo de selección terminado. Intentando iniciar partida...");
         TryStartGame();
     }
 
-    // 🔹 REGISTRA LA ELECCIÓN DE PERSONAJE (UI lo llama)
+    // 🔹 REGISTRA LA ELECCIÓN DE PERSONAJE
     public void SetPlayerCharacter(PlayerRef player, int characterId)
     {
         if (!SelectedCharacters.ContainsKey(player))
@@ -154,7 +164,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    // 🔹 SPAWN DE LOS PREFABS (pf_ixquic / pf_beatriz)
+    // 🔹 SPAWN DE PREFABS DE PERSONAJES
     public void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
         if (!SelectedCharacters.ContainsKey(player))

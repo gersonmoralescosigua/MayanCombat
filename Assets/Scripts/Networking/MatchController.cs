@@ -63,12 +63,10 @@ public class MatchController : NetworkBehaviour
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     void RPC_AssignTeam(PlayerRef target, int team, RpcInfo info = default)
     {
-        if (Object.HasInputAuthority) // solo ejecuta en el jugador correspondiente
+        if (Runner.LocalPlayer == target)
         {
             Debug.Log($"[RPC] Asignado team {team} en cliente local.");
             SessionManager.Instance?.SetTeam(team);
-
-            SceneManager.LoadScene("CharacterSelectWrapper");
         }
     }
 

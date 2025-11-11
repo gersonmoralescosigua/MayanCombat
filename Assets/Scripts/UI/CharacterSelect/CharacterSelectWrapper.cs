@@ -15,6 +15,8 @@ public class CharacterSelectWrapper : MonoBehaviour
 
     void Start()
     {
+        panelMaya.SetActive(false);
+        panelEspanol.SetActive(false);
         Debug.Log("[CharacterSelectWrapper] Iniciando selección de personaje...");
 
         if (SessionManager.Instance == null)
