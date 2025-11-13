@@ -14,14 +14,14 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkRunner _runner;
     public NetworkRunner Runner => _runner;
 
-    [Header("Scenes")]
+    [Header("Scenes (asegúrate de que están en Build Settings)")]
     public string loadingSceneName = "LoadingAssignment";
     public string mapSceneName = "Map_Tikal_Base";
 
     [Header("Matchmaking")]
     public int maxPlayers = 2;
 
-    // Guardará los equipos y prefabs asignados
+    // Guardará equipos y prefabs asignados
     private readonly Dictionary<PlayerRef, int> _playerTeams = new();
     private readonly Dictionary<PlayerRef, int> _playerCharacters = new();
 
@@ -49,12 +49,12 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         var sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
 
-        // Fusion decidirá si host o client
+        // Fusion decide si Host o Client
         var result = await _runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
             SessionName = "MayanRoom_" + UnityEngine.Random.Range(0, 9999),
-            Scene = SceneRef.None,
+            Scene = SceneRef.None, // Fusion no cargará ninguna escena todavía
             SceneManager = sceneManager
         });
 
@@ -79,9 +79,10 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
             if (connected == maxPlayers)
             {
-                // ✅ Ambos conectados -> asignar equipos y cargar LoadingAssignment
                 AssignTeams();
-                runner.LoadScene(loadingSceneName);
+
+                Debug.Log($"📥 Cargando escena: {loadingSceneName}");
+                runner.LoadScene(loadingSceneName); // ✅ usamos nombre directo
             }
         }
     }
@@ -92,7 +93,6 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         var players = _runner.ActivePlayers.ToList();
         if (players.Count < 2) return;
 
-        // Mezclamos aleatoriamente
         players = players.OrderBy(x => UnityEngine.Random.value).ToList();
 
         _playerTeams[players[0]] = 0; // Español
@@ -101,11 +101,8 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         _playerCharacters[players[0]] = 0; // Beatriz
         _playerCharacters[players[1]] = 1; // Ixquic
 
-        // RPC a cada jugador informando su equipo
         foreach (var p in players)
-        {
             RPC_AssignRole(p, _playerTeams[p], _playerCharacters[p]);
-        }
 
         Debug.Log($"✅ Equipos asignados: {players[0]}=Español, {players[1]}=Maya");
     }
@@ -146,7 +143,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
         yield return new WaitForSeconds(delay);
         Debug.Log("⏰ Tiempo terminado. Iniciando partida...");
-        _runner.LoadScene(mapSceneName);
+        _runner.LoadScene(mapSceneName); // ✅ usando nombre directo
     }
 
     // 🔹 SPAWN DE JUGADORES
@@ -189,7 +186,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         input.Set(data);
     }
 
-    // Sin uso, pero necesarios para callbacks
+    // Requeridos por INetworkRunnerCallbacks
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
