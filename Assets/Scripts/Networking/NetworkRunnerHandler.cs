@@ -15,13 +15,14 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public NetworkRunner Runner => _runner;
 
     [Header("Scenes (asegúrate de que están en Build Settings)")]
+    public string matchmakingSceneName = "Matchmaking";
     public string loadingSceneName = "LoadingAssignment";
     public string mapSceneName = "Map_Tikal_Base";
+    public string menuSceneName = "Menu";
 
     [Header("Matchmaking")]
     public int maxPlayers = 2;
 
-    // Guardará equipos y prefabs asignados
     private readonly Dictionary<PlayerRef, int> _playerTeams = new();
     private readonly Dictionary<PlayerRef, int> _playerCharacters = new();
 
@@ -49,13 +50,13 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         var sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
 
-        // Fusion decide si Host o Client
+        // Fusion decidirá si host o client, no cargamos ninguna escena todavía
         var result = await _runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
             SessionName = "MayanRoom_" + UnityEngine.Random.Range(0, 9999),
-            Scene = SceneRef.None, // Fusion no cargará ninguna escena todavía
-            SceneManager = sceneManager
+            SceneManager = sceneManager,
+            Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex) // ✅ CORRECTO PARA Fusion 2.0.8
         });
 
         if (!result.Ok)
@@ -81,8 +82,17 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             {
                 AssignTeams();
 
-                Debug.Log($"📥 Cargando escena: {loadingSceneName}");
-                runner.LoadScene(loadingSceneName); // ✅ usamos nombre directo
+                // ✅ Cambiar a la escena intermedia (pantalla de asignación)
+                int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity");
+                if (sceneIndex >= 0)
+                {
+                    Debug.Log($"📥 Cargando escena: {loadingSceneName}");
+                    runner.LoadScene(SceneRef.FromIndex(sceneIndex));
+                }
+                else
+                {
+                    Debug.LogError($"❌ Escena {loadingSceneName} no está en Build Settings.");
+                }
             }
         }
     }
@@ -143,7 +153,16 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
         yield return new WaitForSeconds(delay);
         Debug.Log("⏰ Tiempo terminado. Iniciando partida...");
-        _runner.LoadScene(mapSceneName); // ✅ usando nombre directo
+
+        int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/Maps/Tikal/{mapSceneName}.unity");
+        if (sceneIndex >= 0)
+        {
+            _runner.LoadScene(SceneRef.FromIndex(sceneIndex));
+        }
+        else
+        {
+            Debug.LogError($"❌ Escena {mapSceneName} no está en Build Settings.");
+        }
     }
 
     // 🔹 SPAWN DE JUGADORES
@@ -165,7 +184,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")})");
     }
 
-    // 🔹 OTROS CALLBACKS
+    // 🔹 CALLBACKS REQUERIDOS
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"🚪 Player left: {player}");
@@ -186,7 +205,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         input.Set(data);
     }
 
-    // Requeridos por INetworkRunnerCallbacks
+    // No utilizados pero necesarios
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
