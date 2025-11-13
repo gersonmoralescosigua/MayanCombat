@@ -50,13 +50,15 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         var sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
 
-        // Fusion decidirá si host o client, no cargamos ninguna escena todavía
+        // Usar SIEMPRE el mismo nombre de sesión
+        const string sessionName = "MayanQuickMatch";
+
         var result = await _runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
-            SessionName = "MayanRoom_" + UnityEngine.Random.Range(0, 9999),
+            SessionName = sessionName,
             SceneManager = sceneManager,
-            Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex) // ✅ CORRECTO PARA Fusion 2.0.8
+            Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex)
         });
 
         if (!result.Ok)
