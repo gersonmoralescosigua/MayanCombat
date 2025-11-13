@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿/*using UnityEngine;
 using UnityEngine.UI;
 using Fusion;
 
@@ -59,4 +59,4 @@ public class CharacterSelectWrapper : MonoBehaviour
         // Intentar iniciar partida
         NetworkRunnerHandler.Instance.TryStartGame();
     }
-}
+}*/

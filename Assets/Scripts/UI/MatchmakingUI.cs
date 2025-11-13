@@ -37,7 +37,7 @@ public class MatchmakingUI : MonoBehaviour
     void OnCancelClicked()
     {
         Debug.Log("❌ Cancelando matchmaking...");
-        NetworkRunnerHandler.Instance?.Shutdown();
+        Destroy(NetworkRunnerHandler.Instance.gameObject);
         UnityEngine.SceneManagement.SceneManager.LoadScene("Menu");
     }
 }

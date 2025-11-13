@@ -14,17 +14,18 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkRunner _runner;
     public NetworkRunner Runner => _runner;
 
-    private bool _isConnecting = false;
-    private Coroutine selectionTimer;
-
     [Header("Scenes")]
-    public string characterSelectScene = "CharacterSelectWrapper";
+    public string loadingSceneName = "LoadingAssignment";
     public string mapSceneName = "Map_Tikal_Base";
 
-    [Header("Players")]
+    [Header("Matchmaking")]
     public int maxPlayers = 2;
 
-    public Dictionary<PlayerRef, int> SelectedCharacters = new();
+    // Guardará los equipos y prefabs asignados
+    private readonly Dictionary<PlayerRef, int> _playerTeams = new();
+    private readonly Dictionary<PlayerRef, int> _playerCharacters = new();
+
+    private Coroutine _autoStartTimer;
 
     private void Awake()
     {
@@ -38,35 +39,32 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         DontDestroyOnLoad(gameObject);
     }
 
-    // 🔹 INICIO DE MATCHMAKING
+    // 🔹 INICIA MATCHMAKING
     public async void StartMatchmaking()
     {
-        if (_isConnecting) return;
-        _isConnecting = true;
-        Debug.Log("🔗 Buscando o creando sesión en Fusion...");
+        Debug.Log("🔗 Iniciando matchmaking...");
 
         _runner = gameObject.AddComponent<NetworkRunner>();
         _runner.ProvideInput = true;
 
         var sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
 
+        // Fusion decidirá si host o client
         var result = await _runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
-            SessionName = "MayanCombatRoom",
-            Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex),
+            SessionName = "MayanRoom_" + UnityEngine.Random.Range(0, 9999),
+            Scene = SceneRef.None,
             SceneManager = sceneManager
         });
 
         if (!result.Ok)
         {
             Debug.LogError($"❌ Error al conectar: {result.ShutdownReason}");
-            _isConnecting = false;
             return;
         }
 
-        Debug.Log("✅ Conectado a Fusion. Esperando jugadores...");
-        _isConnecting = false;
+        Debug.Log("✅ Conectado a Fusion. Esperando jugador...");
     }
 
     // 🔹 CUANDO UN JUGADOR ENTRA
@@ -79,150 +77,108 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             int connected = runner.ActivePlayers.Count();
             Debug.Log($"🧩 Jugadores conectados: {connected}/{maxPlayers}");
 
-            // Asigna equipos (0 = Español, 1 = Maya)
-            int team = (connected % 2 == 1) ? 0 : 1;
-            AssignTeamRPC(player, team);
-
-            // Cuando estén los 2, carga CharacterSelectWrapper
             if (connected == maxPlayers)
             {
-                Debug.Log("✅ Ambos jugadores conectados. Cargando CharacterSelectWrapper...");
-                runner.LoadScene(characterSelectScene);
+                // ✅ Ambos conectados -> asignar equipos y cargar LoadingAssignment
+                AssignTeams();
+                runner.LoadScene(loadingSceneName);
             }
         }
     }
 
-    // 🔹 RPC: Asignar equipo a jugador
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void AssignTeamRPC(PlayerRef target, int team, RpcInfo info = default)
+    // 🔹 Asignar equipos aleatoriamente
+    private void AssignTeams()
     {
-        if (Runner.LocalPlayer == target)
+        var players = _runner.ActivePlayers.ToList();
+        if (players.Count < 2) return;
+
+        // Mezclamos aleatoriamente
+        players = players.OrderBy(x => UnityEngine.Random.value).ToList();
+
+        _playerTeams[players[0]] = 0; // Español
+        _playerTeams[players[1]] = 1; // Maya
+
+        _playerCharacters[players[0]] = 0; // Beatriz
+        _playerCharacters[players[1]] = 1; // Ixquic
+
+        // RPC a cada jugador informando su equipo
+        foreach (var p in players)
+        {
+            RPC_AssignRole(p, _playerTeams[p], _playerCharacters[p]);
+        }
+
+        Debug.Log($"✅ Equipos asignados: {players[0]}=Español, {players[1]}=Maya");
+    }
+
+    // 🔹 RPC: Envia al cliente su rol y personaje
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_AssignRole(PlayerRef target, int team, int charId, RpcInfo info = default)
+    {
+        if (_runner.LocalPlayer == target)
         {
             SessionManager.Instance?.SetTeam(team);
-            Debug.Log($"[NetworkRunnerHandler] 🎯 Asignado equipo {(team == 0 ? "Español" : "Maya")} al jugador local");
+            PlayerPrefs.SetInt("AssignedCharacter", charId);
+            Debug.Log($"🎯 Eres {(team == 0 ? "Español" : "Maya")} - Personaje {charId}");
         }
     }
 
-    // 🔹 CUANDO SE CARGA UNA ESCENA
+    // 🔹 ESCENA CARGADA
     public void OnSceneLoadDone(NetworkRunner runner)
     {
-        string sceneName = SceneManager.GetActiveScene().name;
-        Debug.Log($"✅ Escena cargada (Fusion): {sceneName}");
+        string currentScene = SceneManager.GetActiveScene().name;
+        Debug.Log($"✅ Escena cargada: {currentScene}");
 
-        if (sceneName == characterSelectScene)
+        if (currentScene == loadingSceneName && runner.IsServer)
         {
-            if (runner.IsServer)
-            {
-                Debug.Log("⏳ Dando 10 segundos para seleccionar personaje...");
-                if (selectionTimer != null) StopCoroutine(selectionTimer);
-                selectionTimer = StartCoroutine(SelectionCountdown());
-            }
+            if (_autoStartTimer != null) StopCoroutine(_autoStartTimer);
+            _autoStartTimer = StartCoroutine(AutoStartAfterDelay(10f));
         }
 
-        if (sceneName == mapSceneName)
+        if (currentScene == mapSceneName)
         {
             foreach (var p in runner.ActivePlayers)
                 SpawnPlayer(runner, p);
         }
     }
 
-    // 🔹 TEMPORIZADOR DE 10 SEGUNDOS PARA ELECCIÓN
-    private IEnumerator SelectionCountdown()
+    // 🔹 ESPERA 10 SEGUNDOS Y LANZA PARTIDA
+    private IEnumerator AutoStartAfterDelay(float delay)
     {
-        yield return new WaitForSeconds(10f);
-        Debug.Log("⏰ Tiempo de selección terminado. Asignando personajes automáticamente...");
-        AutoAssignCharacters();
-        TryStartGame();
+        yield return new WaitForSeconds(delay);
+        Debug.Log("⏰ Tiempo terminado. Iniciando partida...");
+        _runner.LoadScene(mapSceneName);
     }
 
-    // 🔹 AUTO ASIGNACIÓN SI NADIE ELIGE
-    private void AutoAssignCharacters()
+    // 🔹 SPAWN DE JUGADORES
+    private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
-        foreach (var player in _runner.ActivePlayers)
-        {
-            if (!SelectedCharacters.ContainsKey(player))
-            {
-                int autoChar = SessionManager.Instance != null && SessionManager.Instance.currentTeam == 0 ? 0 : 1;
-                SelectedCharacters[player] = autoChar;
-                Debug.Log($"⚙️ Auto-asignado personaje {autoChar} para {player}");
-            }
-        }
-    }
+        int team = _playerTeams.ContainsKey(player) ? _playerTeams[player] : 0;
+        int charId = _playerCharacters.ContainsKey(player) ? _playerCharacters[player] : 0;
 
-    // 🔹 REGISTRA LA ELECCIÓN DE PERSONAJE
-    public void SetPlayerCharacter(PlayerRef player, int characterId)
-    {
-        if (!SelectedCharacters.ContainsKey(player))
-            SelectedCharacters.Add(player, characterId);
-        else
-            SelectedCharacters[player] = characterId;
-
-        Debug.Log($"✅ Player {player} eligió personaje {characterId}");
-    }
-
-    // 🔹 INICIA EL JUEGO
-    public void TryStartGame()
-    {
-        if (SelectedCharacters.Count < maxPlayers)
-        {
-            Debug.Log("⌛ Esperando a que ambos elijan personaje...");
-            return;
-        }
-
-        if (_runner.IsServer)
-        {
-            Debug.Log($"🗺 Cargando mapa {mapSceneName}...");
-            _runner.LoadScene(mapSceneName);
-        }
-    }
-
-    // 🔹 SPAWN DE PREFABS
-    public void SpawnPlayer(NetworkRunner runner, PlayerRef player)
-    {
-        if (!SelectedCharacters.ContainsKey(player))
-        {
-            Debug.LogError("❌ Player no ha seleccionado personaje.");
-            return;
-        }
-
-        int charID = SelectedCharacters[player];
-        string prefabPath = $"Prefabs/Characters/pf_{(charID == 0 ? "beatriz" : "ixquic")}";
-
-        GameObject prefab = Resources.Load<GameObject>(prefabPath);
+        string prefabPath = $"Prefabs/Characters/pf_{(charId == 0 ? "beatriz" : "ixquic")}";
+        var prefab = Resources.Load<GameObject>(prefabPath);
         if (prefab == null)
         {
-            Debug.LogError($"❌ Prefab no encontrado en {prefabPath}");
+            Debug.LogError($"❌ Prefab no encontrado: {prefabPath}");
             return;
         }
 
-        Vector3 spawnPos = new Vector3(UnityEngine.Random.Range(-2f, 2f), 1f, 0f);
+        Vector3 spawnPos = team == 0 ? new Vector3(-2, 1, 0) : new Vector3(2, 1, 0);
         runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
-        Debug.Log($"✅ Spawn player {player} ({(charID == 0 ? "Beatriz" : "Ixquic")})");
+        Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")})");
     }
 
-    // 🔹 CIERRA SESIÓN
-    public void Shutdown()
-    {
-        if (_runner != null)
-        {
-            _runner.Shutdown();
-            Destroy(_runner);
-            _runner = null;
-            Debug.Log("🔴 Fusion apagado.");
-        }
-    }
-
-    // ---------- CALLBACKS ----------
+    // 🔹 OTROS CALLBACKS
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"🚪 Player left: {player}");
-        if (SelectedCharacters.ContainsKey(player))
-            SelectedCharacters.Remove(player);
+        _playerTeams.Remove(player);
+        _playerCharacters.Remove(player);
     }
 
     public void OnConnectedToServer(NetworkRunner runner) => Debug.Log("🌐 Connected to server");
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) => Debug.LogWarning($"❌ Disconnected: {reason}");
-    public void OnSceneLoadStart(NetworkRunner runner) => Debug.Log("📥 Fusion comenzó a cargar una escena...");
+    public void OnSceneLoadStart(NetworkRunner runner) => Debug.Log("📥 Fusion comenzó a cargar escena...");
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
         var data = new NetworkInputData();
@@ -233,6 +189,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         input.Set(data);
     }
 
+    // Sin uso, pero necesarios para callbacks
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
