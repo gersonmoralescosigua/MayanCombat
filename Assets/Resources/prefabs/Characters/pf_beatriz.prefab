@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 6817607467047038329}
   - component: {fileID: 4244448824186598198}
   - component: {fileID: 5558099387313084308}
+  - component: {fileID: 2238017263589904987}
   m_Layer: 0
   m_Name: pf_beatriz
   m_TagString: Untagged
@@ -249,3 +250,30 @@ MonoBehaviour:
   _NetVertical: 0
   _NetGrounded:
     _value: 0
+--- !u!114 &2238017263589904987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392798922818354650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 878e6296e6a0ec84ca206af40c532acf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  maxVel: 5
+  jumpForce: 7
+  leftKey: 97
+  rightKey: 100
+  jumpKey: 119
+  attackKey: 106
+  jadeStacks: 0
+  baseSpeed: 5
+  currentSpeed: 0
+  basePushForce: 5
+  isKnocked: 0
+  hasJade: 0
+  canMove: 1
+  isConfused: 0
+  isSlowed: 0
