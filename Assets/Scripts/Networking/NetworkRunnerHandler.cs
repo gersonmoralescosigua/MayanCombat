@@ -2,18 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using UnityEngine;
 using Fusion;
 using Fusion.Sockets;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// NetworkRunnerHandler — Matchmaking robusto con escaneo de sesiones seguro.
-/// - Usa un runner temporal aislado (TempSessionScanner) para pedir lista de sesiones.
-/// - Luego inicia el runner "real" en este GameObject (si hay sala disponible se une, si no la crea).
-/// - Evita DisconnectByClientLogic causado por mezclar callbacks entre runners.
-/// </summary>
 public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 {
     public static NetworkRunnerHandler Instance;
@@ -21,27 +14,19 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkRunner _runner;
     public NetworkRunner Runner => _runner;
 
-    // Lista actualizada por TempSessionScanner
-    private List<SessionInfo> _latestSessions = null;
-
-    [Header("Scenes")]
+    [Header("Scenes (asegúrate de que están en Build Settings)")]
+    public string matchmakingSceneName = "Matchmaking";
     public string loadingSceneName = "LoadingAssignment";
     public string mapSceneName = "Map_Tikal_Base";
+    public string menuSceneName = "Menu";
 
     [Header("Matchmaking")]
     public int maxPlayers = 2;
 
-    [Header("Character Prefabs (Inspector)")]
-    public GameObject pfBeatriz;
-    public GameObject pfIxquic;
-
-    private readonly Dictionary<PlayerRef, int> _teams = new();
-    private readonly Dictionary<PlayerRef, int> _characters = new();
+    private readonly Dictionary<PlayerRef, int> _playerTeams = new();
+    private readonly Dictionary<PlayerRef, int> _playerCharacters = new();
 
     private Coroutine _autoStartTimer;
-
-    // Protección para no arrancar matchmaking dos veces
-    private bool _isMatchmaking = false;
 
     private void Awake()
     {
@@ -50,307 +35,169 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
-    // ---------------------------------------------------------
-    // START MATCHMAKING (seguro)
-    // ---------------------------------------------------------
+    // 🔹 INICIA MATCHMAKING
     public async void StartMatchmaking()
     {
-        if (_isMatchmaking)
-        {
-            Debug.LogWarning("[NetworkRunnerHandler] Matchmaking ya en progreso.");
-            return;
-        }
+        Debug.Log("🔗 Iniciando matchmaking...");
 
-        _isMatchmaking = true;
-        Debug.Log("[NetworkRunnerHandler] Buscando sesiones existentes...");
-
-        // ---------------------------------------------------------
-        // 1) Runner temporal (en GameObject separado) con scanner aislado
-        // ---------------------------------------------------------
-        GameObject tempGO = null;
-        NetworkRunner tempRunner = null;
-        NetworkSceneManagerDefault tempSceneManager = null;
-        TempSessionScanner scanner = null;
-
-        try
-        {
-            tempGO = new GameObject("TempRunnerScanner");
-            // Asegurar que no se destruya inmediatamente por alguna otra cosa
-            DontDestroyOnLoad(tempGO);
-
-            tempRunner = tempGO.AddComponent<NetworkRunner>();
-            tempRunner.ProvideInput = false; // no necesitamos input en el escaneo
-
-            // Añadimos un componente scanner que implementa INetworkRunnerCallbacks pero SOLO
-            // para OnSessionListUpdated (aislado del handler principal).
-            scanner = tempGO.AddComponent<TempSessionScanner>();
-            scanner.Init(this); // le pasamos referencia al handler para que escriba _latestSessions
-
-            tempRunner.AddCallbacks(scanner);
-
-            tempSceneManager = tempGO.AddComponent<NetworkSceneManagerDefault>();
-
-            StartGameArgs tempArgs = new StartGameArgs()
-            {
-                GameMode = GameMode.Shared, // Shared mode permite obtener lista
-                SessionName = "TEMP_SCAN",
-                SceneManager = tempSceneManager
-            };
-
-            var tempResult = await tempRunner.StartGame(tempArgs);
-
-            if (!tempResult.Ok)
-            {
-                Debug.LogWarning($"[NetworkRunnerHandler] Falló tempRunner.StartGame(): {tempResult.ShutdownReason}. Continuamos y crearemos host si es necesario.");
-            }
-            else
-            {
-                // Esperamos a que el scanner llene _latestSessions (con timeout)
-                float timeout = 2.5f;
-                float pollInterval = 0.1f;
-                while (_latestSessions == null && timeout > 0f)
-                {
-                    await Task.Delay((int)(pollInterval * 1000));
-                    timeout -= pollInterval;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogWarning($"[NetworkRunnerHandler] Error durante escaneo: {ex.Message}");
-        }
-        finally
-        {
-            // Shutdown y destruir el runner temporal de forma segura
-            if (tempRunner != null)
-            {
-                try
-                {
-                    // Shutdown devuelve una tarea; await aquí es correcto dentro del finally async
-                    await tempRunner.Shutdown();
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogWarning("[NetworkRunnerHandler] Error al cerrar tempRunner: " + ex.Message);
-                }
-            }
-
-            if (tempGO != null)
-            {
-                Destroy(tempGO);
-            }
-        }
-
-        // ---------------------------------------------------------
-        // 2) Evaluar sesiones obtenidas
-        // ---------------------------------------------------------
-        var sessions = _latestSessions ?? new List<SessionInfo>();
-        SessionInfo joinable = sessions.FirstOrDefault(s => s.PlayerCount < maxPlayers && s.IsOpen);
-
-        // ---------------------------------------------------------
-        // 3) Crear/usar runner "real" en este GameObject
-        // ---------------------------------------------------------
-        if (_runner == null)
-        {
-            // Si no existe, obtener componente (por si existe en inspector) o añadir
-            _runner = gameObject.GetComponent<NetworkRunner>();
-            if (_runner == null)
-            {
-                _runner = gameObject.AddComponent<NetworkRunner>();
-            }
-        }
-        else
-        {
-            // quitamos callbacks previos para evitar duplicados
-            try { _runner.RemoveCallbacks(this); } catch { }
-        }
-
+        _runner = gameObject.AddComponent<NetworkRunner>();
         _runner.ProvideInput = true;
-        _runner.AddCallbacks(this);
 
-        // Asegurar SceneManager para el runner real
-        NetworkSceneManagerDefault realSceneManager = gameObject.GetComponent<NetworkSceneManagerDefault>();
-        if (realSceneManager == null)
-            realSceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
+        var sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
 
-        // ---------------------------------------------------------
-        // 4) Preparar StartGameArgs y unirse o crear
-        // ---------------------------------------------------------
-        StartGameArgs args = new StartGameArgs()
+        // Usar SIEMPRE el mismo nombre de sesión
+        const string sessionName = "MayanQuickMatch";
+
+        var result = await _runner.StartGame(new StartGameArgs()
         {
-            SceneManager = realSceneManager
-        };
-
-        if (joinable != null)
-        {
-            Debug.Log("[NetworkRunnerHandler] Sesión encontrada, entrando: " + joinable.Name);
-            args.GameMode = GameMode.Client;
-            args.SessionName = joinable.Name;
-        }
-        else
-        {
-            string newName = "Room_" + UnityEngine.Random.Range(1000, 9999);
-            Debug.Log("[NetworkRunnerHandler] No hay sesiones disponibles. Creando: " + newName);
-            args.GameMode = GameMode.Host;
-            args.SessionName = newName;
-        }
-
-        // ---------------------------------------------------------
-        // 5) Iniciar la sesión "real"
-        // ---------------------------------------------------------
-        var result = await _runner.StartGame(args);
+            GameMode = GameMode.AutoHostOrClient,
+            SessionName = sessionName,
+            SceneManager = sceneManager,
+            Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex)
+        });
 
         if (!result.Ok)
         {
-            Debug.LogError("[NetworkRunnerHandler] Error al iniciar runner real: " + result.ShutdownReason);
-            _isMatchmaking = false;
+            Debug.LogError($"❌ Error al conectar: {result.ShutdownReason}");
             return;
         }
 
-        Debug.Log("[NetworkRunnerHandler] Runner real iniciado correctamente. SessionName: " + args.SessionName);
-
-        // _runner ya está listo para usarse
-        _isMatchmaking = false;
+        Debug.Log("✅ Conectado a Fusion. Esperando jugador...");
     }
 
-    // ---------------------------------------------------------
-    // PLAYER JOIN
-    // ---------------------------------------------------------
+    // 🔹 CUANDO UN JUGADOR ENTRA
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log("Jugador conectado: " + player);
+        Debug.Log($"👤 Player joined: {player}");
 
-        // solo el servidor controla la asignación
-        if (!runner.IsServer) return;
-
-        int count = runner.ActivePlayers.Count();
-
-        if (count == maxPlayers)
+        if (runner.IsServer)
         {
-            AssignTeams();
-            runner.LoadScene(loadingSceneName);
+            int connected = runner.ActivePlayers.Count();
+            Debug.Log($"🧩 Jugadores conectados: {connected}/{maxPlayers}");
+
+            if (connected == maxPlayers)
+            {
+                AssignTeams();
+
+                // ✅ Cambiar a la escena intermedia (pantalla de asignación)
+                int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity");
+                if (sceneIndex >= 0)
+                {
+                    Debug.Log($"📥 Cargando escena: {loadingSceneName}");
+                    runner.LoadScene(SceneRef.FromIndex(sceneIndex));
+                }
+                else
+                {
+                    Debug.LogError($"❌ Escena {loadingSceneName} no está en Build Settings.");
+                }
+            }
         }
     }
 
-    // ---------------------------------------------------------
-    // Asigna equipos y personajes
-    // ---------------------------------------------------------
+    // 🔹 Asignar equipos aleatoriamente
     private void AssignTeams()
     {
-        if (_runner == null)
-        {
-            Debug.LogWarning("AssignTeams: runner nulo");
-            return;
-        }
+        var players = _runner.ActivePlayers.ToList();
+        if (players.Count < 2) return;
 
-        var players = _runner.ActivePlayers.OrderBy(x => UnityEngine.Random.value).ToList();
+        players = players.OrderBy(x => UnityEngine.Random.value).ToList();
 
-        // seguridad: verificar que haya 2 players
-        if (players.Count < 2)
-        {
-            Debug.LogWarning("AssignTeams: jugadores insuficientes.");
-            return;
-        }
+        _playerTeams[players[0]] = 0; // Español
+        _playerTeams[players[1]] = 1; // Maya
 
-        _teams[players[0]] = 0; // Español
-        _teams[players[1]] = 1; // Maya
-
-        _characters[players[0]] = 0; // Beatriz
-        _characters[players[1]] = 1; // Ixquic
+        _playerCharacters[players[0]] = 0; // Beatriz
+        _playerCharacters[players[1]] = 1; // Ixquic
 
         foreach (var p in players)
-            RPC_AssignRole(p, _teams[p], _characters[p]);
+            RPC_AssignRole(p, _playerTeams[p], _playerCharacters[p]);
 
-        Debug.Log("Equipos asignados correctamente.");
+        Debug.Log($"✅ Equipos asignados: {players[0]}=Español, {players[1]}=Maya");
     }
 
-    // ---------------------------------------------------------
-    // RPC envía datos al cliente
-    // ---------------------------------------------------------
+    // 🔹 RPC: Envia al cliente su rol y personaje
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void RPC_AssignRole(PlayerRef target, int team, int charId, RpcInfo info = default)
     {
-        if (_runner != null && _runner.LocalPlayer == target)
+        if (_runner.LocalPlayer == target)
         {
-            SessionManager.Instance.SetTeam(team);
+            SessionManager.Instance?.SetTeam(team);
             PlayerPrefs.SetInt("AssignedCharacter", charId);
+            Debug.Log($"🎯 Eres {(team == 0 ? "Español" : "Maya")} - Personaje {charId}");
         }
     }
 
-    // ---------------------------------------------------------
-    // ESCENA CARGADA
-    // ---------------------------------------------------------
+    // 🔹 ESCENA CARGADA
     public void OnSceneLoadDone(NetworkRunner runner)
     {
-        string scene = SceneManager.GetActiveScene().name;
-        Debug.Log("Escena cargada: " + scene);
+        string currentScene = SceneManager.GetActiveScene().name;
+        Debug.Log($"✅ Escena cargada: {currentScene}");
 
-        if (scene == loadingSceneName && runner.IsServer)
+        if (currentScene == loadingSceneName && runner.IsServer)
         {
-            _autoStartTimer = StartCoroutine(AutoStartAfterDelay(5f));
+            if (_autoStartTimer != null) StopCoroutine(_autoStartTimer);
+            _autoStartTimer = StartCoroutine(AutoStartAfterDelay(10f));
         }
 
-        if (scene == mapSceneName)
+        if (currentScene == mapSceneName)
         {
             foreach (var p in runner.ActivePlayers)
                 SpawnPlayer(runner, p);
         }
     }
 
-    private IEnumerator AutoStartAfterDelay(float seconds)
+    // 🔹 ESPERA 10 SEGUNDOS Y LANZA PARTIDA
+    private IEnumerator AutoStartAfterDelay(float delay)
     {
-        yield return new WaitForSeconds(seconds);
-        if (_runner != null && _runner.IsRunning)
-            _runner.LoadScene(mapSceneName);
+        yield return new WaitForSeconds(delay);
+        Debug.Log("⏰ Tiempo terminado. Iniciando partida...");
+
+        int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/Maps/Tikal/{mapSceneName}.unity");
+        if (sceneIndex >= 0)
+        {
+            _runner.LoadScene(SceneRef.FromIndex(sceneIndex));
+        }
+        else
+        {
+            Debug.LogError($"❌ Escena {mapSceneName} no está en Build Settings.");
+        }
     }
 
-    // ---------------------------------------------------------
-    // SPAWNEA JUGADOR
-    // ---------------------------------------------------------
-    private void SpawnPlayer(NetworkRunner runner, PlayerRef p)
+    // 🔹 SPAWN DE JUGADORES
+    private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
-        if (!_teams.ContainsKey(p) || !_characters.ContainsKey(p))
+        int team = _playerTeams.ContainsKey(player) ? _playerTeams[player] : 0;
+        int charId = _playerCharacters.ContainsKey(player) ? _playerCharacters[player] : 0;
+
+        string prefabPath = $"Prefabs/Characters/pf_{(charId == 0 ? "beatriz" : "ixquic")}";
+        var prefab = Resources.Load<GameObject>(prefabPath);
+        if (prefab == null)
         {
-            Debug.LogWarning("SpawnPlayer: player no tiene equipo o personaje asignado.");
+            Debug.LogError($"❌ Prefab no encontrado: {prefabPath}");
             return;
         }
 
-        int team = _teams[p];
-        int charId = _characters[p];
-
-        GameObject prefab = charId == 0 ? pfBeatriz : pfIxquic;
-
-        Vector3 pos = team == 0 ? new Vector3(-4, 1, 0) : new Vector3(4, 1, 0);
-
-        runner.Spawn(prefab, pos, Quaternion.identity, p);
-        Debug.Log($"Spawn: {prefab.name} en {pos}");
+        Vector3 spawnPos = team == 0 ? new Vector3(-2, 1, 0) : new Vector3(2, 1, 0);
+        runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
+        Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")})");
     }
 
-    // ---------------------------------------------------------
-    // CALLBACK: se actualiza la lista de sesiones recibida por Fusion
-    // (este método puede ser llamado tanto por tempRunner->scanner como por runner real;
-    //  scanner es quien pone la lista en _latestSessions durante el escaneo)
-    // ---------------------------------------------------------
-    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
-    {
-        Debug.Log("[NetworkRunnerHandler] Lista de sesiones recibida. Cantidad: " + sessionList.Count);
-        _latestSessions = sessionList;
-    }
-
-    // ---------------------------------------------------------
-    // Otros callbacks (implementaciones vacías o manejadas)
-    // ---------------------------------------------------------
+    // 🔹 CALLBACKS REQUERIDOS
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        _teams.Remove(player);
-        _characters.Remove(player);
+        Debug.Log($"🚪 Player left: {player}");
+        _playerTeams.Remove(player);
+        _playerCharacters.Remove(player);
     }
 
-    public void OnInput(NetworkRunner r, NetworkInput input)
+    public void OnConnectedToServer(NetworkRunner runner) => Debug.Log("🌐 Connected to server");
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) => Debug.LogWarning($"❌ Disconnected: {reason}");
+    public void OnSceneLoadStart(NetworkRunner runner) => Debug.Log("📥 Fusion comenzó a cargar escena...");
+    public void OnInput(NetworkRunner runner, NetworkInput input)
     {
         var data = new NetworkInputData();
         data.move.x = Input.GetAxis("Horizontal");
@@ -360,94 +207,17 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         input.Set(data);
     }
 
-    public void OnConnectedToServer(NetworkRunner runner) { }
-    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
-    {
-        // Logging útil para debugging
-        Debug.Log($"[NetworkRunnerHandler] OnDisconnectedFromServer: {reason}");
-    }
-    public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput data) { }
-    public void OnShutdown(NetworkRunner runner, ShutdownReason reason)
-    {
-        Debug.Log($"[NetworkRunnerHandler] OnShutdown: {reason}");
-    }
-    public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest req, byte[] token) { }
-    public void OnConnectFailed(NetworkRunner runner, NetAddress remote, NetConnectFailedReason reason)
-    {
-        Debug.LogWarning($"[NetworkRunnerHandler] OnConnectFailed: {reason}");
-    }
-    public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr ptr) { }
-    public void OnSceneLoadStart(NetworkRunner runner) { }
+    // No utilizados pero necesarios
+    public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
+    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
+    public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
+    public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
+    public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
+    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
-    public void OnHostMigration(NetworkRunner runner, HostMigrationToken token) { }
-    public void OnReliableDataReceived(NetworkRunner runner, PlayerRef p, ReliableKey k, ArraySegment<byte> data) { }
-    public void OnReliableDataProgress(NetworkRunner runner, PlayerRef p, ReliableKey k, float progress) { }
-    public void OnObjectEnterAOI(NetworkRunner r, NetworkObject o, PlayerRef p) { }
-    public void OnObjectExitAOI(NetworkRunner r, NetworkObject o, PlayerRef p) { }
-
-    // ---------------------------------------------------------
-    // Limpieza al destruir este handler: asegúrate de apagar runner
-    // ---------------------------------------------------------
-    private void OnDestroy()
-    {
-        if (_runner != null)
-        {
-            try
-            {
-                _runner.RemoveCallbacks(this);
-                // Shutdown es async; no await en OnDestroy. Llamamos sin bloquear.
-                if (_runner.IsRunning)
-                {
-                    _runner.Shutdown().ConfigureAwait(false);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning("[NetworkRunnerHandler] OnDestroy error: " + ex.Message);
-            }
-        }
-    }
-
-    // ---------------------------------------------------------
-    // Clase auxiliar (componente) que solo escucha OnSessionListUpdated
-    // para el runner temporal. Esto evita mezclar callbacks con el handler principal.
-    // ---------------------------------------------------------
-    private class TempSessionScanner : MonoBehaviour, INetworkRunnerCallbacks
-    {
-        private NetworkRunnerHandler _owner;
-
-        public void Init(NetworkRunnerHandler owner)
-        {
-            _owner = owner;
-        }
-
-        // Solo usamos OnSessionListUpdated para pasar la lista al owner.
-        public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
-        {
-            Debug.Log("[TempSessionScanner] Lista sesiones recibida: " + sessionList.Count);
-            if (_owner != null)
-                _owner._latestSessions = sessionList;
-        }
-
-        // Implementaciones vacías para evitar que Fusion intente llamar otras lógicas
-        public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) { }
-        public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
-        public void OnInput(NetworkRunner runner, NetworkInput input) { }
-        public void OnConnectedToServer(NetworkRunner runner) { }
-        public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
-        public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput data) { }
-        public void OnShutdown(NetworkRunner runner, ShutdownReason reason) { }
-        public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest req, byte[] token) { }
-        public void OnConnectFailed(NetworkRunner runner, NetAddress remote, NetConnectFailedReason reason) { }
-        public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr ptr) { }
-        public void OnSceneLoadStart(NetworkRunner runner) { }
-        public void OnSceneLoadDone(NetworkRunner runner) { }   // ← FALTA ESTE
-        public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
-        public void OnHostMigration(NetworkRunner runner, HostMigrationToken token) { }
-        public void OnReliableDataReceived(NetworkRunner runner, PlayerRef p, ReliableKey k, ArraySegment<byte> data) { }
-        public void OnReliableDataProgress(NetworkRunner runner, PlayerRef p, ReliableKey k, float progress) { }
-        public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject o, PlayerRef p) { }
-        public void OnObjectExitAOI(NetworkRunner runner, NetworkObject o, PlayerRef p) { }
-
-    }
+    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
+    public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
+    public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
+    public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
+    public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
 }
