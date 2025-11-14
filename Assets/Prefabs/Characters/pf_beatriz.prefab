@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6166838384249402642}
   - component: {fileID: 6817607467047038329}
   - component: {fileID: 4244448824186598198}
+  - component: {fileID: 5558099387313084308}
   m_Layer: 0
   m_Name: pf_beatriz
   m_TagString: Untagged
@@ -135,6 +136,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 6166838384249402642}
+  - {fileID: 5558099387313084308}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &6166838384249402642
 MonoBehaviour:
@@ -149,6 +151,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerNetwork
   _CharacterId: 0
+  _HasMaize:
+    _value: 0
+  _HasCacao:
+    _value: 0
+  _JadeStacks: 0
 --- !u!50 &6817607467047038329
 Rigidbody2D:
   serializedVersion: 5
@@ -222,3 +229,23 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.93, y: 2.1415093}
   m_EdgeRadius: 0
+--- !u!114 &5558099387313084308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392798922818354650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d45890923cec2ed43a1737646c37ce37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementNetworked
+  moveSpeed: 5
+  jumpForce: 7
+  airControl: 0.8
+  accel: 40
+  _NetSpeed: 0
+  _NetVertical: 0
+  _NetGrounded:
+    _value: 0
