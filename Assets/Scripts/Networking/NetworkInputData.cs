@@ -1,9 +1,15 @@
-using UnityEngine;
 using Fusion;
+using UnityEngine;
 
 public struct NetworkInputData : INetworkInput
 {
-    public Vector2 move;   // X para izquierda/derecha
-    public NetworkBool jumpPressed;
-    public NetworkBool attackPressed;
+    // movimiento normalizado (-1..1) en X (y opcional Y)
+    public Vector2 Move;
+    // acciones
+    public NetworkBool JumpPressed;
+    public NetworkBool AttackPressed;
+
+    // helpers para lectura más cómoda en scripts
+    public bool Jump => JumpPressed;
+    public bool Attack => AttackPressed;
 }

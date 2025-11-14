@@ -15,8 +15,7 @@ GameObject:
   - component: {fileID: 6166838384249402642}
   - component: {fileID: 6817607467047038329}
   - component: {fileID: 4244448824186598198}
-  - component: {fileID: 5558099387313084308}
-  - component: {fileID: 2238017263589904987}
+  - component: {fileID: 2317041465194639473}
   m_Layer: 0
   m_Name: pf_beatriz
   m_TagString: Untagged
@@ -137,7 +136,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 6166838384249402642}
-  - {fileID: 5558099387313084308}
+  - {fileID: 2317041465194639473}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &6166838384249402642
 MonoBehaviour:
@@ -172,7 +171,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 2
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -183,7 +182,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 4
+  m_Constraints: 0
 --- !u!61 &4244448824186598198
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -230,7 +229,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.93, y: 2.1415093}
   m_EdgeRadius: 0
---- !u!114 &5558099387313084308
+--- !u!114 &2317041465194639473
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -239,41 +238,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 392798922818354650}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d45890923cec2ed43a1737646c37ce37, type: 3}
+  m_Script: {fileID: 11500000, guid: 5cbe472b00ce1b640bf351e32f409794, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementNetworked
   moveSpeed: 5
+  maxSpeed: 8
   jumpForce: 7
-  airControl: 0.8
-  accel: 40
+  groundCheckDistance: 0.6
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 0
+  attackForce: 18
   _NetSpeed: 0
   _NetVertical: 0
-  _NetGrounded:
-    _value: 0
---- !u!114 &2238017263589904987
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 392798922818354650}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 878e6296e6a0ec84ca206af40c532acf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  maxVel: 5
-  jumpForce: 7
-  leftKey: 97
-  rightKey: 100
-  jumpKey: 119
-  attackKey: 106
-  jadeStacks: 0
-  baseSpeed: 5
-  currentSpeed: 0
-  basePushForce: 5
-  isKnocked: 0
-  hasJade: 0
-  canMove: 1
-  isConfused: 0
-  isSlowed: 0
+  _NetGrounded: 0

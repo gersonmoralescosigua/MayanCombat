@@ -1147,6 +1147,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1727894315}
   - component: {fileID: 1727894314}
+  - component: {fileID: 1727894316}
   m_Layer: 0
   m_Name: PickupsSpawner
   m_TagString: Untagged
@@ -1202,6 +1203,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1727894316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1727894313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
+  SortKey: 1485498285
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 1727894314}
+  ForceRemoteRenderTimeframe: 0
 --- !u!4 &1812175407 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4820292749293268330, guid: c5049b8bf6400cc459663958e6e0af8a, type: 3}

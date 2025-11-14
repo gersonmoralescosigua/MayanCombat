@@ -2,41 +2,43 @@ using UnityEngine;
 using Fusion;
 
 /// <summary>
-/// Lee propiedades networked del PlayerMovementNetworked y actualiza el Animator.
-/// - Ejecuta en todos los clientes; usa las variables networked para sincronizar animaciones.
+/// Sincroniza animaciones usando variables networked del PlayerMovementNetworked.
+/// Funciona en todos los clientes.
 /// </summary>
 [DisallowMultipleComponent]
 public class PlayerAnimatorNetwork : NetworkBehaviour
 {
     public Animator animator;
-    PlayerMovementNetworked movement;
+    private PlayerMovementNetworked movement;
+
+    // Hashes EXACTOS para tu Animator
     private int hSpeed = Animator.StringToHash("Speed");
-    private int hGrounded = Animator.StringToHash("Grounded");
     private int hVertical = Animator.StringToHash("Vertical");
+    private int hGrounded = Animator.StringToHash("Grounded");
+    private int hAttack = Animator.StringToHash("Attack");
 
     void Awake()
     {
-        if (animator == null) animator = GetComponentInChildren<Animator>();
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
+
         movement = GetComponent<PlayerMovementNetworked>();
     }
 
     public override void FixedUpdateNetwork()
     {
-        if (animator == null || movement == null) return;
+        if (animator == null || movement == null)
+            return;
 
-        // leer props networked (estos están sincronizados por movement)
-        float speed = movement.NetSpeed;
-        float vert = movement.NetVertical;
-        bool grounded = movement.NetGrounded;
-
-        animator.SetFloat(hSpeed, speed);
-        animator.SetFloat(hVertical, vert);
-        animator.SetBool(hGrounded, grounded);
+        animator.SetFloat(hSpeed, movement.NetSpeed);
+        animator.SetFloat(hVertical, movement.NetVertical);
+        animator.SetBool(hGrounded, movement.NetGrounded);
     }
 
-    // trigger de ataque local (por ejemplo)
+    // Llamado desde input local al presionar J
     public void PlayAttack()
     {
-        animator?.SetTrigger("Attack");
+        if (animator != null)
+            animator.SetTrigger(hAttack);
     }
 }

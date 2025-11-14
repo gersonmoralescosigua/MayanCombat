@@ -182,8 +182,10 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
 
         Vector3 spawnPos = team == 0 ? new Vector3(-0.39f, -0.382f, 0f) : new Vector3(1.3f, -0.4f, 0f);
+
+        // Solo el host debe pedir spawnAuthority (o usar inputAuthority = player)
         runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
-        Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")})");
+        Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")}) at {spawnPos}");
     }
 
     // 🔹 CALLBACKS REQUERIDOS
@@ -199,11 +201,17 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public void OnSceneLoadStart(NetworkRunner runner) => Debug.Log("📥 Fusion comenzó a cargar escena...");
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        var data = new NetworkInputData();
-        data.move.x = Input.GetAxis("Horizontal");
-        data.move.y = Input.GetAxis("Vertical");
-        data.jumpPressed = Input.GetKey(KeyCode.Space);
-        data.attackPressed = Input.GetKey(KeyCode.J);
+        NetworkInputData data = new NetworkInputData();
+        Vector2 move = Vector2.zero;
+        if (Input.GetKey(KeyCode.A)) move.x -= 1f;
+        if (Input.GetKey(KeyCode.D)) move.x += 1f;
+        if (Input.GetKey(KeyCode.W)) move.y += 1f;
+        if (Input.GetKey(KeyCode.S)) move.y -= 1f;
+
+        data.Move = move.normalized;
+        data.JumpPressed = Input.GetKeyDown(KeyCode.W);   // si quieres salto con W
+        data.AttackPressed = Input.GetKeyDown(KeyCode.J);
+
         input.Set(data);
     }
 
