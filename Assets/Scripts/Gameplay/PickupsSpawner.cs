@@ -3,7 +3,7 @@ using UnityEngine;
 using Fusion;
 using System.Collections;
 
-public class PickupsSpawner : MonoBehaviour
+public class PickupsSpawner : NetworkBehaviour
 {
     private NetworkRunner runner;
 
@@ -27,12 +27,14 @@ public class PickupsSpawner : MonoBehaviour
     private readonly List<NetworkObject> activePickups = new List<NetworkObject>();
     private readonly Dictionary<Transform, bool> spawnPointOccupied = new Dictionary<Transform, bool>();
 
-    void Start()
+
+    public override void Spawned()
     {
-        runner = NetworkRunnerHandler.Instance.Runner;
-        if (runner == null)
+        runner = Runner;
+
+        if (!runner.IsServer)
         {
-            Debug.LogError("[PickupsSpawner] Runner no encontrado.");
+            // ❌ IMPORTANTE: Los clientes NO hacen nada
             return;
         }
 
@@ -52,6 +54,7 @@ public class PickupsSpawner : MonoBehaviour
         StartCoroutine(SpawnRoutine());
     }
 
+
     IEnumerator SpawnRoutine()
     {
         while (true)
@@ -59,6 +62,7 @@ public class PickupsSpawner : MonoBehaviour
             yield return new WaitForSeconds(Random.Range(spawnIntervalMin, spawnIntervalMax));
 
             CleanupList();
+
             if (activePickups.Count >= maxSimultaneousPickups)
                 continue;
 
@@ -66,8 +70,12 @@ public class PickupsSpawner : MonoBehaviour
         }
     }
 
+
     void TrySpawnOne()
     {
+        // ❌ Clientes JAMÁS deben entrar a esta función
+        if (!runner.IsServer) return;
+
         List<Transform> availablePoints = new List<Transform>();
 
         foreach (Transform point in spawnPoints)
@@ -97,15 +105,20 @@ public class PickupsSpawner : MonoBehaviour
 
         Vector3 pos = spawnPoint.position;
 
-            NetworkObject obj = runner.Spawn(prefab, pos, Quaternion.identity);
-            activePickups.Add(obj);
+        NetworkObject obj = runner.Spawn(prefab, pos, Quaternion.identity);
+        activePickups.Add(obj);
 
         spawnPointOccupied[spawnPoint] = true;
+
         StartCoroutine(AutoDestroyPickup(obj, spawnPoint));
     }
 
+
     IEnumerator AutoDestroyPickup(NetworkObject obj, Transform spawnPoint)
     {
+        // ❌ Clientes NO destruyen pickups
+        if (!runner.IsServer) yield break;
+
         yield return new WaitForSeconds(autoDestroyTime);
 
         if (obj != null)
@@ -117,18 +130,22 @@ public class PickupsSpawner : MonoBehaviour
         spawnPointOccupied[spawnPoint] = false;
     }
 
-    // ✅ Llamado desde Pickup.cs cuando un jugador recoge un pickup
+
+    // Llamado desde Pickup.cs cuando un jugador lo recoge
     public void OnPickupCollected(NetworkObject obj, Transform spawnPointUsed)
     {
+        if (!runner.IsServer) return;
+
         if (activePickups.Contains(obj))
             activePickups.Remove(obj);
 
-        if (runner != null && obj != null)
+        if (obj != null)
             runner.Despawn(obj);
 
         if (spawnPointUsed != null && spawnPointOccupied.ContainsKey(spawnPointUsed))
             spawnPointOccupied[spawnPointUsed] = false;
     }
+
 
     void CleanupList()
     {
