@@ -247,7 +247,7 @@ GameObject:
   - component: {fileID: 446261840}
   - component: {fileID: 446261839}
   - component: {fileID: 446261841}
-  m_Layer: 3
+  m_Layer: 8
   m_Name: Plataformas Tikal_2
   m_TagString: Suelo
   m_Icon: {fileID: 0}
@@ -580,7 +580,7 @@ GameObject:
   - component: {fileID: 895137377}
   - component: {fileID: 895137376}
   - component: {fileID: 895137378}
-  m_Layer: 3
+  m_Layer: 8
   m_Name: Plataformas Tikal_1
   m_TagString: Suelo
   m_Icon: {fileID: 0}
@@ -885,7 +885,7 @@ GameObject:
   - component: {fileID: 1211226599}
   - component: {fileID: 1211226598}
   - component: {fileID: 1211226600}
-  m_Layer: 3
+  m_Layer: 8
   m_Name: Plataformas Tikal_3
   m_TagString: Suelo
   m_Icon: {fileID: 0}
@@ -1185,7 +1185,6 @@ MonoBehaviour:
   spawnIntervalMax: 7
   maxSimultaneousPickups: 5
   initialSpawnCount: 3
-  randomizeWithinSpawnPoint: 0
   overlapCheckRadius: 1.5
   autoDestroyTime: 10
 --- !u!4 &1727894315
@@ -1219,8 +1218,7 @@ MonoBehaviour:
   ObjectInterest: 1
   Flags: 262145
   NestedObjects: []
-  NetworkedBehaviours:
-  - {fileID: 1727894314}
+  NetworkedBehaviours: []
   ForceRemoteRenderTimeframe: 0
 --- !u!4 &1812175407 stripped
 Transform:
@@ -1238,7 +1236,7 @@ GameObject:
   - component: {fileID: 1944240098}
   - component: {fileID: 1944240097}
   - component: {fileID: 1944240099}
-  m_Layer: 3
+  m_Layer: 8
   m_Name: Plataformas Tikal_0
   m_TagString: Suelo
   m_Icon: {fileID: 0}
@@ -1465,7 +1463,7 @@ GameObject:
   - component: {fileID: 2143210305}
   - component: {fileID: 2143210304}
   - component: {fileID: 2143210306}
-  m_Layer: 3
+  m_Layer: 8
   m_Name: Plataformas Tikal_1
   m_TagString: Suelo
   m_Icon: {fileID: 0}

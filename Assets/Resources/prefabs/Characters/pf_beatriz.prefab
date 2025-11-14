@@ -247,7 +247,7 @@ MonoBehaviour:
   groundCheckDistance: 0.6
   groundMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   attackForce: 18
   _NetSpeed: 0
   _NetVertical: 0
