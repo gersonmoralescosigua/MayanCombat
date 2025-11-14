@@ -181,7 +181,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
-        Vector3 spawnPos = team == 0 ? new Vector3(-0.39, -0.382, 0) : new Vector3(1.3, -0.4, 0);
+        Vector3 spawnPos = team == 0 ? new Vector3(-0.39f, -0.382f, 0f) : new Vector3(1.3f, -0.4f, 0f);
         runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
         Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")})");
     }
