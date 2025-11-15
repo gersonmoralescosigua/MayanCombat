@@ -16,7 +16,8 @@ GameObject:
   - component: {fileID: 6817607467047038329}
   - component: {fileID: 4244448824186598198}
   - component: {fileID: 2317041465194639473}
-  - component: {fileID: -3750001040689671584}
+  - component: {fileID: -7924143872835205272}
+  - component: {fileID: 7803057132912853981}
   m_Layer: 7
   m_Name: pf_beatriz
   m_TagString: Player
@@ -138,7 +139,8 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 6166838384249402642}
   - {fileID: 2317041465194639473}
-  - {fileID: -3750001040689671584}
+  - {fileID: -7924143872835205272}
+  - {fileID: 7803057132912853981}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &6166838384249402642
 MonoBehaviour:
@@ -244,7 +246,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementNetworked
   moveSpeed: 5
-  maxSpeed: 8
   jumpForce: 7
   groundCheckDistance: 0.6
   groundMask:
@@ -254,7 +255,24 @@ MonoBehaviour:
   _NetSpeed: 0
   _NetVertical: 0
   _NetGrounded: 0
---- !u!114 &-3750001040689671584
+--- !u!114 &-7924143872835205272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392798922818354650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkTransform
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0
+--- !u!114 &7803057132912853981
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -266,4 +284,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e139313b198adb34e8f1acb47900022c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimatorNetwork
-  animator: {fileID: 0}
+  animator: {fileID: 369483802363440233}

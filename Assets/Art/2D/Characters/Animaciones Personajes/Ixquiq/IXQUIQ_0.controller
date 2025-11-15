@@ -220,16 +220,16 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: -3162131388061815942}
-    m_Position: {x: 160, y: 400, z: 0}
+    m_Position: {x: 170, y: 450, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -5230060351159866501}
     m_Position: {x: 550, y: 380, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 355976322414063382}
-    m_Position: {x: 370, y: 60, z: 0}
+    m_Position: {x: 400, y: 30, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -3377633813935712178}
-    m_Position: {x: 550, y: 220, z: 0}
+    m_Position: {x: 610, y: 210, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: -7895104775193565467}
@@ -280,7 +280,7 @@ AnimatorStateTransition:
     m_EventTreshold: 0
   - m_ConditionMode: 3
     m_ConditionEvent: Velocidad
-    m_EventTreshold: 0.1
+    m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -5230060351159866501}
   m_Solo: 0

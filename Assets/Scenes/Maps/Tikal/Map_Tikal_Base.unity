@@ -1181,11 +1181,10 @@ MonoBehaviour:
   - {fileID: 1216470846}
   - {fileID: 478970155}
   - {fileID: 1503929762}
-  spawnIntervalMin: 3
-  spawnIntervalMax: 7
+  spawnMin: 3
+  spawnMax: 7
+  overlapRadius: 1.5
   maxSimultaneousPickups: 5
-  initialSpawnCount: 3
-  overlapCheckRadius: 1.5
   autoDestroyTime: 10
 --- !u!4 &1727894315
 Transform:
@@ -1218,7 +1217,8 @@ MonoBehaviour:
   ObjectInterest: 1
   Flags: 262145
   NestedObjects: []
-  NetworkedBehaviours: []
+  NetworkedBehaviours:
+  - {fileID: 1727894314}
   ForceRemoteRenderTimeframe: 0
 --- !u!4 &1812175407 stripped
 Transform:

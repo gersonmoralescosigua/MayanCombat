@@ -1,14 +1,13 @@
-// Assets/Scripts/Networking/PlayerMovementNetworked.cs
 using Fusion;
 using UnityEngine;
 
 [RequireComponent(typeof(NetworkObject))]
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(NetworkTransform))]
 public class PlayerMovementNetworked : NetworkBehaviour
 {
     [Header("Movimiento")]
-    public float moveSpeed = 5f;    // usado en tests y anim
-    public float maxSpeed = 8f;
+    public float moveSpeed = 5f;
     public float jumpForce = 7f;
 
     [Header("Físicas / Suelo")]
@@ -18,21 +17,22 @@ public class PlayerMovementNetworked : NetworkBehaviour
     [Header("Golpe cuerpo a cuerpo")]
     public float attackForce = 18f;
 
+    [Header("Referencias")]
+    public Animator animator; // Arrastra el Animator aquí en el prefab
+
     // networked props (usadas por animator)
     [Networked] public float NetSpeed { get; set; }
     [Networked] public float NetVertical { get; set; }
     [Networked] public bool NetGrounded { get; set; }
+    [Networked] public NetworkBool NetAttacking { get; set; }
 
-    Rigidbody2D rb;
-    Animator animator;
-
-    // local
-    private Vector2 lastMove = Vector2.zero;
+    private Rigidbody2D rb;
+    private bool wasGrounded = true;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        animator = GetComponentInChildren<Animator>();
+        if (animator == null) animator = GetComponentInChildren<Animator>();
         if (rb != null) rb.freezeRotation = true;
     }
 
@@ -46,8 +46,8 @@ public class PlayerMovementNetworked : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        // Solo quien tiene input authority procesa inputs
-        if (GetInput(out NetworkInputData data))
+        // SOLO el dueño controla el movimiento
+        if (HasInputAuthority && GetInput(out NetworkInputData data))
         {
             Vector2 desired = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
 
@@ -56,31 +56,52 @@ public class PlayerMovementNetworked : NetworkBehaviour
             float newVelX = Mathf.Lerp(rb.linearVelocity.x, desired.x, blend);
             rb.linearVelocity = new Vector2(newVelX, rb.linearVelocity.y);
 
-            // salto
-            if (data.Jump)
+            // Salto - solo cuando presiona el botón Y está en suelo
+            if (data.Jump && NetGrounded)
             {
-                if (IsGrounded())
-                {
-                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
-                    rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-                }
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+                
+                // Trigger de salto en animator
+                if (animator != null)
+                    animator.SetTrigger("Saltar");
             }
 
-            // ataque (solo local, pero habrá que notificar al host si quieres efecto server-side)
+            // Ataque
             if (data.Attack)
             {
+                NetAttacking = true;
+                if (animator != null)
+                    animator.SetTrigger("Atacar");
+                    
                 // ejemplo simple: impulse hacia delante para el que ataca
                 Vector2 dir = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
                 rb.AddForce(dir * attackForce, ForceMode2D.Impulse);
             }
+            else
+            {
+                NetAttacking = false;
+            }
 
-            lastMove = data.Move;
+            // Voltear personaje según dirección
+            if (data.Move.x > 0.1f)
+                transform.localScale = new Vector3(1, 1, 1);
+            else if (data.Move.x < -0.1f)
+                transform.localScale = new Vector3(-1, 1, 1);
         }
 
         // siempre actualizar props networked (replicadas)
         NetSpeed = Mathf.Abs(rb.linearVelocity.x);
         NetVertical = rb.linearVelocity.y;
         NetGrounded = IsGrounded();
+
+        // Actualizar animator localmente (por si acaso)
+        if (animator != null)
+        {
+            animator.SetFloat("Velocidad", NetSpeed);
+            animator.SetBool("EnSuelo", NetGrounded);
+            animator.SetBool("IsWalking", NetSpeed > 0.1f);
+        }
     }
 
     bool IsGrounded()
