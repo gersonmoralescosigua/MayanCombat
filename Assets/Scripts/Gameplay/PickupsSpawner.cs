@@ -1,64 +1,40 @@
-﻿using System.Collections;
+﻿// Assets/Scripts/Gameplay/PickupsSpawner.cs
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
 
-public class PickupsSpawner : MonoBehaviour
+public class PickupsSpawner : NetworkBehaviour
 {
-    private NetworkRunner runner;
-
-    [Header("Prefabs de pickups")]
-    public GameObject[] pickupPrefabs;
-
-    [Header("Puntos de spawn")]
+    public GameObject[] pickupPrefabs;      // asignar desde inspector (prefabs deben estar en Resources y en NetworkProjectConfig)
     public Transform[] spawnPoints;
-
-    [Header("Control de spawns")]
-    public float spawnIntervalMin = 3f;
-    public float spawnIntervalMax = 7f;
+    public float spawnMin = 3f;
+    public float spawnMax = 7f;
+    public float overlapRadius = 1.5f;
     public int maxSimultaneousPickups = 3;
-    public int initialSpawnCount = 2;
+    public float autoDestroyTime = 12f;
 
-    [Header("Control de superposición y tiempo")]
-    public float overlapCheckRadius = 1.5f;
-    public float autoDestroyTime = 10f;
+    private List<NetworkObject> active = new List<NetworkObject>();
+    private Dictionary<Transform, bool> occupied = new Dictionary<Transform, bool>();
 
-    private readonly List<NetworkObject> activePickups = new List<NetworkObject>();
-    private readonly Dictionary<Transform, bool> spawnPointOccupied = new Dictionary<Transform, bool>();
-
-    void Start()
+    public override void Spawned()
     {
-        runner = NetworkRunnerHandler.Instance?.Runner;
-        if (runner == null)
+        if (Runner.IsServer)
         {
-            Debug.LogError("[PickupsSpawner] Runner no encontrado.");
-            return;
+            foreach (var pt in spawnPoints) occupied[pt] = false;
+            StartCoroutine(SpawnRoutine());
         }
-
-        if (pickupPrefabs == null || pickupPrefabs.Length == 0)
-        {
-            Debug.LogWarning("[PickupsSpawner] No hay pickupPrefabs asignados.");
-            return;
-        }
-
-        foreach (Transform pt in spawnPoints)
-            spawnPointOccupied[pt] = false;
-
-        int spawnInicial = Mathf.Clamp(initialSpawnCount, 0, maxSimultaneousPickups);
-        for (int i = 0; i < spawnInicial; i++)
-            TrySpawnOne();
-
-        StartCoroutine(SpawnRoutine());
     }
 
     IEnumerator SpawnRoutine()
     {
         while (true)
         {
-            yield return new WaitForSeconds(Random.Range(spawnIntervalMin, spawnIntervalMax));
-            CleanupList();
+            yield return new WaitForSeconds(Random.Range(spawnMin, spawnMax));
 
-            if (activePickups.Count >= maxSimultaneousPickups) continue;
+            Cleanup();
+            if (!Runner.IsServer) yield break;
+            if (active.Count >= maxSimultaneousPickups) continue;
 
             TrySpawnOne();
         }
@@ -66,70 +42,53 @@ public class PickupsSpawner : MonoBehaviour
 
     void TrySpawnOne()
     {
-        if (runner == null) return;
-        if (!runner.IsServer) return; // importantísimo
+        if (!Runner.IsServer) return;
 
         List<Transform> available = new List<Transform>();
 
         foreach (var pt in spawnPoints)
         {
-            if (spawnPointOccupied[pt]) continue;
-
-            Collider2D[] overlaps = Physics2D.OverlapCircleAll(pt.position, overlapCheckRadius);
-            bool nearby = false;
-            foreach (var c in overlaps)
-            {
-                if (c.CompareTag("Pickup"))
-                {
-                    nearby = true; break;
-                }
-            }
-
-            if (!nearby) available.Add(pt);
+            if (occupied.ContainsKey(pt) && occupied[pt]) continue;
+            Collider2D[] hits = Physics2D.OverlapCircleAll(pt.position, overlapRadius);
+            bool hasPickup = false;
+            foreach (var h in hits) if (h.CompareTag("Pickup")) { hasPickup = true; break; }
+            if (!hasPickup) available.Add(pt);
         }
 
         if (available.Count == 0) return;
 
-        Transform chosen = available[Random.Range(0, available.Count)];
-        GameObject prefab = pickupPrefabs[Random.Range(0, pickupPrefabs.Length)];
-        Vector3 pos = chosen.position;
+        var chosen = available[Random.Range(0, available.Count)];
+        var prefab = pickupPrefabs[Random.Range(0, pickupPrefabs.Length)];
+        var obj = Runner.Spawn(prefab, chosen.position, Quaternion.identity, null);
 
-        NetworkObject obj = runner.Spawn(prefab, pos, Quaternion.identity, null);
         if (obj != null)
         {
-            activePickups.Add(obj);
-            spawnPointOccupied[chosen] = true;
-            StartCoroutine(AutoDestroyPickup(obj, chosen));
+            active.Add(obj);
+            occupied[chosen] = true;
+            StartCoroutine(AutoDestroy(obj, chosen));
         }
     }
 
-    IEnumerator AutoDestroyPickup(NetworkObject obj, Transform spawnPoint)
+    IEnumerator AutoDestroy(NetworkObject obj, Transform pt)
     {
         yield return new WaitForSeconds(autoDestroyTime);
-
         if (obj != null)
         {
-            activePickups.Remove(obj);
-            runner.Despawn(obj);
+            active.Remove(obj);
+            if (Runner != null) Runner.Despawn(obj);
         }
-
-        if (spawnPoint != null && spawnPointOccupied.ContainsKey(spawnPoint))
-            spawnPointOccupied[spawnPoint] = false;
+        if (pt != null && occupied.ContainsKey(pt)) occupied[pt] = false;
     }
 
-    // llamado por Pickup cuando alguien lo recoge
-    public void OnPickupCollected(NetworkObject obj, Transform spawnPoint)
+    public void OnPickupCollected(NetworkObject obj, Transform usedPoint)
     {
-        if (activePickups.Contains(obj)) activePickups.Remove(obj);
-
-        if (runner != null && obj != null) runner.Despawn(obj);
-
-        if (spawnPoint != null && spawnPointOccupied.ContainsKey(spawnPoint))
-            spawnPointOccupied[spawnPoint] = false;
+        if (active.Contains(obj)) active.Remove(obj);
+        if (Runner != null && obj != null) Runner.Despawn(obj);
+        if (usedPoint != null && occupied.ContainsKey(usedPoint)) occupied[usedPoint] = false;
     }
 
-    void CleanupList()
+    void Cleanup()
     {
-        activePickups.RemoveAll(x => x == null || !x.gameObject.activeInHierarchy);
+        active.RemoveAll(x => x == null || !x.gameObject.activeInHierarchy);
     }
 }

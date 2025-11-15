@@ -1,51 +1,44 @@
+// Assets/Scripts/Networking/PlayerMovementNetworked.cs
 using Fusion;
 using UnityEngine;
 
-/// <summary>
-/// Player movement networked (FUSION).
-/// - Usa Rigidbody2D (no depende de NetworkRigidbody2D).
-/// - Expone propiedades networked NetSpeed, NetVertical, NetGrounded
-/// - Campos públicos moveSpeed, jumpForce utilizados por tests y animator.
-/// </summary>
 [RequireComponent(typeof(NetworkObject))]
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovementNetworked : NetworkBehaviour
 {
-    [Header("Movimiento (editable)")]
-    public float moveSpeed = 5f;        // usado por tests
+    [Header("Movimiento")]
+    public float moveSpeed = 5f;    // usado en tests y anim
     public float maxSpeed = 8f;
-    public float jumpForce = 7f;        // usado por tests
+    public float jumpForce = 7f;
 
-    [Header("Física")]
+    [Header("Físicas / Suelo")]
     public float groundCheckDistance = 0.6f;
-    public LayerMask groundMask;
+    public LayerMask groundMask; // asignar en prefab al layer "Suelo"
 
-    // Attack (si quieres usar)
+    [Header("Golpe cuerpo a cuerpo")]
     public float attackForce = 18f;
 
-    // --------- Networked properties (usadas por el AnimatorNetwork) ----------
+    // networked props (usadas por animator)
     [Networked] public float NetSpeed { get; set; }
     [Networked] public float NetVertical { get; set; }
     [Networked] public bool NetGrounded { get; set; }
 
-    // -------------------------------------
-    private Rigidbody2D rb;
-    private Animator animator;
+    Rigidbody2D rb;
+    Animator animator;
 
-    // Local runtime (no networked)
-    private bool wantJump = false;
+    // local
+    private Vector2 lastMove = Vector2.zero;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponentInChildren<Animator>();
-        // Seguridad en caso de sueño del rigidbody
         if (rb != null) rb.freezeRotation = true;
     }
 
     public override void Spawned()
     {
-        // inicializa networked vars
+        // inicializar networked
         NetSpeed = 0f;
         NetVertical = 0f;
         NetGrounded = true;
@@ -53,22 +46,19 @@ public class PlayerMovementNetworked : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        // Sólo quien tenga input authority envía inputs
+        // Solo quien tiene input authority procesa inputs
         if (GetInput(out NetworkInputData data))
         {
-            // MOVIMIENTO HORIZONTAL
-            Vector2 desired = data.Move * moveSpeed;
-            Vector2 vel = rb.linearVelocity;
+            Vector2 desired = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
 
-            // Interpolación suave
-            float blend = Mathf.Clamp01(30f * (float)Runner.DeltaTime); // ajuste rápido
-            float newVelX = Mathf.Lerp(vel.x, desired.x, blend);
-            rb.linearVelocity = new Vector2(newVelX, vel.y);
+            // suavizar velocidad X (blend)
+            float blend = Mathf.Clamp01(30f * (float)Runner.DeltaTime);
+            float newVelX = Mathf.Lerp(rb.linearVelocity.x, desired.x, blend);
+            rb.linearVelocity = new Vector2(newVelX, rb.linearVelocity.y);
 
-            // SALTO (se detecta en GetInput con botón)
-            if (data.JumpPressed)
+            // salto
+            if (data.Jump)
             {
-                // sólo si en suelo
                 if (IsGrounded())
                 {
                     rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
@@ -76,14 +66,18 @@ public class PlayerMovementNetworked : NetworkBehaviour
                 }
             }
 
-            // Attack simple: se puede implementar similar
-            if (data.AttackPressed)
+            // ataque (solo local, pero habrá que notificar al host si quieres efecto server-side)
+            if (data.Attack)
             {
-                // ejemplo: aplicar fuerza hacia adelante (opcional)
+                // ejemplo simple: impulse hacia delante para el que ataca
+                Vector2 dir = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
+                rb.AddForce(dir * attackForce, ForceMode2D.Impulse);
             }
+
+            lastMove = data.Move;
         }
 
-        // Actualiza props networked (estas serán replicadas a todos)
+        // siempre actualizar props networked (replicadas)
         NetSpeed = Mathf.Abs(rb.linearVelocity.x);
         NetVertical = rb.linearVelocity.y;
         NetGrounded = IsGrounded();
@@ -96,7 +90,6 @@ public class PlayerMovementNetworked : NetworkBehaviour
         return hit.collider != null;
     }
 
-    // Para debugging visual en editor
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;

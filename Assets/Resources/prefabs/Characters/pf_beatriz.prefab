@@ -16,9 +16,9 @@ GameObject:
   - component: {fileID: 6817607467047038329}
   - component: {fileID: 4244448824186598198}
   - component: {fileID: 2317041465194639473}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pf_beatriz
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -181,7 +181,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
 --- !u!61 &4244448824186598198
 BoxCollider2D:

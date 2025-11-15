@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: -5079816623054000601}
   - component: {fileID: -2786232082339343840}
   - component: {fileID: -1743126012839077415}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pf_ixquic
   m_TagString: Player
   m_Icon: {fileID: 0}

@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Assets/Scripts/Networking/NetworkRunnerHandler.cs
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +11,10 @@ using UnityEngine.SceneManagement;
 public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 {
     public static NetworkRunnerHandler Instance;
-
     private NetworkRunner _runner;
     public NetworkRunner Runner => _runner;
 
-    [Header("Scenes (asegúrate de que están en Build Settings)")]
+    [Header("Scenes (asegúrate en Build Settings)")]
     public string matchmakingSceneName = "Matchmaking";
     public string loadingSceneName = "LoadingAssignment";
     public string mapSceneName = "Map_Tikal_Base";
@@ -30,17 +30,11 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
-    // 🔹 INICIA MATCHMAKING
     public async void StartMatchmaking()
     {
         Debug.Log("🔗 Iniciando matchmaking...");
@@ -50,7 +44,6 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         var sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
 
-        // Usar SIEMPRE el mismo nombre de sesión
         const string sessionName = "MayanQuickMatch";
 
         var result = await _runner.StartGame(new StartGameArgs()
@@ -70,7 +63,6 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         Debug.Log("✅ Conectado a Fusion. Esperando jugador...");
     }
 
-    // 🔹 CUANDO UN JUGADOR ENTRA
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"👤 Player joined: {player}");
@@ -84,34 +76,25 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             {
                 AssignTeams();
 
-                // ✅ Cambiar a la escena intermedia (pantalla de asignación)
                 int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity");
                 if (sceneIndex >= 0)
-                {
-                    Debug.Log($"📥 Cargando escena: {loadingSceneName}");
                     runner.LoadScene(SceneRef.FromIndex(sceneIndex));
-                }
                 else
-                {
                     Debug.LogError($"❌ Escena {loadingSceneName} no está en Build Settings.");
-                }
             }
         }
     }
 
-    // 🔹 Asignar equipos aleatoriamente
     private void AssignTeams()
     {
         var players = _runner.ActivePlayers.ToList();
         if (players.Count < 2) return;
-
         players = players.OrderBy(x => UnityEngine.Random.value).ToList();
 
-        _playerTeams[players[0]] = 0; // Español
-        _playerTeams[players[1]] = 1; // Maya
-
-        _playerCharacters[players[0]] = 0; // Beatriz
-        _playerCharacters[players[1]] = 1; // Ixquic
+        _playerTeams[players[0]] = 0;
+        _playerTeams[players[1]] = 1;
+        _playerCharacters[players[0]] = 0;
+        _playerCharacters[players[1]] = 1;
 
         foreach (var p in players)
             RPC_AssignRole(p, _playerTeams[p], _playerCharacters[p]);
@@ -119,7 +102,6 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         Debug.Log($"✅ Equipos asignados: {players[0]}=Español, {players[1]}=Maya");
     }
 
-    // 🔹 RPC: Envia al cliente su rol y personaje
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void RPC_AssignRole(PlayerRef target, int team, int charId, RpcInfo info = default)
     {
@@ -131,7 +113,6 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    // 🔹 ESCENA CARGADA
     public void OnSceneLoadDone(NetworkRunner runner)
     {
         string currentScene = SceneManager.GetActiveScene().name;
@@ -143,14 +124,14 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             _autoStartTimer = StartCoroutine(AutoStartAfterDelay(10f));
         }
 
-        if (currentScene == mapSceneName)
+        // IMPORTANT: spawn SOLO en servidor
+        if (currentScene == mapSceneName && runner.IsServer)
         {
             foreach (var p in runner.ActivePlayers)
                 SpawnPlayer(runner, p);
         }
     }
 
-    // 🔹 ESPERA 10 SEGUNDOS Y LANZA PARTIDA
     private IEnumerator AutoStartAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -158,16 +139,12 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/Maps/Tikal/{mapSceneName}.unity");
         if (sceneIndex >= 0)
-        {
             _runner.LoadScene(SceneRef.FromIndex(sceneIndex));
-        }
         else
-        {
             Debug.LogError($"❌ Escena {mapSceneName} no está en Build Settings.");
-        }
     }
 
-    // 🔹 SPAWN DE JUGADORES
+    // ---- SpawnPlayer: solo servidor debe llamar a esto ----
     private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
         int team = _playerTeams.ContainsKey(player) ? _playerTeams[player] : 0;
@@ -183,39 +160,42 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         Vector3 spawnPos = team == 0 ? new Vector3(-0.39f, -0.382f, 0f) : new Vector3(1.3f, -0.4f, 0f);
 
-        // Solo el host debe pedir spawnAuthority (o usar inputAuthority = player)
-        runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
-        Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")}) at {spawnPos}");
+        try
+        {
+            // servidor spawnea y asigna input authority al player
+            var spawned = runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
+            if (spawned == null)
+                Debug.LogError("❌ runner.Spawn devolvió null");
+            else
+                Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")}) at {spawnPos}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"❌ Excepción al spawnear: {ex}");
+        }
     }
 
-    // 🔹 CALLBACKS REQUERIDOS
+    // ---- Callbacks vacíos requeridos por la interfaz ----
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         Debug.Log($"🚪 Player left: {player}");
         _playerTeams.Remove(player);
         _playerCharacters.Remove(player);
     }
-
     public void OnConnectedToServer(NetworkRunner runner) => Debug.Log("🌐 Connected to server");
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) => Debug.LogWarning($"❌ Disconnected: {reason}");
     public void OnSceneLoadStart(NetworkRunner runner) => Debug.Log("📥 Fusion comenzó a cargar escena...");
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        NetworkInputData data = new NetworkInputData();
-        Vector2 move = Vector2.zero;
-        if (Input.GetKey(KeyCode.A)) move.x -= 1f;
-        if (Input.GetKey(KeyCode.D)) move.x += 1f;
-        if (Input.GetKey(KeyCode.W)) move.y += 1f;
-        if (Input.GetKey(KeyCode.S)) move.y -= 1f;
-
-        data.Move = move.normalized;
-        data.JumpPressed = Input.GetKeyDown(KeyCode.W);   // si quieres salto con W
-        data.AttackPressed = Input.GetKeyDown(KeyCode.J);
-
+        var data = new NetworkInputData();
+        // USAMOS WASD+J en todos los clientes (decisión A)
+        data.Move.x = Input.GetKey(KeyCode.D) ? 1f : Input.GetKey(KeyCode.A) ? -1f : 0f;
+        data.Move.y = 0f;
+        data.JumpPressed = Input.GetKey(KeyCode.W);
+        data.AttackPressed = Input.GetKey(KeyCode.J);
         input.Set(data);
     }
 
-    // No utilizados pero necesarios
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
