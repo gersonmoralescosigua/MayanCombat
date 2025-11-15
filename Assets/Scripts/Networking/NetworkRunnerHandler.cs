@@ -126,14 +126,19 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         if (runner.IsServer && currentScene == mapSceneName)
         {
-            // Cuando la escena termina de cargar para todos, spawneamos a quienes aún no tienen prefab
             foreach (var p in runner.ActivePlayers)
             {
-                // SOLO si ese jugador NO tiene todavía NetworkObjects propios
-                if (!runner.GetPlayerRunners(p).Any())
+                if (runner.GetPlayerObject(p) == null)
+                {
                     SpawnPlayer(runner, p);
+                }
             }
         }
+    }
+
+    private bool PlayerAlreadyHasCharacter(NetworkRunner runner, PlayerRef player)
+    {
+        return runner.GetPlayerObject(player) != null;
     }
 
     private IEnumerator AutoStartAfterDelay(float delay)

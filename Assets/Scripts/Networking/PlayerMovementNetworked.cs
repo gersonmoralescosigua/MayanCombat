@@ -6,6 +6,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovementNetworked : NetworkBehaviour
 {
+    [Networked] public PlayerRef Owner { get; set; }
+
     [Header("Movimiento")]
     public float moveSpeed = 5f;    // usado en tests y anim
     public float maxSpeed = 8f;
