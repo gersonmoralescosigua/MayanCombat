@@ -145,7 +145,6 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     }
 
     // ---- SpawnPlayer: solo servidor debe llamar a esto ----
-    // dentro de NetworkRunnerHandler.cs -> reemplaza SpawnPlayer con:
     private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
         int team = _playerTeams.ContainsKey(player) ? _playerTeams[player] : 0;
@@ -163,25 +162,12 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         try
         {
+            // servidor spawnea y asigna input authority al player
             var spawned = runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
             if (spawned == null)
-            {
                 Debug.LogError("❌ runner.Spawn devolvió null");
-                return;
-            }
-
-            // SIEMPRE: setear owner networked en el componente networked (el server tiene state authority)
-            var pm = spawned.GetComponent<PlayerMovementNetworked>();
-            if (pm != null)
-            {
-                pm.SetOwnerPlayer(player);
-                // Inicializar variables networked con la posición inicial
-                pm.NetPosition = spawnPos;
-                pm.NetVelocity = Vector2.zero;
-                pm.NetGrounded = true;
-            }
-
-            Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")}) at {spawnPos}");
+            else
+                Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")}) at {spawnPos}");
         }
         catch (Exception ex)
         {

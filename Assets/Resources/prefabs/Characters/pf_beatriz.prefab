@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 6817607467047038329}
   - component: {fileID: 4244448824186598198}
   - component: {fileID: 2317041465194639473}
+  - component: {fileID: -3750001040689671584}
   m_Layer: 7
   m_Name: pf_beatriz
   m_TagString: Player
@@ -137,6 +138,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 6166838384249402642}
   - {fileID: 2317041465194639473}
+  - {fileID: -3750001040689671584}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &6166838384249402642
 MonoBehaviour:
@@ -252,3 +254,16 @@ MonoBehaviour:
   _NetSpeed: 0
   _NetVertical: 0
   _NetGrounded: 0
+--- !u!114 &-3750001040689671584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392798922818354650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e139313b198adb34e8f1acb47900022c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimatorNetwork
+  animator: {fileID: 0}
