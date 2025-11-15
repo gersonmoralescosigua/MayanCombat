@@ -67,6 +67,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
         Debug.Log($"👤 Player joined: {player}");
 
+        // Solo el server asigna equipos
         if (runner.IsServer)
         {
             int connected = runner.ActivePlayers.Count();
@@ -76,12 +77,17 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             {
                 AssignTeams();
 
-                int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity");
-                if (sceneIndex >= 0)
-                    runner.LoadScene(SceneRef.FromIndex(sceneIndex));
-                else
-                    Debug.LogError($"❌ Escena {loadingSceneName} no está en Build Settings.");
+                runner.LoadScene(SceneRef.FromIndex(
+                    SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity")
+                ));
             }
+        }
+
+        // Si ya estamos en la escena del juego, el server debe spawnear al jugador AHORA
+        string currentScene = SceneManager.GetActiveScene().name;
+        if (runner.IsServer && currentScene == mapSceneName)
+        {
+            SpawnPlayer(runner, player);
         }
     }
 
@@ -118,17 +124,15 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         string currentScene = SceneManager.GetActiveScene().name;
         Debug.Log($"✅ Escena cargada: {currentScene}");
 
-        if (currentScene == loadingSceneName && runner.IsServer)
+        if (runner.IsServer && currentScene == mapSceneName)
         {
-            if (_autoStartTimer != null) StopCoroutine(_autoStartTimer);
-            _autoStartTimer = StartCoroutine(AutoStartAfterDelay(10f));
-        }
-
-        // IMPORTANT: spawn SOLO en servidor
-        if (currentScene == mapSceneName && runner.IsServer)
-        {
+            // Cuando la escena termina de cargar para todos, spawneamos a quienes aún no tienen prefab
             foreach (var p in runner.ActivePlayers)
-                SpawnPlayer(runner, p);
+            {
+                // SOLO si ese jugador NO tiene todavía NetworkObjects propios
+                if (!runner.GetPlayerRunners(p).Any())
+                    SpawnPlayer(runner, p);
+            }
         }
     }
 
