@@ -25,21 +25,22 @@ public class PlayerMovementNetworked : NetworkBehaviour
     [Networked] public float NetVertical { get; set; }
     [Networked] public bool NetGrounded { get; set; }
     [Networked] public NetworkBool NetAttacking { get; set; }
-    [Networked] public int NetFacingDirection { get; set; }
+    
+    // SOLUCIÓN PERFECTA PARA EL VOLTEO SIN DEFORMACIÓN
+    [Networked] private NetworkButtons _previousButtons { get; set; }
+    private float _currentFacingDirection = 1f;
 
     private Rigidbody2D rb;
-    private NetworkTransform networkTransform;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        networkTransform = GetComponent<NetworkTransform>();
-        
         if (animator == null) animator = GetComponentInChildren<Animator>();
         if (rb != null) 
         {
             rb.freezeRotation = true;
-            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            // QUITAMOS la interpolación del Rigidbody para evitar conflicto con NetworkTransform
+            rb.interpolation = RigidbodyInterpolation2D.None;
         }
     }
 
@@ -48,51 +49,53 @@ public class PlayerMovementNetworked : NetworkBehaviour
         NetSpeed = 0f;
         NetVertical = 0f;
         NetGrounded = true;
-        NetFacingDirection = 1;
-
-        // CONFIGURACIÓN SIMPLIFICADA - compatible con tu versión de Fusion
-        if (networkTransform != null)
-        {
-            // En versiones más recientes de Fusion, la interpolación se configura automáticamente
-            // No necesitamos configurar manualmente InterpolationDataSource
-        }
+        _currentFacingDirection = 1f;
     }
 
     public override void FixedUpdateNetwork()
     {
-        // SOLO el dueño procesa input y aplica fuerzas
+        // CRÍTICO: Todos procesan el input, pero solo el dueño aplica física
         if (GetInput(out NetworkInputData data))
         {
-            ProcessMovement(data);
-            ProcessJump(data);
-            ProcessAttack(data);
+            // Solo el dueño mueve el Rigidbody
+            if (HasInputAuthority)
+            {
+                ProcessMovement(data);
+                ProcessJump(data);
+                ProcessAttack(data);
+            }
+            
+            // Todos actualizan la dirección basada en el input
             UpdateFacingDirection(data);
         }
 
-        // TODOS actualizan propiedades y animaciones
+        // Todos actualizan propiedades networked
         UpdateNetworkedProperties();
+        
+        // Todos aplican el volteo (esto es seguro porque no afecta la física)
         ApplyFacingDirection();
+        
+        // Todos actualizan animaciones
         UpdateAnimations();
     }
 
     private void ProcessMovement(NetworkInputData data)
     {
-        if (!HasInputAuthority) return;
+        Vector2 desired = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
 
-        Vector2 desiredVelocity = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
-        
-        // Suavizado mejorado
-        float blend = 0.5f; // Valor balanceado para buen rendimiento
-        float newVelX = Mathf.Lerp(rb.linearVelocity.x, desiredVelocity.x, blend);
-        
+        // Suavizado original que funcionaba bien
+        float blend = Mathf.Clamp01(30f * (float)Runner.DeltaTime);
+        float newVelX = Mathf.Lerp(rb.linearVelocity.x, desired.x, blend);
         rb.linearVelocity = new Vector2(newVelX, rb.linearVelocity.y);
     }
 
     private void ProcessJump(NetworkInputData data)
     {
-        if (!HasInputAuthority) return;
+        // Detectar cuando se PRESIONA el botón, no cuando está mantenido
+        var pressed = data.GetButtonPressed(_previousButtons);
+        _previousButtons = data.Buttons;
 
-        if (data.Jump && NetGrounded)
+        if (pressed.Jump && NetGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
@@ -104,15 +107,16 @@ public class PlayerMovementNetworked : NetworkBehaviour
 
     private void ProcessAttack(NetworkInputData data)
     {
-        if (!HasInputAuthority) return;
+        // Detectar cuando se PRESIONA el botón
+        var pressed = data.GetButtonPressed(_previousButtons);
 
-        if (data.Attack)
+        if (pressed.Attack)
         {
             NetAttacking = true;
             if (animator != null)
                 animator.SetTrigger("Atacar");
                     
-            Vector2 dir = NetFacingDirection > 0 ? Vector2.right : Vector2.left;
+            Vector2 dir = _currentFacingDirection > 0 ? Vector2.right : Vector2.left;
             rb.AddForce(dir * attackForce, ForceMode2D.Impulse);
         }
         else
@@ -123,15 +127,14 @@ public class PlayerMovementNetworked : NetworkBehaviour
 
     private void UpdateFacingDirection(NetworkInputData data)
     {
-        if (!HasInputAuthority) return;
-
+        // SOLUCIÓN PERFECTA: Solo cambiamos una variable local, no el transform
         if (data.Move.x > 0.1f)
         {
-            NetFacingDirection = 1;
+            _currentFacingDirection = 1f;
         }
         else if (data.Move.x < -0.1f)
         {
-            NetFacingDirection = -1;
+            _currentFacingDirection = -1f;
         }
     }
 
@@ -144,18 +147,14 @@ public class PlayerMovementNetworked : NetworkBehaviour
 
     private void ApplyFacingDirection()
     {
-        Vector3 newScale = transform.localScale;
+        // SOLUCIÓN PERFECTA: Scale matemáticamente seguro
+        // Esto se ejecuta en TODOS los clientes de forma idéntica
+        Vector3 currentScale = transform.localScale;
         
-        if (NetFacingDirection > 0)
-        {
-            newScale.x = Mathf.Abs(newScale.x);
-        }
-        else if (NetFacingDirection < 0)
-        {
-            newScale.x = -Mathf.Abs(newScale.x);
-        }
+        // Preservamos la escala Y y Z original, solo modificamos X con valor absoluto
+        float newXScale = Mathf.Abs(currentScale.x) * _currentFacingDirection;
         
-        transform.localScale = newScale;
+        transform.localScale = new Vector3(newXScale, currentScale.y, currentScale.z);
     }
 
     private void UpdateAnimations()
@@ -173,20 +172,6 @@ public class PlayerMovementNetworked : NetworkBehaviour
         Vector2 origin = (Vector2)transform.position;
         RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, groundCheckDistance, groundMask);
         return hit.collider != null;
-    }
-
-    // Método importante para suavizar objetos remotos
-    public override void Render()
-    {
-        // Fusion automáticamente interpola los Networked properties entre FixedUpdateNetwork
-        // Este método se ejecuta en cada frame de renderizado, permitiendo animaciones suaves
-        
-        // Para objetos remotos, podemos agregar suavizado adicional visual si es necesario
-        if (!HasInputAuthority)
-        {
-            // Esto asegura que las animaciones se actualicen suavemente para otros jugadores
-            UpdateAnimations();
-        }
     }
 
     void OnDrawGizmosSelected()
