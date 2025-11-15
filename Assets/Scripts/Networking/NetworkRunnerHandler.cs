@@ -67,7 +67,6 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
         Debug.Log($"👤 Player joined: {player}");
 
-        // Solo el server asigna equipos
         if (runner.IsServer)
         {
             int connected = runner.ActivePlayers.Count();
@@ -77,17 +76,12 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             {
                 AssignTeams();
 
-                runner.LoadScene(SceneRef.FromIndex(
-                    SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity")
-                ));
+                int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity");
+                if (sceneIndex >= 0)
+                    runner.LoadScene(SceneRef.FromIndex(sceneIndex));
+                else
+                    Debug.LogError($"❌ Escena {loadingSceneName} no está en Build Settings.");
             }
-        }
-
-        // Si ya estamos en la escena del juego, el server debe spawnear al jugador AHORA
-        string currentScene = SceneManager.GetActiveScene().name;
-        if (runner.IsServer && currentScene == mapSceneName)
-        {
-            SpawnPlayer(runner, player);
         }
     }
 
@@ -124,21 +118,18 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         string currentScene = SceneManager.GetActiveScene().name;
         Debug.Log($"✅ Escena cargada: {currentScene}");
 
-        if (runner.IsServer && currentScene == mapSceneName)
+        if (currentScene == loadingSceneName && runner.IsServer)
+        {
+            if (_autoStartTimer != null) StopCoroutine(_autoStartTimer);
+            _autoStartTimer = StartCoroutine(AutoStartAfterDelay(10f));
+        }
+
+        // IMPORTANT: spawn SOLO en servidor
+        if (currentScene == mapSceneName && runner.IsServer)
         {
             foreach (var p in runner.ActivePlayers)
-            {
-                if (runner.GetPlayerObject(p) == null)
-                {
-                    SpawnPlayer(runner, p);
-                }
-            }
+                SpawnPlayer(runner, p);
         }
-    }
-
-    private bool PlayerAlreadyHasCharacter(NetworkRunner runner, PlayerRef player)
-    {
-        return runner.GetPlayerObject(player) != null;
     }
 
     private IEnumerator AutoStartAfterDelay(float delay)
@@ -154,6 +145,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     }
 
     // ---- SpawnPlayer: solo servidor debe llamar a esto ----
+    // dentro de NetworkRunnerHandler.cs -> reemplaza SpawnPlayer con:
     private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
         int team = _playerTeams.ContainsKey(player) ? _playerTeams[player] : 0;
@@ -171,12 +163,25 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
         try
         {
-            // servidor spawnea y asigna input authority al player
             var spawned = runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
             if (spawned == null)
+            {
                 Debug.LogError("❌ runner.Spawn devolvió null");
-            else
-                Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")}) at {spawnPos}");
+                return;
+            }
+
+            // SIEMPRE: setear owner networked en el componente networked (el server tiene state authority)
+            var pm = spawned.GetComponent<PlayerMovementNetworked>();
+            if (pm != null)
+            {
+                pm.SetOwnerPlayer(player);
+                // Inicializar variables networked con la posición inicial
+                pm.NetPosition = spawnPos;
+                pm.NetVelocity = Vector2.zero;
+                pm.NetGrounded = true;
+            }
+
+            Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")}) at {spawnPos}");
         }
         catch (Exception ex)
         {
