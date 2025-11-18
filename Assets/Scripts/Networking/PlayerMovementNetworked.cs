@@ -26,8 +26,9 @@ public class PlayerMovementNetworked : NetworkBehaviour
     [Networked] public bool NetGrounded { get; set; }
     [Networked] public NetworkBool NetAttacking { get; set; }
     
-    // SOLUCIÓN PERFECTA PARA EL VOLTEO SIN DEFORMACIÓN
-    [Networked] private NetworkButtons _previousButtons { get; set; }
+    // Variables para detección de botones
+    [Networked] private NetworkBool _wasJumpPressed { get; set; }
+    [Networked] private NetworkBool _wasAttackPressed { get; set; }
     private float _currentFacingDirection = 1f;
 
     private Rigidbody2D rb;
@@ -39,7 +40,6 @@ public class PlayerMovementNetworked : NetworkBehaviour
         if (rb != null) 
         {
             rb.freezeRotation = true;
-            // QUITAMOS la interpolación del Rigidbody para evitar conflicto con NetworkTransform
             rb.interpolation = RigidbodyInterpolation2D.None;
         }
     }
@@ -91,11 +91,11 @@ public class PlayerMovementNetworked : NetworkBehaviour
 
     private void ProcessJump(NetworkInputData data)
     {
-        // Detectar cuando se PRESIONA el botón, no cuando está mantenido
-        var pressed = data.GetButtonPressed(_previousButtons);
-        _previousButtons = data.Buttons;
+        // Detectar cuando se PRESIONA el botón (no estado mantenido)
+        bool jumpPressed = data.Jump && !_wasJumpPressed;
+        _wasJumpPressed = data.Jump;
 
-        if (pressed.Jump && NetGrounded)
+        if (jumpPressed && NetGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
@@ -107,10 +107,11 @@ public class PlayerMovementNetworked : NetworkBehaviour
 
     private void ProcessAttack(NetworkInputData data)
     {
-        // Detectar cuando se PRESIONA el botón
-        var pressed = data.GetButtonPressed(_previousButtons);
+        // Detectar cuando se PRESIONA el botón (no estado mantenido)
+        bool attackPressed = data.Attack && !_wasAttackPressed;
+        _wasAttackPressed = data.Attack;
 
-        if (pressed.Attack)
+        if (attackPressed)
         {
             NetAttacking = true;
             if (animator != null)
