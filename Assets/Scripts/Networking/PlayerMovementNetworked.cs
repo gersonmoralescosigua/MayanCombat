@@ -25,11 +25,11 @@ public class PlayerMovementNetworked : NetworkBehaviour
     [Networked] public float NetVertical { get; set; }
     [Networked] public bool NetGrounded { get; set; }
     [Networked] public NetworkBool NetAttacking { get; set; }
-    
-    // Variables para detección de botones
+    [Networked] public int NetFacingDirection { get; set; }
+
+    // Para detección de botones presionados (no mantenidos)
     [Networked] private NetworkBool _wasJumpPressed { get; set; }
     [Networked] private NetworkBool _wasAttackPressed { get; set; }
-    private float _currentFacingDirection = 1f;
 
     private Rigidbody2D rb;
 
@@ -46,116 +46,123 @@ public class PlayerMovementNetworked : NetworkBehaviour
 
     public override void Spawned()
     {
+        // DEBUG crítico para verificar autoridad
+        Debug.Log($"🎮 [{Object?.Id}] Spawned - InputAuthority: {Object?.InputAuthority}, LocalPlayer: {Runner?.LocalPlayer}, HasInputAuth: {HasInputAuthority}");
+        
         NetSpeed = 0f;
         NetVertical = 0f;
         NetGrounded = true;
-        _currentFacingDirection = 1f;
+        NetFacingDirection = 1;
+        _wasJumpPressed = false;
+        _wasAttackPressed = false;
     }
 
     public override void FixedUpdateNetwork()
     {
-        // CRÍTICO: Todos procesan el input, pero solo el dueño aplica física
+        // Verificación de seguridad
+        if (Object == null || !Object.IsValid || Runner == null) return;
+
+        // SOLO procesar input si tenemos autoridad de input
         if (GetInput(out NetworkInputData data))
         {
-            // Solo el dueño mueve el Rigidbody
-            if (HasInputAuthority)
-            {
-                ProcessMovement(data);
-                ProcessJump(data);
-                ProcessAttack(data);
-            }
-            
-            // Todos actualizan la dirección basada en el input
-            UpdateFacingDirection(data);
+            ProcessInput(data);
         }
 
-        // Todos actualizan propiedades networked
+        // ACTUALIZAR PROPIEDADES NETWORKED (todos los clientes)
         UpdateNetworkedProperties();
         
-        // Todos aplican el volteo (esto es seguro porque no afecta la física)
+        // APLICAR VOLTEO (todos los clientes)
         ApplyFacingDirection();
         
-        // Todos actualizan animaciones
+        // ACTUALIZAR ANIMACIONES (todos los clientes)
         UpdateAnimations();
     }
 
-    private void ProcessMovement(NetworkInputData data)
+    private void ProcessInput(NetworkInputData data)
     {
-        Vector2 desired = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
-
-        // Suavizado original que funcionaba bien
-        float blend = Mathf.Clamp01(30f * (float)Runner.DeltaTime);
-        float newVelX = Mathf.Lerp(rb.linearVelocity.x, desired.x, blend);
-        rb.linearVelocity = new Vector2(newVelX, rb.linearVelocity.y);
-    }
-
-    private void ProcessJump(NetworkInputData data)
-    {
-        // Detectar cuando se PRESIONA el botón (no estado mantenido)
-        bool jumpPressed = data.Jump && !_wasJumpPressed;
-        _wasJumpPressed = data.Jump;
-
-        if (jumpPressed && NetGrounded)
+        // 1. MOVIMIENTO HORIZONTAL (solo input authority)
+        if (HasInputAuthority)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
-            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            Vector2 desiredVelocity = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
             
-            if (animator != null)
-                animator.SetTrigger("Saltar");
+            // Suavizado optimizado
+            float blend = Mathf.Clamp01(25f * Runner.DeltaTime);
+            float newVelX = Mathf.Lerp(rb.linearVelocity.x, desiredVelocity.x, blend);
+            rb.linearVelocity = new Vector2(newVelX, rb.linearVelocity.y);
         }
-    }
 
-    private void ProcessAttack(NetworkInputData data)
-    {
-        // Detectar cuando se PRESIONA el botón (no estado mantenido)
-        bool attackPressed = data.Attack && !_wasAttackPressed;
-        _wasAttackPressed = data.Attack;
-
-        if (attackPressed)
+        // 2. DETECCIÓN DE BOTONES PRESIONADOS (solo input authority)
+        if (HasInputAuthority)
         {
-            NetAttacking = true;
-            if (animator != null)
-                animator.SetTrigger("Atacar");
-                    
-            Vector2 dir = _currentFacingDirection > 0 ? Vector2.right : Vector2.left;
-            rb.AddForce(dir * attackForce, ForceMode2D.Impulse);
-        }
-        else
-        {
-            NetAttacking = false;
-        }
-    }
+            // SALTO (solo cuando se PRESIONA el botón, no se mantiene)
+            bool jumpPressed = data.JumpPressed && !_wasJumpPressed;
+            _wasJumpPressed = data.JumpPressed;
 
-    private void UpdateFacingDirection(NetworkInputData data)
-    {
-        // SOLUCIÓN PERFECTA: Solo cambiamos una variable local, no el transform
+            if (jumpPressed && NetGrounded)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+                if (animator != null) 
+                {
+                    animator.SetTrigger("Saltar");
+                    Debug.Log("🦘 Salto ejecutado");
+                }
+            }
+
+            // ATAQUE (solo cuando se PRESIONA el botón)
+            bool attackPressed = data.AttackPressed && !_wasAttackPressed;
+            _wasAttackPressed = data.AttackPressed;
+
+            if (attackPressed)
+            {
+                NetAttacking = true;
+                if (animator != null) 
+                {
+                    animator.SetTrigger("Atacar");
+                    Debug.Log("⚔️ Ataque ejecutado");
+                }
+                
+                Vector2 dir = NetFacingDirection > 0 ? Vector2.right : Vector2.left;
+                rb.AddForce(dir * attackForce, ForceMode2D.Impulse);
+            }
+            else
+            {
+                NetAttacking = false;
+            }
+        }
+
+        // 3. ACTUALIZAR DIRECCIÓN (basado en input de cualquier jugador)
         if (data.Move.x > 0.1f)
         {
-            _currentFacingDirection = 1f;
+            NetFacingDirection = 1; // Derecha
         }
         else if (data.Move.x < -0.1f)
         {
-            _currentFacingDirection = -1f;
+            NetFacingDirection = -1; // Izquierda
         }
     }
 
     private void UpdateNetworkedProperties()
     {
-        NetSpeed = Mathf.Abs(rb.linearVelocity.x);
-        NetVertical = rb.linearVelocity.y;
-        NetGrounded = IsGrounded();
+        if (rb != null)
+        {
+            NetSpeed = Mathf.Abs(rb.linearVelocity.x);
+            NetVertical = rb.linearVelocity.y;
+            NetGrounded = IsGrounded();
+        }
     }
 
     private void ApplyFacingDirection()
     {
-        // SOLUCIÓN PERFECTA: Scale matemáticamente seguro
-        // Esto se ejecuta en TODOS los clientes de forma idéntica
+        // SOLUCIÓN PERFECTA PARA VOLTEO SIN DEFORMACIÓN
         Vector3 currentScale = transform.localScale;
+        float newXScale = Mathf.Abs(currentScale.x) * (NetFacingDirection >= 0 ? 1f : -1f);
         
-        // Preservamos la escala Y y Z original, solo modificamos X con valor absoluto
-        float newXScale = Mathf.Abs(currentScale.x) * _currentFacingDirection;
-        
-        transform.localScale = new Vector3(newXScale, currentScale.y, currentScale.z);
+        // Solo aplicar si hay cambio para optimizar
+        if (Mathf.Abs(newXScale - currentScale.x) > 0.01f)
+        {
+            transform.localScale = new Vector3(newXScale, currentScale.y, currentScale.z);
+        }
     }
 
     private void UpdateAnimations()
@@ -168,11 +175,28 @@ public class PlayerMovementNetworked : NetworkBehaviour
         }
     }
 
-    bool IsGrounded()
+    private bool IsGrounded()
     {
         Vector2 origin = (Vector2)transform.position;
         RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, groundCheckDistance, groundMask);
-        return hit.collider != null;
+        bool grounded = hit.collider != null;
+        
+        // Debug ocasional del estado en suelo
+        if (Runner.Tick % 100 == 0 && HasInputAuthority)
+        {
+            Debug.Log($"🦶 Grounded: {grounded}, Position: {transform.position}");
+        }
+        
+        return grounded;
+    }
+
+    // DEBUG para verificar estado en tiempo real
+    public override void Render()
+    {
+        if (Runner.Tick % 150 == 0 && Object != null) // Cada 150 ticks
+        {
+            Debug.Log($"👀 [{Object.Id}] Render - InputAuth: {Object.InputAuthority}, Speed: {NetSpeed}, Grounded: {NetGrounded}");
+        }
     }
 
     void OnDrawGizmosSelected()

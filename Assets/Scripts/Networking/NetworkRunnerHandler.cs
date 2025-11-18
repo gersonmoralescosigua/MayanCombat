@@ -146,34 +146,24 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
     // ---- SpawnPlayer: solo servidor debe llamar a esto ----
     private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
+{
+    int team = _playerTeams.ContainsKey(player) ? _playerTeams[player] : 0;
+    int charId = _playerCharacters.ContainsKey(player) ? _playerCharacters[player] : 0;
+
+    string prefabPath = $"Prefabs/Characters/pf_{(charId == 0 ? "beatriz" : "ixquic")}";
+    var prefab = Resources.Load<NetworkObject>(prefabPath); // Cambiar a NetworkObject
+    
+    Debug.Log($"🎯 Spawneando: Player {player}, Team {team}, Char {charId}, Prefab {prefabPath}");
+
+    Vector3 spawnPos = team == 0 ? new Vector3(-0.39f, -0.382f, 0f) : new Vector3(1.3f, -0.4f, 0f);
+
+    var spawned = runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
+    
+    if (spawned != null)
     {
-        int team = _playerTeams.ContainsKey(player) ? _playerTeams[player] : 0;
-        int charId = _playerCharacters.ContainsKey(player) ? _playerCharacters[player] : 0;
-
-        string prefabPath = $"Prefabs/Characters/pf_{(charId == 0 ? "beatriz" : "ixquic")}";
-        var prefab = Resources.Load<GameObject>(prefabPath);
-        if (prefab == null)
-        {
-            Debug.LogError($"❌ Prefab no encontrado: {prefabPath}");
-            return;
-        }
-
-        Vector3 spawnPos = team == 0 ? new Vector3(-0.39f, -0.382f, 0f) : new Vector3(1.3f, -0.4f, 0f);
-
-        try
-        {
-            // servidor spawnea y asigna input authority al player
-            var spawned = runner.Spawn(prefab, spawnPos, Quaternion.identity, player);
-            if (spawned == null)
-                Debug.LogError("❌ runner.Spawn devolvió null");
-            else
-                Debug.Log($"✅ Spawn {prefab.name} ({(team == 0 ? "Español" : "Maya")}) at {spawnPos}");
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"❌ Excepción al spawnear: {ex}");
-        }
+        Debug.Log($"✅ Spawn exitoso - InputAuthority: {spawned.InputAuthority}, StateAuthority: {spawned.HasStateAuthority}");
     }
+}
 
     // ---- Callbacks vacíos requeridos por la interfaz ----
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
@@ -186,15 +176,21 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) => Debug.LogWarning($"❌ Disconnected: {reason}");
     public void OnSceneLoadStart(NetworkRunner runner) => Debug.Log("📥 Fusion comenzó a cargar escena...");
     public void OnInput(NetworkRunner runner, NetworkInput input)
-    {
-        var data = new NetworkInputData();
-        // USAMOS WASD+J en todos los clientes (decisión A)
-        data.Move.x = Input.GetKey(KeyCode.D) ? 1f : Input.GetKey(KeyCode.A) ? -1f : 0f;
-        data.Move.y = 0f;
-        data.JumpPressed = Input.GetKey(KeyCode.W);
-        data.AttackPressed = Input.GetKey(KeyCode.J);
-        input.Set(data);
-    }
+{
+    var data = new NetworkInputData();
+    
+    // Movimiento horizontal (usa la estructura que ya tienes)
+    data.Move.x = 0f;
+    if (Input.GetKey(KeyCode.A)) data.Move.x -= 1f;
+    if (Input.GetKey(KeyCode.D)) data.Move.x += 1f;
+    data.Move.y = 0f; // No hay movimiento vertical con teclas
+    
+    // Botones (usa NetworkBool como ya lo tienes)
+    data.JumpPressed = Input.GetKey(KeyCode.W);
+    data.AttackPressed = Input.GetKey(KeyCode.J);
+    
+    input.Set(data);
+}
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
