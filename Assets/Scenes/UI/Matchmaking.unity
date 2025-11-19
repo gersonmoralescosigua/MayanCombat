@@ -1269,6 +1269,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NetworkRunnerHandler
       objectReference: {fileID: 0}
+    - target: {fileID: 6444408747882936101, guid: 68c8f7232a85aa9459e45e4978ca12cd, type: 3}
+      propertyPath: playerDataPrefab
+      value: 
+      objectReference: {fileID: 7575717284639000693, guid: f6e35111b12b1a84698669eceb886fe9, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
