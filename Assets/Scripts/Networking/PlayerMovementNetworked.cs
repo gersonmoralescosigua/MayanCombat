@@ -57,90 +57,80 @@ public class PlayerMovementNetworked : NetworkBehaviour
         _wasAttackPressed = false;
     }
 
-    public override void FixedUpdateNetwork()
+// En PlayerMovementNetworked.cs
+
+public override void FixedUpdateNetwork()
+{
+    // Verificación básica
+    if (Object == null || !Object.IsValid || Runner == null) return;
+
+    // 1. Obtener Input. 
+    // GetInput devuelve TRUE si:
+    // a) Soy el Cliente y es mi input.
+    // b) Soy el Servidor y recibí el input del cliente.
+    // c) Soy el Host y es mi propio input.
+    if (GetInput(out NetworkInputData data))
     {
-        // Verificación de seguridad
-        if (Object == null || !Object.IsValid || Runner == null) return;
-
-        // SOLO procesar input si tenemos autoridad de input
-        if (GetInput(out NetworkInputData data))
-        {
-            ProcessInput(data);
-        }
-
-        // ACTUALIZAR PROPIEDADES NETWORKED (todos los clientes)
-        UpdateNetworkedProperties();
-        
-        // APLICAR VOLTEO (todos los clientes)
-        ApplyFacingDirection();
-        
-        // ACTUALIZAR ANIMACIONES (todos los clientes)
-        UpdateAnimations();
+        ProcessInput(data);
     }
+    
+    // Mantenemos esto fuera para interpolación visual correcta
+    UpdateNetworkedProperties();
+    ApplyFacingDirection();
+    UpdateAnimations();
+}
 
-    private void ProcessInput(NetworkInputData data)
+private void ProcessInput(NetworkInputData data)
+{
+    // --- AQUI ESTABA EL ERROR: Eliminamos el if (HasInputAuthority) ---
+    
+    // 1. MOVIMIENTO HORIZONTAL
+    // Calculamos la velocidad deseada
+    Vector2 desiredVelocity = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
+
+    // Aplicamos física. Como esto corre en FixedUpdateNetwork tanto en Cliente como Servidor,
+    // ambos estarán sincronizados. Fusion manejará la predicción.
+    float blend = Mathf.Clamp01(25f * Runner.DeltaTime);
+    float newVelX = Mathf.Lerp(rb.linearVelocity.x, desiredVelocity.x, blend);
+    rb.linearVelocity = new Vector2(newVelX, rb.linearVelocity.y);
+
+    // 2. ACCIONES (Salto y Ataque)
+    // Usamos los datos del struct data, no Input.GetButton directo
+    
+    // SALTO
+    // Nota: Para saltos precisos en red, a veces es mejor usar botones "NetworkBool" que se resetean,
+    // pero tu lógica actual funcionará si quitamos el bloqueo de autoridad.
+    if (data.JumpPressed && !_wasJumpPressed) // Detect flank
     {
-        // 1. MOVIMIENTO HORIZONTAL (solo input authority)
-        if (HasInputAuthority)
+        if (NetGrounded)
         {
-            Vector2 desiredVelocity = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
-            
-            // Suavizado optimizado
-            float blend = Mathf.Clamp01(25f * Runner.DeltaTime);
-            float newVelX = Mathf.Lerp(rb.linearVelocity.x, desiredVelocity.x, blend);
-            rb.linearVelocity = new Vector2(newVelX, rb.linearVelocity.y);
-        }
-
-        // 2. DETECCIÓN DE BOTONES PRESIONADOS (solo input authority)
-        if (HasInputAuthority)
-        {
-            // SALTO (solo cuando se PRESIONA el botón, no se mantiene)
-            bool jumpPressed = data.JumpPressed && !_wasJumpPressed;
-            _wasJumpPressed = data.JumpPressed;
-
-            if (jumpPressed && NetGrounded)
-            {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
-                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-                if (animator != null) 
-                {
-                    animator.SetTrigger("Saltar");
-                    Debug.Log("🦘 Salto ejecutado");
-                }
-            }
-
-            // ATAQUE (solo cuando se PRESIONA el botón)
-            bool attackPressed = data.AttackPressed && !_wasAttackPressed;
-            _wasAttackPressed = data.AttackPressed;
-
-            if (attackPressed)
-            {
-                NetAttacking = true;
-                if (animator != null) 
-                {
-                    animator.SetTrigger("Atacar");
-                    Debug.Log("⚔️ Ataque ejecutado");
-                }
-                
-                Vector2 dir = NetFacingDirection > 0 ? Vector2.right : Vector2.left;
-                rb.AddForce(dir * attackForce, ForceMode2D.Impulse);
-            }
-            else
-            {
-                NetAttacking = false;
-            }
-        }
-
-        // 3. ACTUALIZAR DIRECCIÓN (basado en input de cualquier jugador)
-        if (data.Move.x > 0.1f)
-        {
-            NetFacingDirection = 1; // Derecha
-        }
-        else if (data.Move.x < -0.1f)
-        {
-            NetFacingDirection = -1; // Izquierda
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            if (animator != null) animator.SetTrigger("Saltar");
         }
     }
+    _wasJumpPressed = data.JumpPressed; // Guardar estado anterior del input actual
+
+    // ATAQUE
+    if (data.AttackPressed && !_wasAttackPressed)
+    {
+        NetAttacking = true;
+        if (animator != null) animator.SetTrigger("Atacar");
+        
+        // Impulso de ataque
+        Vector2 dir = NetFacingDirection > 0 ? Vector2.right : Vector2.left;
+        rb.AddForce(dir * attackForce, ForceMode2D.Impulse);
+    }
+    else
+    {
+        NetAttacking = false;
+    }
+    _wasAttackPressed = data.AttackPressed;
+
+    // 3. DIRECCIÓN
+    if (data.Move.x > 0.1f) NetFacingDirection = 1;
+    else if (data.Move.x < -0.1f) NetFacingDirection = -1;
+}
 
     private void UpdateNetworkedProperties()
     {
@@ -204,4 +194,6 @@ public class PlayerMovementNetworked : NetworkBehaviour
         Gizmos.color = Color.cyan;
         Gizmos.DrawLine(transform.position, transform.position + Vector3.down * groundCheckDistance);
     }
+
+    
 }

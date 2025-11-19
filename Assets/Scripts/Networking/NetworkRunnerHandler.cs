@@ -63,27 +63,24 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         Debug.Log("✅ Conectado a Fusion. Esperando jugador...");
     }
 
-    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+{
+    Debug.Log($"👤 Player joined: {player}");
+
+    if (runner.IsServer)
     {
-        Debug.Log($"👤 Player joined: {player}");
+        int connected = runner.ActivePlayers.Count();
+        Debug.Log($"🧩 Jugadores conectados: {connected}/{maxPlayers}");
 
-        if (runner.IsServer)
+        if (connected == maxPlayers)
         {
-            int connected = runner.ActivePlayers.Count();
-            Debug.Log($"🧩 Jugadores conectados: {connected}/{maxPlayers}");
-
-            if (connected == maxPlayers)
-            {
-                AssignTeams();
-
-                int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity");
-                if (sceneIndex >= 0)
-                    runner.LoadScene(SceneRef.FromIndex(sceneIndex));
-                else
-                    Debug.LogError($"❌ Escena {loadingSceneName} no está en Build Settings.");
-            }
+            AssignTeams(); // Envía los RPCs
+            // Inicia una corrutina para esperar 1s antes de cargar la escena
+            // Esto da tiempo a que los RPCs lleguen a los clientes y SessionManager se actualice
+            StartCoroutine(DelayLoadLevel(runner)); 
         }
     }
+}
 
     private void AssignTeams()
     {
@@ -192,6 +189,8 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     input.Set(data);
 }
 
+
+
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
@@ -204,4 +203,13 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
+
+
+    // Añade esta corrutina al NetworkRunnerHandler.cs:
+IEnumerator DelayLoadLevel(NetworkRunner runner)
+{
+    yield return new WaitForSeconds(1.0f); // Espera de seguridad para sync de datos
+    int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity");
+    if (sceneIndex >= 0) runner.LoadScene(SceneRef.FromIndex(sceneIndex));
+}
 }
