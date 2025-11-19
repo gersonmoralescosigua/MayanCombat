@@ -250,12 +250,13 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   attackForce: 18
-  animator: {fileID: 0}
+  animator: {fileID: 369483802363440233}
   _NetSpeed: 0
   _NetVertical: 0
   _NetGrounded: 0
   _NetAttacking:
     _value: 0
+  _NetFacingDirection: 0
 --- !u!114 &-7924143872835205272
 MonoBehaviour:
   m_ObjectHideFlags: 0

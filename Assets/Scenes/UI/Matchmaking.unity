@@ -701,8 +701,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 31.708984, y: -11.900024}
-  m_SizeDelta: {x: -1822.0121, y: -1068.8309}
+  m_AnchoredPosition: {x: -0.0005493164, y: -78.2}
+  m_SizeDelta: {x: 910.62, y: -303.29}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1063935807
 MonoBehaviour:
@@ -1049,7 +1049,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a79d4304d264384bbb94d3166ffcffb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchmakingUI
-  txtStatus: {fileID: 0}
+  txtStatus: {fileID: 1063935809}
   btnCancel: {fileID: 885438495}
 --- !u!4 &1701132065
 Transform:
@@ -1341,7 +1341,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &6859703917382349586 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7698038593935461335, guid: 1c46dcf350b554247852ff2e1c9c39a9, type: 3}
+  m_CorrespondingSourceObject: {fileID: -1288414012810550882, guid: 1c46dcf350b554247852ff2e1c9c39a9, type: 3}
   m_PrefabInstance: {fileID: 6859703917382349584}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6859703917382349585}
