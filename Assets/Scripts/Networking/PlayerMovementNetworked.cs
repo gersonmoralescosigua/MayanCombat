@@ -82,25 +82,18 @@ public override void FixedUpdateNetwork()
 
 private void ProcessInput(NetworkInputData data)
 {
-    // --- AQUI ESTABA EL ERROR: Eliminamos el if (HasInputAuthority) ---
-    
     // 1. MOVIMIENTO HORIZONTAL
-    // Calculamos la velocidad deseada
+    // Calculamos la velocidad deseada basada en el input
     Vector2 desiredVelocity = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
 
-    // Aplicamos física. Como esto corre en FixedUpdateNetwork tanto en Cliente como Servidor,
-    // ambos estarán sincronizados. Fusion manejará la predicción.
-    float blend = Mathf.Clamp01(25f * Runner.DeltaTime);
-    float newVelX = Mathf.Lerp(rb.linearVelocity.x, desiredVelocity.x, blend);
-    rb.linearVelocity = new Vector2(newVelX, rb.linearVelocity.y);
+    // IMPORTANTE: Asignación directa. 
+    // Eliminamos el Lerp para que la predicción de Fusion (NetworkTransform) haga el suavizado visual.
+    rb.linearVelocity = desiredVelocity;
 
     // 2. ACCIONES (Salto y Ataque)
-    // Usamos los datos del struct data, no Input.GetButton directo
     
     // SALTO
-    // Nota: Para saltos precisos en red, a veces es mejor usar botones "NetworkBool" que se resetean,
-    // pero tu lógica actual funcionará si quitamos el bloqueo de autoridad.
-    if (data.JumpPressed && !_wasJumpPressed) // Detect flank
+    if (data.JumpPressed && !_wasJumpPressed)
     {
         if (NetGrounded)
         {
@@ -109,7 +102,7 @@ private void ProcessInput(NetworkInputData data)
             if (animator != null) animator.SetTrigger("Saltar");
         }
     }
-    _wasJumpPressed = data.JumpPressed; // Guardar estado anterior del input actual
+    _wasJumpPressed = data.JumpPressed;
 
     // ATAQUE
     if (data.AttackPressed && !_wasAttackPressed)
@@ -117,7 +110,6 @@ private void ProcessInput(NetworkInputData data)
         NetAttacking = true;
         if (animator != null) animator.SetTrigger("Atacar");
         
-        // Impulso de ataque
         Vector2 dir = NetFacingDirection > 0 ? Vector2.right : Vector2.left;
         rb.AddForce(dir * attackForce, ForceMode2D.Impulse);
     }
@@ -131,7 +123,6 @@ private void ProcessInput(NetworkInputData data)
     if (data.Move.x > 0.1f) NetFacingDirection = 1;
     else if (data.Move.x < -0.1f) NetFacingDirection = -1;
 }
-
     private void UpdateNetworkedProperties()
     {
         if (rb != null)

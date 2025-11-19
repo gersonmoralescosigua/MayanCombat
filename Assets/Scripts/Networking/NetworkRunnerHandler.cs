@@ -35,33 +35,71 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         DontDestroyOnLoad(gameObject);
     }
 
-    public async void StartMatchmaking()
+    // En NetworkRunnerHandler.cs
+
+// Variables nuevas para controlar el flujo
+private bool _joining = false;
+
+public void StartMatchmaking()
+{
+    Debug.Log("🔗 Conectando al Lobby para buscar partida...");
+    _joining = true;
+    
+    if (_runner == null) _runner = gameObject.AddComponent<NetworkRunner>();
+    
+    // Paso 1: Unirse al Lobby para ver las listas de salas
+    _runner.JoinSessionLobby(SessionLobby.ClientServer);
+}
+
+// ESTE MÉTODO ES NUEVO: Fusion lo llama cuando recibe la lista de salas del Lobby
+public async void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
+{
+    if (!_joining) return; // Solo actuamos si estamos buscando partida
+
+    Debug.Log($"📋 Lista de sesiones recibida. Total: {sessionList.Count}");
+
+    // Buscamos una sesión que tenga espacio (menos de 2 jugadores) y esté abierta
+    SessionInfo availableSession = null;
+    foreach (var session in sessionList)
     {
-        Debug.Log("🔗 Iniciando matchmaking...");
-
-        _runner = gameObject.AddComponent<NetworkRunner>();
-        _runner.ProvideInput = true;
-
-        var sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
-
-        const string sessionName = "MayanQuickMatch";
-
-        var result = await _runner.StartGame(new StartGameArgs()
+        if (session.PlayerCount < maxPlayers && session.IsOpen)
         {
-            GameMode = GameMode.AutoHostOrClient,
-            SessionName = sessionName,
+            availableSession = session;
+            break;
+        }
+    }
+
+    // Configuramos la escena
+    var sceneManager = gameObject.GetComponent<NetworkSceneManagerDefault>() ?? gameObject.AddComponent<NetworkSceneManagerDefault>();
+    _joining = false; // Dejamos de buscar para no spamear uniones
+
+    if (availableSession != null)
+    {
+        Debug.Log($"✅ Sala encontrada: {availableSession.Name}. Uniéndose...");
+        await runner.StartGame(new StartGameArgs()
+        {
+            GameMode = GameMode.Client, // Nos unimos como cliente
+            SessionName = availableSession.Name,
             SceneManager = sceneManager,
             Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex)
         });
-
-        if (!result.Ok)
-        {
-            Debug.LogError($"❌ Error al conectar: {result.ShutdownReason}");
-            return;
-        }
-
-        Debug.Log("✅ Conectado a Fusion. Esperando jugador...");
     }
+    else
+    {
+        Debug.Log("⚠️ No hay salas disponibles. Creando una NUEVA sala Host...");
+        // Creamos una sala con nombre único (Guid) para que nadie más se meta por error
+        await runner.StartGame(new StartGameArgs()
+        {
+            GameMode = GameMode.Host, // Somos el Host de la nueva sala
+            SessionName = System.Guid.NewGuid().ToString(), // Nombre único aleatorio
+            PlayerCount = maxPlayers, // Límite estricto de 2
+            SceneManager = sceneManager,
+            Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex)
+        });
+    }
+}
+
+// --- Asegúrate de mantener el resto del código (OnPlayerJoined, SpawnPlayer corregido, etc.) ---
 
 public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
 {
@@ -106,8 +144,7 @@ public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
         {
             SessionManager.Instance?.SetTeam(team);
             PlayerPrefs.SetInt("AssignedCharacter", charId);
-            Debug.Log($"🎯 Eres {(team == 0 ? "Español" : "Maya")} - Personaje {charId}");
-        }
+Debug.Log($"🎯 Eres {(team == 0 ? "Español" : "Maya")} - Personaje {charId}");        }
     }
 
     public void OnSceneLoadDone(NetworkRunner runner)
@@ -147,8 +184,10 @@ public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     int team = _playerTeams.ContainsKey(player) ? _playerTeams[player] : 0;
     int charId = _playerCharacters.ContainsKey(player) ? _playerCharacters[player] : 0;
 
-    string prefabPath = $"Prefabs/Characters/pf_{(charId == 0 ? "beatriz" : "ixquic")}";
-    var prefab = Resources.Load<NetworkObject>(prefabPath); // Cambiar a NetworkObject
+// En NetworkRunnerHandler.cs -> SpawnPlayer
+// CAMBIO: Invertir la lógica ternaria. Si es 0 (Maya), carga ixquic. Si es 1, beatriz.
+string prefabPath = $"Prefabs/Characters/pf_{(charId == 0 ? "ixquic" : "beatriz")}";
+var prefab = Resources.Load<NetworkObject>(prefabPath); // Cambiar a NetworkObject
     
     Debug.Log($"🎯 Spawneando: Player {player}, Team {team}, Char {charId}, Prefab {prefabPath}");
 
@@ -196,7 +235,6 @@ public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
     public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
-    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
