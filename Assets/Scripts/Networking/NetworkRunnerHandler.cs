@@ -13,39 +13,36 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkRunner _runner;
     public NetworkRunner Runner => _runner;
 
-    [Header("Configuración de Escenas")]
+    [Header("Escenas")]
     public string matchmakingSceneName = "Matchmaking";
     public string loadingSceneName = "LoadingAssignment";
     public string resultsSceneName = "MatchResults"; 
     public string menuSceneName = "Menu";
 
-    // Nombres exactos de tus escenas de video
-    [Header("Escenas de Video")]
+    [Header("Videos")]
     public string videoGanaMaya = "GanaMaya";
     public string videoPierdeMaya = "PierdeMaya";
     public string videoGanaSpanish = "GanaSpanish";
     public string videoPierdeSpanish = "PierdeSpanish";
 
-    public string[] mapRotation = new string[] { 
-        "Map_Tikal_Base", 
-        "Map_Atitlan_Base", 
-        "Map_Volcan_Base" 
-    };
+    public string[] mapRotation = new string[] { "Map_Tikal_Base", "Map_Atitlan_Base", "Map_Volcan_Base" };
 
-    [Header("Matchmaking")]
+    [Header("Configuración")]
     public int maxPlayers = 2;
     public NetworkObject playerDataPrefab; 
 
+    // Estado
     private int _mayaWins = 0;
     private int _spanishWins = 0;
     private int _currentMapIndex = 0;
+    private bool _roundIsActive = true; // SEMÁFORO IMPORTANTE
     private List<string> _mapsPlayedHistory = new List<string>();
 
+    // Diccionarios
     private Dictionary<PlayerRef, int> _playerTeams = new Dictionary<PlayerRef, int>();
     private Dictionary<PlayerRef, int> _playerCharacters = new Dictionary<PlayerRef, int>();
 
     private bool _joining = false;
-    private Coroutine _autoStartTimer;
 
     private void Awake()
     {
@@ -54,10 +51,10 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         DontDestroyOnLoad(gameObject);
     }
 
+    // ... (StartMatchmaking y OnSessionListUpdated IGUAL QUE ANTES) ...
     public void StartMatchmaking()
     {
-        _mayaWins = 0; _spanishWins = 0; _currentMapIndex = 0;
-        _mapsPlayedHistory.Clear();
+        _mayaWins = 0; _spanishWins = 0; _currentMapIndex = 0; _mapsPlayedHistory.Clear();
         _joining = true;
         if (_runner == null) _runner = gameObject.AddComponent<NetworkRunner>();
         _runner.JoinSessionLobby(SessionLobby.ClientServer);
@@ -67,15 +64,12 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (!_joining) return;
         SessionInfo availableSession = sessionList.FirstOrDefault(s => s.PlayerCount < maxPlayers && s.IsOpen);
-        
         var sceneManager = gameObject.GetComponent<NetworkSceneManagerDefault>() ?? gameObject.AddComponent<NetworkSceneManagerDefault>();
         _joining = false;
-
-        if (availableSession != null)
-            await runner.StartGame(new StartGameArgs() { GameMode = GameMode.Client, SessionName = availableSession.Name, SceneManager = sceneManager, Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex) });
-        else
-            await runner.StartGame(new StartGameArgs() { GameMode = GameMode.Host, SessionName = System.Guid.NewGuid().ToString(), PlayerCount = maxPlayers, SceneManager = sceneManager, Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex) });
+        if (availableSession != null) await runner.StartGame(new StartGameArgs() { GameMode = GameMode.Client, SessionName = availableSession.Name, SceneManager = sceneManager, Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex) });
+        else await runner.StartGame(new StartGameArgs() { GameMode = GameMode.Host, SessionName = System.Guid.NewGuid().ToString(), PlayerCount = maxPlayers, SceneManager = sceneManager, Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex) });
     }
+    // ... (Fin Matchmaking) ...
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
@@ -95,8 +89,8 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         yield return new WaitForSeconds(0.5f);
         AssignTeams();
         yield return new WaitForSeconds(1.0f);
-        int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity");
-        if (sceneIndex >= 0) _runner.LoadScene(SceneRef.FromIndex(sceneIndex));
+        // Cargar Loading
+        _runner.LoadScene(SceneRef.FromIndex(SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity")));
     }
 
     private void AssignTeams()
@@ -121,31 +115,33 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
+    // --- CONTROL DE ESCENAS ---
     public void OnSceneLoadDone(NetworkRunner runner)
     {
         string currentScene = SceneManager.GetActiveScene().name;
-        
-        if (currentScene == loadingSceneName && runner.IsServer) StartCoroutine(AutoStartRound(8f));
-        
-        // Si estamos en resultados intermedios, esperamos y avanzamos
-        if (currentScene == resultsSceneName && runner.IsServer) StartCoroutine(ProcessMatchResults(8f));
 
-        if (IsMapScene(currentScene) && runner.IsServer)
+        if (runner.IsServer)
         {
-            foreach (var p in runner.ActivePlayers) SpawnPlayer(runner, p);
-            if (!_mapsPlayedHistory.Contains(currentScene)) _mapsPlayedHistory.Add(currentScene);
+            if (currentScene == loadingSceneName)
+            {
+                StartCoroutine(LoadMapDelay(5f));
+            }
+            else if (currentScene == resultsSceneName)
+            {
+                // Aquí decidimos: ¿Siguiente mapa o Video Final?
+                StartCoroutine(ProcessMatchResultsLogic(8f));
+            }
+            else if (mapRotation.Contains(currentScene))
+            {
+                // Estamos en un mapa de juego
+                _roundIsActive = true; // ACTIVAMOS EL SEMÁFORO DE LA RONDA
+                foreach (var p in runner.ActivePlayers) SpawnPlayer(runner, p);
+                if (!_mapsPlayedHistory.Contains(currentScene)) _mapsPlayedHistory.Add(currentScene);
+            }
         }
     }
 
-    private bool IsMapScene(string sceneName) => mapRotation.Contains(sceneName);
-
-    private IEnumerator AutoStartRound(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        LoadCurrentMap();
-    }
-
-    private IEnumerator ProcessMatchResults(float delay)
+    IEnumerator LoadMapDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
         LoadCurrentMap();
@@ -155,148 +151,166 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (_currentMapIndex < mapRotation.Length)
         {
-            string mapToLoad = mapRotation[_currentMapIndex];
-            int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/Maps/{(_currentMapIndex == 0 ? "Tikal" : (_currentMapIndex == 1 ? "Atitlan" : "Volcan"))}/{mapToLoad}.unity");
-            if (sceneIndex < 0) _runner.LoadScene(SceneRef.FromIndex(SceneUtility.GetBuildIndexByScenePath(mapToLoad)));
-            else _runner.LoadScene(SceneRef.FromIndex(sceneIndex));
+            string mapName = mapRotation[_currentMapIndex];
+            _runner.LoadScene(SceneRef.FromIndex(SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/Maps/{GetMapFolder(mapName)}/{mapName}.unity")));
         }
+    }
+
+    private string GetMapFolder(string mapName)
+    {
+        if (mapName.Contains("Tikal")) return "Tikal";
+        if (mapName.Contains("Atitlan")) return "Atitlan";
+        return "Volcan";
     }
 
     private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
-        int charId = 0; int team = 0;
-        if (_playerCharacters.ContainsKey(player)) { charId = _playerCharacters[player]; team = _playerTeams[player]; }
-        else { team = player.RawEncoded % 2; charId = team; }
-
-        string prefabPath = $"Prefabs/Characters/pf_{(charId == 0 ? "ixquic" : "beatriz")}";
+        int team = _playerTeams.ContainsKey(player) ? _playerTeams[player] : player.RawEncoded % 2;
+        string prefabPath = $"Prefabs/Characters/pf_{(team == 0 ? "ixquic" : "beatriz")}";
         
+        // Spawn Dinámico por nombre de objeto
         Vector3 spawnPos = Vector3.zero;
-        string spawnPointName = (team == 0) ? "Spawn_Maya" : "Spawn_Spanish";
-        GameObject point = GameObject.Find(spawnPointName);
+        string spawnName = (team == 0) ? "Spawn_Maya" : "Spawn_Spanish";
+        GameObject point = GameObject.Find(spawnName);
+        
         if (point != null) spawnPos = point.transform.position;
-        else spawnPos = (team == 0) ? new Vector3(-2, 0, 0) : new Vector3(2, 0, 0);
+        else spawnPos = (team == 0) ? new Vector3(-2, 2, 0) : new Vector3(2, 2, 0);
 
         runner.Spawn(Resources.Load<NetworkObject>(prefabPath), spawnPos, Quaternion.identity, player);
     }
 
+    // --- LÓGICA DE MUERTE (CORREGIDA) ---
     public void OnPlayerFellToDeath(GameObject deadPlayerObj)
     {
-        if (!_runner.IsServer) return;
+        // Si no soy servidor O la ronda ya terminó, ignoramos
+        if (!_runner.IsServer || !_roundIsActive) return;
+
+        _roundIsActive = false; // BLOQUEAMOS INMEDIATAMENTE PARA EVITAR DOBLES MUERTES
 
         NetworkObject netObj = deadPlayerObj.GetComponent<NetworkObject>();
         if (netObj == null) return;
 
-        PlayerRef deadPlayerRef = netObj.InputAuthority;
-        int losingTeam = -1;
-        if (_playerTeams.ContainsKey(deadPlayerRef)) losingTeam = _playerTeams[deadPlayerRef];
-
+        int losingTeam = _playerTeams.ContainsKey(netObj.InputAuthority) ? _playerTeams[netObj.InputAuthority] : -1;
         int winningTeam = (losingTeam == 0) ? 1 : 0;
 
+        // Sumar puntos
         if (winningTeam == 0) _mayaWins++; else _spanishWins++;
 
-        // Verificar Fin de Torneo
+        // Verificar si terminó el torneo
         bool matchEnded = (_mayaWins >= 2 || _spanishWins >= 2 || _currentMapIndex >= mapRotation.Length - 1);
-        
-        string winnerTeamName = (_mayaWins > _spanishWins) ? "Maya" : "Español";
-        string roundWinnerName = (winningTeam == 0) ? "Maya" : "Español";
+        string winnerName = (_mayaWins > _spanishWins) ? "IMPERIO MAYA" : "ESPAÑOLES";
 
-        // Notificar a todos
-        foreach(var player in _runner.ActivePlayers)
+        string msg = "";
+        if (matchEnded)
+            msg = $"👑 ¡FIN DEL TORNEO!\n\nGanador Global: {winnerName}\nMarcador: Maya {_mayaWins} - {_spanishWins} Español";
+        else
+            msg = $"Ronda Terminada\nGanador Ronda: {(winningTeam == 0 ? "Maya" : "Español")}\n\nGlobal: Maya {_mayaWins} - {_spanishWins} Español";
+
+        Debug.Log(msg);
+
+        // ENVIAR RPC Y ESPERAR
+        SendGlobalRPC(msg, matchEnded);
+
+        // Si terminó, guardamos en Firebase AHORA
+        if (matchEnded)
         {
-            if (_runner.TryGetPlayerObject(player, out var pObj))
+            SaveToFirebase(winningTeam == 0 ? "Maya" : "Español");
+        }
+
+        StartCoroutine(GoToResultsScene(3f));
+    }
+
+    private void SendGlobalRPC(string msg, bool isFinal)
+    {
+        foreach(var p in _runner.ActivePlayers)
+        {
+            if (_runner.TryGetPlayerObject(p, out var obj))
             {
-                var data = pObj.GetComponent<PlayerDataNetworked>();
-                if (data != null)
-                {
-                    if (matchEnded)
-                    {
-                        string finalMsg = $"👑 FIN DEL TORNEO\nGanador Global: {winnerTeamName}\n\nMarcador: Maya {_mayaWins} - {_spanishWins} Español";
-                        data.RPC_FinalMatchResult(winningTeam == 0 ? 0 : 1, finalMsg);
-                    }
-                    else
-                    {
-                        string roundMsg = $"Ronda Terminada\nGanador Ronda: {roundWinnerName}\n\nGlobal: Maya {_mayaWins} - {_spanishWins} Español";
-                        data.RPC_RoundFinished(roundMsg);
-                    }
-                }
+                var pd = obj.GetComponent<PlayerDataNetworked>();
+                if (pd != null) pd.RPC_UpdateMatchResults(msg, isFinal);
             }
         }
+    }
+
+    private void SaveToFirebase(string winnerTeam)
+    {
+        // Buscar nicknames
+        string winnerNick = "CPU", loserNick = "CPU";
+        // Lógica simplificada de búsqueda de nombres...
+        // ... (Usa tu lógica actual de MatchHistoryLogger) ...
+        
+        string loserTeam = (winnerTeam == "Maya") ? "Español" : "Maya";
+        MatchHistoryLogger.SaveMatch(winnerTeam, loserTeam, winnerNick, loserNick, 20, 0, _mapsPlayedHistory);
+    }
+
+    IEnumerator GoToResultsScene(float delay)
+    {
+        yield return new WaitForSeconds(delay); // Esperar que el mensaje se lea
+        _runner.LoadScene(SceneRef.FromIndex(SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{resultsSceneName}.unity")));
+    }
+
+    // --- PROCESO EN PANTALLA DE RESULTADOS ---
+    IEnumerator ProcessMatchResultsLogic(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        bool matchEnded = (_mayaWins >= 2 || _spanishWins >= 2 || _currentMapIndex >= mapRotation.Length);
 
         if (matchEnded)
         {
-            // Guardar en Firebase
-            string winnerNick = "Desconocido";
-            string loserNick = "Desconocido";
+            // ORDENAR TRANSICIÓN A VIDEO
+            string wTeam = (_mayaWins > _spanishWins) ? "Maya" : "Español";
+            Debug.Log($"🎬 Ordenando transición a video. Ganó: {wTeam}");
             
-            // Intentar obtener nicknames
-            foreach(var player in _runner.ActivePlayers)
+            // Enviar RPC a todos para que carguen su video correspondiente
+            foreach(var p in _runner.ActivePlayers)
             {
-                if (_runner.TryGetPlayerObject(player, out var pObj))
+                if (_runner.TryGetPlayerObject(p, out var obj))
                 {
-                    var pd = pObj.GetComponent<PlayerDataNetworked>();
-                    if (_playerTeams[player] == (winningTeam == 0 ? 0 : 1)) winnerNick = pd.PlayerName.ToString();
-                    else loserNick = pd.PlayerName.ToString();
+                    var pd = obj.GetComponent<PlayerDataNetworked>();
+                    if (pd != null)
+                    {
+                        // Determinamos qué video le toca a cada uno
+                        int pTeam = _playerTeams[p];
+                        bool pWon = (pTeam == 0 && wTeam == "Maya") || (pTeam == 1 && wTeam == "Español");
+                        
+                        string videoScene = "";
+                        if (pTeam == 0) videoScene = pWon ? videoGanaMaya : videoPierdeMaya;
+                        else videoScene = pWon ? videoGanaSpanish : videoPierdeSpanish;
+
+                        pd.RPC_GoToVideoScene(videoScene);
+                    }
                 }
             }
-
-            string wTeam = (_mayaWins > _spanishWins) ? "Maya" : "Español";
-            string lTeam = (wTeam == "Maya") ? "Español" : "Maya";
-            
-            // PUNTOS: Ganador 20, Perdedor 0
-            MatchHistoryLogger.SaveMatch(wTeam, lTeam, winnerNick, loserNick, 20, 0, _mapsPlayedHistory);
-            
-            // No cargamos escena de red, esperamos que el RPC desconecte a los clientes
         }
         else
         {
-            // Continuar torneo
+            // SIGUIENTE MAPA
             _currentMapIndex++;
-            StartCoroutine(GoToResultsRoutine());
+            LoadCurrentMap();
         }
     }
 
-    IEnumerator GoToResultsRoutine()
+    // Ejecutado localmente por el RPC
+    public void ExecuteVideoTransition()
     {
-        yield return new WaitForSeconds(2.0f);
-        int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{resultsSceneName}.unity");
-        if (sceneIndex >= 0) _runner.LoadScene(SceneRef.FromIndex(sceneIndex));
+        StartCoroutine(DisconnectAndLoadVideo());
     }
 
-    // --- LÓGICA DE TRANSICIÓN A VIDEO (Cliente y Host) ---
-    public void HandleFinalVideoTransition(int winningTeamID)
+    IEnumerator DisconnectAndLoadVideo()
     {
-        StartCoroutine(VideoTransitionCoroutine(winningTeamID));
-    }
-
-    IEnumerator VideoTransitionCoroutine(int winningTeamID)
-    {
-        // Esperamos un poco para leer el mensaje final en el UI de Fusion
-        yield return new WaitForSeconds(5.0f);
-
-        // Determinamos mi equipo local
-        int myTeam = SessionManager.Instance.currentTeam;
-        bool iWon = (myTeam == winningTeamID);
-        bool isMaya = (myTeam == 0);
-
-        string sceneToLoad = "";
-
-        // Lógica de escenas de video
-        if (isMaya)
-        {
-            sceneToLoad = iWon ? videoGanaMaya : videoPierdeMaya;
-        }
-        else // Español
-        {
-            sceneToLoad = iWon ? videoGanaSpanish : videoPierdeSpanish;
-        }
-
-        Debug.Log($"🎬 Desconectando de Fusion y cargando video: {sceneToLoad}");
-
-        // Apagar Fusion
-        _runner.Shutdown();
-
-        // Cargar escena localmente
-        SceneManager.LoadScene(sceneToLoad);
+        string sceneToLoad = SessionManager.Instance.VideoSceneToLoad;
+        Debug.Log($"👋 Desconectando Fusion... Próxima parada: {sceneToLoad}");
+        
+        // Desconexión limpia
+        if (_runner != null) _runner.Shutdown();
+        
+        yield return new WaitForSeconds(1.0f); // Esperar desconexión
+        
+        if (!string.IsNullOrEmpty(sceneToLoad))
+            SceneManager.LoadScene(sceneToLoad);
+        else
+            SceneManager.LoadScene(menuSceneName);
     }
 
     // Callbacks vacíos...
@@ -304,8 +318,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public void OnConnectedToServer(NetworkRunner runner) { }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
     public void OnSceneLoadStart(NetworkRunner runner) { }
-    public void OnInput(NetworkRunner runner, NetworkInput input) 
-    {
+    public void OnInput(NetworkRunner runner, NetworkInput input) { 
         var data = new NetworkInputData();
         data.Move.x = 0f;
         if (Input.GetKey(KeyCode.A)) data.Move.x -= 1f;

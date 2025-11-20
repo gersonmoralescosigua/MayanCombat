@@ -5,25 +5,17 @@ public class PlayerDataNetworked : NetworkBehaviour
 {
     [Networked] public int TeamID { get; set; } = -1;
     [Networked] public int CharacterID { get; set; } = -1;
-    [Networked] public NetworkString<_16> PlayerName { get; set; } // Nuevo: Nickname sincronizado
+    [Networked] public NetworkString<_16> PlayerName { get; set; }
 
     private int _lastTeamID = -1;
 
     public override void Spawned()
     {
-        // Al nacer, si soy yo (InputAuthority), envío mi nombre al servidor
         if (Object.HasInputAuthority)
         {
-            string myNick = "Jugador";
-            if (SessionManager.Instance != null) myNick = SessionManager.Instance.playerNickname;
+            string myNick = SessionManager.Instance != null ? SessionManager.Instance.playerNickname : "Jugador";
             RPC_SetNickname(myNick);
         }
-    }
-
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    public void RPC_SetNickname(string name)
-    {
-        PlayerName = name;
     }
 
     public override void Render()
@@ -34,39 +26,39 @@ public class PlayerDataNetworked : NetworkBehaviour
             {
                 _lastTeamID = TeamID;
                 SessionManager.Instance?.SetTeam(TeamID);
-                PlayerPrefs.SetInt("AssignedCharacter", CharacterID);
             }
         }
     }
 
-    // --- RPC PARA RONDA TERMINADA (Intermedia) ---
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    public void RPC_SetNickname(string name) => PlayerName = name;
+
+    // --- RPC 1: FINAL DE RONDA O PARTIDA (Actualiza textos) ---
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_RoundFinished(string message)
+    public void RPC_UpdateMatchResults(string message, bool isFinal)
     {
-        Debug.Log($"🏆 Info Ronda: {message}");
+        Debug.Log($"📩 RPC Recibido: {message}");
         if (SessionManager.Instance != null)
         {
             SessionManager.Instance.GameOverMessage = message;
-            SessionManager.Instance.IsFinalMatch = false; // Es ronda intermedia
+            SessionManager.Instance.IsFinalMatch = isFinal;
         }
     }
 
-    // --- RPC PARA FINAL DEL JUEGO (Transición a Videos) ---
+    // --- RPC 2: ORDEN DE IR A VIDEO (Desconectar) ---
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_FinalMatchResult(int winningTeamID, string message)
+    public void RPC_GoToVideoScene(string sceneName)
     {
-        Debug.Log("🎬 Fin del Juego recibido. Calculando escena de video...");
+        Debug.Log($"🎬 Orden recibida: Ir a video {sceneName}");
+        if (SessionManager.Instance != null)
+        {
+            SessionManager.Instance.VideoSceneToLoad = sceneName;
+        }
         
-        if (SessionManager.Instance != null)
+        // Llamamos al Handler local para que ejecute la desconexión
+        if (NetworkRunnerHandler.Instance != null)
         {
-            SessionManager.Instance.GameOverMessage = message;
-            SessionManager.Instance.IsFinalMatch = true;
-            
-            // Llamamos al Handler para que maneje la desconexión y el video
-            if (NetworkRunnerHandler.Instance != null)
-            {
-                NetworkRunnerHandler.Instance.HandleFinalVideoTransition(winningTeamID);
-            }
+            NetworkRunnerHandler.Instance.ExecuteVideoTransition();
         }
     }
 }

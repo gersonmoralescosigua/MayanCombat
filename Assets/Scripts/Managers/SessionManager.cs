@@ -12,13 +12,16 @@ public class SessionManager : MonoBehaviour
     public bool isGuest;
 
     // Datos de sesión
-    public int currentTeam = -1; 
+    public int currentTeam = -1; // 0: Maya, 1: Español
 
     // --- Variables para el flujo del juego ---
     public string GameOverMessage = ""; // Mensaje a mostrar
     public bool IsFinalMatch = false;   // ¿Es el fin del juego o solo una ronda?
     public int RoundIndex = 0;          // Ronda actual (para UI)
     public string WinnerName = ""; 
+    
+    // Variable para saber qué video reproducir al desconectar
+    public string VideoSceneToLoad = ""; 
     // -----------------------------------------------
 
     // Internals
@@ -153,4 +156,3 @@ public class SessionManager : MonoBehaviour
         Debug.Log($"[SessionManager] Team asignado: {(team == 0 ? "Maya" : "Español")}");
     }
 }
-

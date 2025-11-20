@@ -1,29 +1,40 @@
-
-
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI; // Necesario aunque no usemos botones
-
 
 public class MatchResultsUI : MonoBehaviour
 {
     public TMP_Text winnerText;
-            public GameObject loadingSpinner; // Opcional, si quieres poner algo que gire
-
 
     void Start()
     {
+        // Forzamos actualización del texto
+        UpdateText();
+    }
+
+    void Update()
+    {
+        // Opcional: Actualizar en tiempo real por si el RPC llega un poco tarde
+        // (Solo si el texto sigue siendo el default)
+        if (winnerText != null && winnerText.text.Contains("Esperando"))
+        {
+            UpdateText();
+        }
+    }
+
+    void UpdateText()
+    {
         if (SessionManager.Instance != null && winnerText != null)
         {
-            // Si el mensaje está vacío, ponemos uno por defecto
-            if (string.IsNullOrEmpty(SessionManager.Instance.GameOverMessage))
+            if (!string.IsNullOrEmpty(SessionManager.Instance.GameOverMessage))
             {
-                winnerText.text = "Procesando resultados de la ronda...";
+                winnerText.text = SessionManager.Instance.GameOverMessage;
             }
             else
             {
-                winnerText.text = SessionManager.Instance.GameOverMessage;
+                winnerText.text = "Esperando resultados del árbitro...";
             }
         }
     }
 }
+
+
