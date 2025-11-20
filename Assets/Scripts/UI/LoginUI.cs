@@ -85,7 +85,7 @@ public class LoginUI : MonoBehaviour
         }
         finally
         {
-            //j
+            //nada, para chingar
         }
     }
 
