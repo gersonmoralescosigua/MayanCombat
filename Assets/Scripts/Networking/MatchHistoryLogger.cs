@@ -5,19 +5,10 @@ using System;
 
 public static class MatchHistoryLogger
 {
-    public struct MatchResultData
-    {
-        public string winner { get; set; }
-        public string loser { get; set; }
-        public string score { get; set; }
-        public string date { get; set; }
-        public string played_maps { get; set; }
-    }
-
     // URL de tu base de datos Realtime
     private const string DATABASE_URL = "https://login1-78a38-default-rtdb.firebaseio.com/";
 
-    public static async void SaveMatch(string winnerTeam, string loserTeam, int winnerScore, int loserScore, List<string> mapsPlayed)
+    public static async void SaveMatch(string winnerTeam, string loserTeam, string winnerName, string loserName, int winnerPoints, int loserPoints, List<string> mapsPlayed)
     {
         if (!FirebaseInitializer.IsReady)
         {
@@ -25,16 +16,16 @@ public static class MatchHistoryLogger
             return;
         }
 
-        // --- CAMBIO CLAVE AQUÍ ---
-        // En lugar de DefaultInstance, usamos GetInstance con tu URL específica.
-        // Esto soluciona el problema si tu JSON es viejo y no trae la URL.
         DatabaseReference dbRef = FirebaseDatabase.GetInstance(DATABASE_URL).RootReference;
 
         var matchData = new Dictionary<string, object>
         {
-            { "winner", winnerTeam },
-            { "loser", loserTeam },
-            { "score", $"{winnerScore}-{loserScore}" },
+            { "winner_team", winnerTeam },
+            { "loser_team", loserTeam },
+            { "winner_nickname", winnerName }, // Nuevo
+            { "loser_nickname", loserName },   // Nuevo
+            { "winner_points", winnerPoints }, // 20
+            { "loser_points", loserPoints },   // 0
             { "date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") },
             { "played_maps", string.Join(", ", mapsPlayed) }
         };
@@ -43,8 +34,7 @@ public static class MatchHistoryLogger
         {
             DatabaseReference newMatchRef = dbRef.Child("match_history").Push();
             await newMatchRef.SetValueAsync(matchData);
-
-            Debug.Log($"✅ Historial guardado en Realtime Database ID: {newMatchRef.Key}");
+            Debug.Log($"✅ Historial guardado con Nombres y Puntos.");
         }
         catch (Exception ex)
         {
