@@ -173,7 +173,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 2
+  m_GravityScale: 3
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -245,18 +245,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementNetworked
   moveSpeed: 5
   jumpForce: 7
-  groundCheckDistance: 0.6
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 256
-  attackForce: 18
   animator: {fileID: 369483802363440233}
   _NetSpeed: 0
-  _NetVertical: 0
   _NetGrounded: 0
   _NetAttacking:
     _value: 0
   _NetFacingDirection: 0
+  groundCheckDistance: 0.6
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!114 &-7924143872835205272
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -48,6 +48,9 @@ EditorBuildSettings:
     path: Assets/Scenes/UI/Register.unity
     guid: cb9b79a48067c224eb0bdb83bb46ba3c
   - enabled: 1
+    path: Assets/Scenes/UI/MatchResults.unity
+    guid: c19beeb7e91a6d3499faea0cc9938ec4
+  - enabled: 1
     path: Assets/Scenes/UI/Friends.unity
     guid: a762647016255604f8164348106ddde8
   - enabled: 1

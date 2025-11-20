@@ -3,50 +3,41 @@ using UnityEngine;
 
 public class PlayerDataNetworked : NetworkBehaviour
 {
-    // 1. Quitamos el (OnChanged = ...) para evitar el error CS0246
-    [Networked]
-    public int TeamID { get; set; } = -1;
-
-    [Networked]
-    public int CharacterID { get; set; } = -1;
-
-    // Variable local para recordar el último valor y detectar cambios
+    [Networked] public int TeamID { get; set; } = -1;
+    [Networked] public int CharacterID { get; set; } = -1;
+    
     private int _lastTeamID = -1;
 
-    public override void Spawned()
-    {
-        // Al nacer, si ya tengo datos, los aplico
-        if (Object.HasInputAuthority)
-        {
-            CheckForChanges();
-        }
-    }
-
-    // Usamos Render (que corre cada frame) para vigilar si el dato cambió.
-    // Esto reemplaza al sistema de "OnChanged" que te daba error.
     public override void Render()
     {
         if (Object.HasInputAuthority)
         {
-            CheckForChanges();
+            if (TeamID != _lastTeamID)
+            {
+                _lastTeamID = TeamID;
+                if (TeamID != -1)
+                {
+                    SessionManager.Instance?.SetTeam(TeamID);
+                    PlayerPrefs.SetInt("AssignedCharacter", CharacterID);
+                }
+            }
         }
     }
 
-    private void CheckForChanges()
+    // --- RPC CRUCIAL: RECIBE EL MENSAJE DE GANADOR ---
+    // [Rpc(RpcSources.StateAuthority, RpcTargets.All)] significa:
+    // "El Servidor (StateAuthority) lo llama, y se ejecuta en TODOS (All) los clientes".
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_GameFinished(int winningTeamID)
     {
-        // Si el valor en red es diferente al último que recuerdo...
-        if (TeamID != _lastTeamID)
+        string winnerRole = (winningTeamID == 0) ? "IMPERIO MAYA" : "ESPAÑOLES";
+        string mensaje = $"¡VICTORIA PARA {winnerRole}!\n\n(El oponente ha caído)";
+        
+        Debug.Log($"🏆 RPC Recibido en cliente: {mensaje}");
+
+        if (SessionManager.Instance != null)
         {
-            // ... significa que hubo una actualización.
-            _lastTeamID = TeamID; // Actualizo mi memoria
-            
-            if (TeamID != -1)
-            {
-                // Aplico los datos al juego
-                SessionManager.Instance?.SetTeam(TeamID);
-                PlayerPrefs.SetInt("AssignedCharacter", CharacterID);
-                Debug.Log($"✅ [Cliente] Datos recibidos y sincronizados: Team {TeamID}, Char {CharacterID}");
-            }
+            SessionManager.Instance.GameOverMessage = mensaje;
         }
     }
 }
