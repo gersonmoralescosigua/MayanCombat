@@ -1,47 +1,49 @@
 using UnityEngine;
-using TMPro;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+using Firebase.Firestore; // Ahora esto dejará de dar error rojo
+using System.Collections.Generic;
+using System;
 
-public class MatchResultsUI : MonoBehaviour
+public static class MatchHistoryLogger
 {
-    public TMP_Text winnerText;
-    public Button btnMenu;
-    public GameObject loadingSpinner; // Opcional, si quieres poner algo que gire
-
-    void Start()
+    // Esta etiqueta [FirestoreData] ahora será reconocida gracias al paquete que acabas de instalar
+    [FirestoreData]
+    public struct MatchResultData
     {
-        if (SessionManager.Instance != null && winnerText != null)
-        {
-            winnerText.text = SessionManager.Instance.GameOverMessage;
-            
-            // Si ES la final, mostramos el botón de salir
-            if (SessionManager.Instance.IsFinalMatch)
-            {
-                if (btnMenu != null) 
-                {
-                    btnMenu.gameObject.SetActive(true);
-                    btnMenu.onClick.AddListener(OnMenuClicked);
-                }
-            }
-            else
-            {
-                // Si NO es la final (es ronda intermedia), ocultamos el botón
-                // porque el Host nos moverá automáticamente al siguiente mapa
-                if (btnMenu != null) btnMenu.gameObject.SetActive(false);
-            }
-        }
+        [FirestoreProperty] public string winner { get; set; }
+        [FirestoreProperty] public string loser { get; set; }
+        [FirestoreProperty] public string score { get; set; }
+        [FirestoreProperty] public string date { get; set; }
+        [FirestoreProperty] public string played_maps { get; set; }
     }
 
-    void OnMenuClicked()
+    public static async void SaveMatch(string winnerTeam, string loserTeam, int winnerScore, int loserScore, List<string> mapsPlayed)
     {
-        if (SessionManager.Instance != null) SessionManager.Instance.GameOverMessage = "";
-        
-        if (NetworkRunnerHandler.Instance != null && NetworkRunnerHandler.Instance.Runner != null)
+        if (!FirebaseInitializer.IsReady)
         {
-            NetworkRunnerHandler.Instance.Runner.Shutdown();
+            Debug.LogError("❌ Firebase no está listo.");
+            return;
         }
+
+        var db = FirebaseFirestore.DefaultInstance;
         
-        SceneManager.LoadScene("Menu");
+        var matchData = new MatchResultData
+        {
+            winner = winnerTeam,
+            loser = loserTeam,
+            score = $"{winnerScore}-{loserScore}",
+            date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            played_maps = string.Join(", ", mapsPlayed)
+        };
+
+        try
+        {
+            // Esto creará automáticamente la colección "match_history" si no existe
+            DocumentReference docRef = await db.Collection("match_history").AddAsync(matchData);
+            Debug.Log($"✅ Historial guardado en Firebase ID: {docRef.Id}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"❌ Error guardando en Firebase: {ex.Message}");
+        }
     }
 }
