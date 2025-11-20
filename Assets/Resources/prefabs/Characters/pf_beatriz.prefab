@@ -243,8 +243,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cbe472b00ce1b640bf351e32f409794, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementNetworked
-  moveSpeed: 5
-  jumpForce: 7
+  moveSpeed: 10
+  jumpForce: 20
   animator: {fileID: 369483802363440233}
   _NetSpeed: 0
   _NetGrounded: 0
