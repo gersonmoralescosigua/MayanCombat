@@ -148,3 +148,6 @@ public class SessionManager : MonoBehaviour
 public string WinnerName = ""; 
 public string GameOverMessage = ""; // Mensaje personalizado
 }
+
+
+
