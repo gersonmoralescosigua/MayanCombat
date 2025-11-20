@@ -18,7 +18,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     public string loadingSceneName = "LoadingAssignment";
     public string mapSceneName = "Map_Tikal_Base";
     public string menuSceneName = "Menu";
-    public string resultsSceneName = "MatchResults"; // ASEGURATE QUE EL NOMBRE SEA EXACTO
+    public string resultsSceneName = "MatchResults"; 
 
     [Header("Matchmaking")]
     public int maxPlayers = 2;
@@ -83,11 +83,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
                 var playerObj = runner.Spawn(playerDataPrefab, Vector3.zero, Quaternion.identity, player);
                 runner.SetPlayerObject(player, playerObj);
             }
-
-            if (runner.ActivePlayers.Count() == maxPlayers)
-            {
-                StartCoroutine(AssignTeamsRoutine());
-            }
+            if (runner.ActivePlayers.Count() == maxPlayers) StartCoroutine(AssignTeamsRoutine());
         }
     }
 
@@ -96,7 +92,6 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         yield return new WaitForSeconds(0.5f);
         AssignTeams();
         yield return new WaitForSeconds(1.0f);
-        
         int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity");
         if (sceneIndex >= 0) _runner.LoadScene(SceneRef.FromIndex(sceneIndex));
     }
@@ -106,20 +101,15 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         var players = _runner.ActivePlayers.ToList();
         if (players.Count < 2) return;
         
-        // Asignación Determinista para evitar confusiones
         players = players.OrderBy(x => UnityEngine.Random.value).ToList();
 
-        // Player 0 -> Maya (Ixquic)
-        _playerTeams[players[0]] = 0;
+        _playerTeams[players[0]] = 0; // Maya
         _playerCharacters[players[0]] = 0;
         SetPlayerData(players[0], 0, 0);
 
-        // Player 1 -> Español (Beatriz)
-        _playerTeams[players[1]] = 1;
+        _playerTeams[players[1]] = 1; // Español
         _playerCharacters[players[1]] = 1;
         SetPlayerData(players[1], 1, 1);
-
-        Debug.Log($"✅ Equipos Definidos: P1=Maya, P2=Español");
     }
 
     private void SetPlayerData(PlayerRef player, int team, int charId)
@@ -131,7 +121,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    // --- LOGICA DE ESCENAS Y SPAWN ---
+    // --- SPAWN ---
     public void OnSceneLoadDone(NetworkRunner runner)
     {
         string currentScene = SceneManager.GetActiveScene().name;
@@ -139,9 +129,8 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         if (currentScene == loadingSceneName && runner.IsServer)
         {
             if (_autoStartTimer != null) StopCoroutine(_autoStartTimer);
-            _autoStartTimer = StartCoroutine(AutoStartAfterDelay(8f)); // 8 Segundos de lectura
+            _autoStartTimer = StartCoroutine(AutoStartAfterDelay(8f));
         }
-
         if (currentScene == mapSceneName && runner.IsServer)
         {
             foreach (var p in runner.ActivePlayers) SpawnPlayer(runner, p);
@@ -157,64 +146,53 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
     private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
-        // DEFAULT: 0 (Maya) si falla el diccionario
-        int charId = 0; 
-        int team = 0;
+        int charId = 0; int team = 0;
+        if (_playerCharacters.ContainsKey(player)) { charId = _playerCharacters[player]; team = _playerTeams[player]; }
+        else { team = player.RawEncoded % 2; charId = team; }
 
-        if (_playerCharacters.ContainsKey(player))
-        {
-            charId = _playerCharacters[player];
-            team = _playerTeams[player];
-        }
-        else
-        {
-            // Si entras aquí, es el bug de "Dos Mayas". 
-            // Forzamos re-cálculo simple basado en PlayerID para evitar duplicados si el diccionario falla
-            Debug.LogWarning("⚠️ Usando lógica de respaldo para equipos.");
-            team = player.RawEncoded % 2; 
-            charId = team;
-        }
-
-        // Lógica Correcta: 0=Ixquic, 1=Beatriz
+        // 0=Ixquic, 1=Beatriz
         string prefabPath = $"Prefabs/Characters/pf_{(charId == 0 ? "ixquic" : "beatriz")}";
-        
         Vector3 spawnPos = team == 0 ? new Vector3(-0.39f, -0.382f, 0f) : new Vector3(1.3f, -0.4f, 0f);
         runner.Spawn(Resources.Load<NetworkObject>(prefabPath), spawnPos, Quaternion.identity, player);
     }
 
-    // --- LÓGICA DE MUERTE (NUEVO) ---
+    // --- LÓGICA DE MUERTE ---
     public void OnPlayerFellToDeath(GameObject deadPlayerObj)
     {
         if (!_runner.IsServer) return;
 
-        Debug.Log("💀 Fin de la partida detectado.");
-
-        // Identificar quién murió
         NetworkObject netObj = deadPlayerObj.GetComponent<NetworkObject>();
+        if (netObj == null) return;
+
         PlayerRef deadPlayerRef = netObj.InputAuthority;
-        
-        // Determinar ganador (El que NO murió)
-        string winnerText = "";
-        string loserTeam = "";
+        int losingTeam = -1;
 
-        if (_playerTeams.ContainsKey(deadPlayerRef))
+        if (_playerTeams.ContainsKey(deadPlayerRef)) losingTeam = _playerTeams[deadPlayerRef];
+
+        // Si perdió el 0, gana el 1.
+        int winningTeam = (losingTeam == 0) ? 1 : 0;
+
+        Debug.Log($"💀 Murió team {losingTeam}. Gana team {winningTeam}");
+
+        // AVISAR A TODOS LOS JUGADORES ACTUALIZANDO SUS DATOS
+        foreach(var player in _runner.ActivePlayers)
         {
-            int teamID = _playerTeams[deadPlayerRef];
-            loserTeam = (teamID == 0) ? "Maya" : "Español";
-            winnerText = (teamID == 0) ? "¡GANAN LOS ESPAÑOLES!" : "¡GANA EL IMPERIO MAYA!";
-        }
-        else
-        {
-            winnerText = "JUEGO TERMINADO";
+            if (_runner.TryGetPlayerObject(player, out var pObj))
+            {
+                var data = pObj.GetComponent<PlayerDataNetworked>();
+                if (data != null)
+                {
+                    data.WinnerTeamID = winningTeam; // Esto dispara el update en el Cliente
+                }
+            }
         }
 
-        // Guardamos mensaje globalmente (esto es un hack rápido, lo ideal es NetworkVariable, pero funcionará)
-        if (SessionManager.Instance != null)
-        {
-            SessionManager.Instance.GameOverMessage = $"{winnerText}\n\n(El jugador {loserTeam} cayó al vacío)";
-        }
+        StartCoroutine(FinishMatchRoutine());
+    }
 
-        // Cargar escena de resultados
+    IEnumerator FinishMatchRoutine()
+    {
+        yield return new WaitForSeconds(1.0f); // Esperar a que el dato se sincronice
         int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{resultsSceneName}.unity");
         if (sceneIndex >= 0) _runner.LoadScene(SceneRef.FromIndex(sceneIndex));
     }

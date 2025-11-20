@@ -10,11 +10,31 @@ public class MatchResultsUI : MonoBehaviour
 
     void Start()
     {
-        if (btnMenu != null) btnMenu.onClick.AddListener(() => SceneManager.LoadScene("Menu"));
+        if (btnMenu != null) btnMenu.onClick.AddListener(OnMenuClicked);
 
         if (SessionManager.Instance != null && winnerText != null)
         {
-            winnerText.text = SessionManager.Instance.GameOverMessage;
+            if (string.IsNullOrEmpty(SessionManager.Instance.GameOverMessage))
+            {
+                winnerText.text = "JUEGO TERMINADO";
+            }
+            else
+            {
+                winnerText.text = SessionManager.Instance.GameOverMessage;
+            }
         }
+    }
+
+    void OnMenuClicked()
+    {
+        if (SessionManager.Instance != null) SessionManager.Instance.GameOverMessage = "";
+        
+        // Cerrar conexión de red
+        if (NetworkRunnerHandler.Instance != null && NetworkRunnerHandler.Instance.Runner != null)
+        {
+            NetworkRunnerHandler.Instance.Runner.Shutdown();
+        }
+        
+        SceneManager.LoadScene("Menu");
     }
 }

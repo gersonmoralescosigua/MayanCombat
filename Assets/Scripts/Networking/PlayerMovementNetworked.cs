@@ -6,25 +6,23 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkTransform))]
 public class PlayerMovementNetworked : NetworkBehaviour
 {
-    [Header("Movimiento")]
-    public float moveSpeed = 5f;
-    public float jumpForce = 7f;
+    [Header("Movimiento Ágil")]
+    public float moveSpeed = 9f;     // Aumentado para que camine rápido
+    public float jumpForce = 16f;    // Aumentado para compensar la Gravity Scale de 3
 
     [Header("Referencias")]
     public Animator animator;
 
-    // Propiedades de red
+    // Networked properties
     [Networked] public float NetSpeed { get; set; }
     [Networked] public bool NetGrounded { get; set; }
     [Networked] public NetworkBool NetAttacking { get; set; }
     [Networked] public int NetFacingDirection { get; set; }
 
-    // Inputs detectados
     [Networked] private NetworkBool _wasJumpPressed { get; set; }
     [Networked] private NetworkBool _wasAttackPressed { get; set; }
 
     private Rigidbody2D rb;
-    // Configuración de físicas
     public float groundCheckDistance = 0.6f;
     public LayerMask groundMask;
 
@@ -36,7 +34,7 @@ public class PlayerMovementNetworked : NetworkBehaviour
         if (rb != null) 
         {
             rb.freezeRotation = true;
-            // IMPORTANTE: Interpolate suaviza el movimiento visual entre Ticks de red
+            // Interpolate suaviza lo visual, pero la física interna será instantánea
             rb.interpolation = RigidbodyInterpolation2D.Interpolate; 
         }
     }
@@ -47,7 +45,6 @@ public class PlayerMovementNetworked : NetworkBehaviour
         NetFacingDirection = 1;
     }
 
-    // 1. LÓGICA FÍSICA (Sincronizada por Red - FixedUpdate)
     public override void FixedUpdateNetwork()
     {
         if (Object == null || !Object.IsValid || Runner == null) return;
@@ -57,13 +54,12 @@ public class PlayerMovementNetworked : NetworkBehaviour
             ProcessInput(data);
         }
         
-        // Actualizamos variables de red para que todos sepan mi estado
+        // Actualizar estado de red
+        // Nota: Si usas Unity 6 usa linearVelocity, si es Unity anterior usa velocity
         NetSpeed = Mathf.Abs(rb.linearVelocity.x);
         NetGrounded = IsGrounded();
     }
 
-    // 2. LÓGICA VISUAL (Suavizado Local - Update Normal)
-    // Al poner esto en Render, eliminamos el "temblor" porque corre a los FPS del monitor
     public override void Render()
     {
         UpdateVisuals();
@@ -71,23 +67,25 @@ public class PlayerMovementNetworked : NetworkBehaviour
 
     private void ProcessInput(NetworkInputData data)
     {
-        // Movimiento DIRECTO (La interpolación visual la hace el Render + NetworkTransform)
-        Vector2 desiredVelocity = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
-        rb.linearVelocity = desiredVelocity;
+        // 1. MOVIMIENTO INSTANTÁNEO (Sin aceleración suave)
+        float targetVelocityX = data.Move.x * moveSpeed;
+        rb.linearVelocity = new Vector2(targetVelocityX, rb.linearVelocity.y);
 
-        // Salto
+        // 2. SALTO
         if (data.JumpPressed && !_wasJumpPressed)
         {
             if (NetGrounded)
             {
+                // Reseteamos Y para salto consistente
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
                 rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+                
                 if (animator != null) animator.SetTrigger("Saltar");
             }
         }
         _wasJumpPressed = data.JumpPressed;
 
-        // Ataque
+        // 3. ATAQUE
         if (data.AttackPressed && !_wasAttackPressed)
         {
             NetAttacking = true;
@@ -95,14 +93,14 @@ public class PlayerMovementNetworked : NetworkBehaviour
         }
         _wasAttackPressed = data.AttackPressed;
 
-        // Dirección
+        // 4. DIRECCIÓN
         if (data.Move.x > 0.1f) NetFacingDirection = 1;
         else if (data.Move.x < -0.1f) NetFacingDirection = -1;
     }
 
     private void UpdateVisuals()
     {
-        // Volteo suave
+        // Volteo visual
         Vector3 currentScale = transform.localScale;
         float targetX = Mathf.Abs(currentScale.x) * (NetFacingDirection >= 0 ? 1f : -1f);
         
@@ -127,7 +125,6 @@ public class PlayerMovementNetworked : NetworkBehaviour
         return hit.collider != null;
     }
 }
-
 
 
 

@@ -3,49 +3,44 @@ using UnityEngine;
 
 public class PlayerDataNetworked : NetworkBehaviour
 {
-    // 1. Quitamos el (OnChanged = ...) para evitar el error CS0246
-    [Networked]
-    public int TeamID { get; set; } = -1;
+    [Networked] public int TeamID { get; set; } = -1;
+    [Networked] public int CharacterID { get; set; } = -1;
+    
+    // Variable mágica: -1 = Nadie gana aún. 0 = Gana Maya. 1 = Gana Español.
+    [Networked] public int WinnerTeamID { get; set; } = -1; 
 
-    [Networked]
-    public int CharacterID { get; set; } = -1;
-
-    // Variable local para recordar el último valor y detectar cambios
     private int _lastTeamID = -1;
+    private int _lastWinnerID = -1;
 
-    public override void Spawned()
-    {
-        // Al nacer, si ya tengo datos, los aplico
-        if (Object.HasInputAuthority)
-        {
-            CheckForChanges();
-        }
-    }
-
-    // Usamos Render (que corre cada frame) para vigilar si el dato cambió.
-    // Esto reemplaza al sistema de "OnChanged" que te daba error.
     public override void Render()
     {
         if (Object.HasInputAuthority)
         {
-            CheckForChanges();
-        }
-    }
-
-    private void CheckForChanges()
-    {
-        // Si el valor en red es diferente al último que recuerdo...
-        if (TeamID != _lastTeamID)
-        {
-            // ... significa que hubo una actualización.
-            _lastTeamID = TeamID; // Actualizo mi memoria
-            
-            if (TeamID != -1)
+            // Detectar asignación de equipo (Inicio de partida)
+            if (TeamID != _lastTeamID)
             {
-                // Aplico los datos al juego
-                SessionManager.Instance?.SetTeam(TeamID);
-                PlayerPrefs.SetInt("AssignedCharacter", CharacterID);
-                Debug.Log($"✅ [Cliente] Datos recibidos y sincronizados: Team {TeamID}, Char {CharacterID}");
+                _lastTeamID = TeamID;
+                if (TeamID != -1)
+                {
+                    SessionManager.Instance?.SetTeam(TeamID);
+                    PlayerPrefs.SetInt("AssignedCharacter", CharacterID);
+                }
+            }
+
+            // Detectar FINAL DE PARTIDA (Cuando alguien muere)
+            if (WinnerTeamID != -1 && WinnerTeamID != _lastWinnerID)
+            {
+                _lastWinnerID = WinnerTeamID;
+                
+                if (SessionManager.Instance != null)
+                {
+                    // 0 = Maya, 1 = Español
+                    string winnerRole = (WinnerTeamID == 0) ? "IMPERIO MAYA" : "ESPAÑOLES";
+                    
+                    // Mensaje personalizado para todos
+                    SessionManager.Instance.GameOverMessage = $"¡VICTORIA PARA {winnerRole}!\n\n(El oponente ha caído)";
+                    Debug.Log($"🏆 Ganador recibido: {winnerRole}");
+                }
             }
         }
     }
