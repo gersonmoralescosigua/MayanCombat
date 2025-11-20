@@ -1,12 +1,10 @@
 using UnityEngine;
-using Firebase.Database; // Cambiado de Firestore a Database
+using Firebase.Database;
 using System.Collections.Generic;
 using System;
 
 public static class MatchHistoryLogger
 {
-    // Ya no son necesarios los atributos de Firestore.
-    // Mantenemos la estructura limpia.
     public struct MatchResultData
     {
         public string winner { get; set; }
@@ -16,6 +14,9 @@ public static class MatchHistoryLogger
         public string played_maps { get; set; }
     }
 
+    // URL de tu base de datos Realtime
+    private const string DATABASE_URL = "https://login1-78a38-default-rtdb.firebaseio.com/";
+
     public static async void SaveMatch(string winnerTeam, string loserTeam, int winnerScore, int loserScore, List<string> mapsPlayed)
     {
         if (!FirebaseInitializer.IsReady)
@@ -24,12 +25,11 @@ public static class MatchHistoryLogger
             return;
         }
 
-        // Obtenemos la referencia a la base de datos (Root)
-        DatabaseReference dbRef = FirebaseDatabase.DefaultInstance.RootReference;
+        // --- CAMBIO CLAVE AQUÍ ---
+        // En lugar de DefaultInstance, usamos GetInstance con tu URL específica.
+        // Esto soluciona el problema si tu JSON es viejo y no trae la URL.
+        DatabaseReference dbRef = FirebaseDatabase.GetInstance(DATABASE_URL).RootReference;
 
-        // Preparamos los datos.
-        // Nota: Para Realtime Database en Unity, lo más seguro y robusto es pasar los datos
-        // como un Diccionario <string, object> para evitar problemas de serialización con propiedades {get; set;}
         var matchData = new Dictionary<string, object>
         {
             { "winner", winnerTeam },
@@ -41,18 +41,14 @@ public static class MatchHistoryLogger
 
         try
         {
-            // 1. Accedemos al nodo "match_history" (se crea si no existe)
-            // 2. Usamos .Push() para generar un ID único automáticamente (igual que el ID del documento en Firestore)
             DatabaseReference newMatchRef = dbRef.Child("match_history").Push();
-
-            // 3. Guardamos los datos
             await newMatchRef.SetValueAsync(matchData);
 
             Debug.Log($"✅ Historial guardado en Realtime Database ID: {newMatchRef.Key}");
         }
         catch (Exception ex)
         {
-            Debug.LogError($"❌ Error guardando en Firebase: {ex.Message}");
+            Debug.LogError($"❌ Error guardando en Realtime Database: {ex.Message}");
         }
     }
 }
