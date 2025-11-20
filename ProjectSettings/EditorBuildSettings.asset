@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
+    path: Assets/Scenes/UI/ranking.unity
+    guid: 6404df4ed9a81e949aba9b4270d7d6ae
+  - enabled: 1
     path: Assets/Scenes/Maps/Atitlan/Map_Atitlan_Base.unity
     guid: c387ae261b33e644f9a046d0b92acdd0
   - enabled: 1
@@ -38,6 +41,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/UI/Matchmaking.unity
     guid: 82057a8d39ba9e9489a32367013a6f56
+  - enabled: 1
+    path: Assets/Scenes/UI/Winners/GanaMaya.unity
+    guid: 5d82aec9669b43148970938fc25c811d
+  - enabled: 1
+    path: Assets/Scenes/UI/Winners/GanaSpanish.unity
+    guid: afc07c767f07de24abf2abb88e76c9f0
+  - enabled: 1
+    path: Assets/Scenes/UI/Winners/PierdeMaya.unity
+    guid: f024b4effe5009745a8abe770194ecaf
+  - enabled: 1
+    path: Assets/Scenes/UI/Winners/PierdeSpanish.unity
+    guid: f393bd4f163f62d41bf05aafd15df196
   - enabled: 1
     path: Assets/Scenes/UI/CharacterSelect/CharacterSelectWrapper.unity
     guid: b0b0eecf13503ce4489758d0684096f6
