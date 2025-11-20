@@ -143,4 +143,8 @@ public class SessionManager : MonoBehaviour
         currentTeam = team;
         Debug.Log($"[SessionManager] Team asignado: {(team == 0 ? "Maya" : "Español")}");
     }
+
+    // Agrega esto dentro de tu clase SessionManager existente
+public string WinnerName = ""; 
+public string GameOverMessage = ""; // Mensaje personalizado
 }
