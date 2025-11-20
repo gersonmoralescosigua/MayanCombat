@@ -11,6 +11,16 @@ public class SessionManager : MonoBehaviour
     public string playerNickname;
     public bool isGuest;
 
+    // Datos de sesión
+    public int currentTeam = -1; 
+
+    // --- Variables para el flujo del juego ---
+    public string GameOverMessage = ""; // Mensaje a mostrar
+    public bool IsFinalMatch = false;   // ¿Es el fin del juego o solo una ronda?
+    public int RoundIndex = 0;          // Ronda actual (para UI)
+    public string WinnerName = ""; 
+    // -----------------------------------------------
+
     // Internals
     private FirebaseAuth auth;
     private bool listeningAuth = false;
@@ -110,6 +120,7 @@ public class SessionManager : MonoBehaviour
         playerEmail = "";
         playerNickname = "";
         isGuest = false;
+        currentTeam = -1;
         Debug.Log("[SessionManager] Sesión limpiada.");
     }
 
@@ -136,18 +147,10 @@ public class SessionManager : MonoBehaviour
 
     public bool HasActiveSession() => !string.IsNullOrEmpty(playerNickname);
 
-    public int currentTeam = -1; // 0 = Maya, 1 = Español
-
     public void SetTeam(int team)
     {
         currentTeam = team;
         Debug.Log($"[SessionManager] Team asignado: {(team == 0 ? "Maya" : "Español")}");
     }
-
-    // Agrega esto dentro de tu clase SessionManager existente
-public string WinnerName = ""; 
-public string GameOverMessage = ""; // Mensaje personalizado
 }
-
-
 

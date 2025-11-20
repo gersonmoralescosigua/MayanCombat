@@ -7,20 +7,28 @@ public class MatchResultsUI : MonoBehaviour
 {
     public TMP_Text winnerText;
     public Button btnMenu;
+    public GameObject loadingSpinner; // Opcional, si quieres poner algo que gire
 
     void Start()
     {
-        if (btnMenu != null) btnMenu.onClick.AddListener(OnMenuClicked);
-
         if (SessionManager.Instance != null && winnerText != null)
         {
-            if (string.IsNullOrEmpty(SessionManager.Instance.GameOverMessage))
+            winnerText.text = SessionManager.Instance.GameOverMessage;
+            
+            // Si ES la final, mostramos el botón de salir
+            if (SessionManager.Instance.IsFinalMatch)
             {
-                winnerText.text = "JUEGO TERMINADO";
+                if (btnMenu != null) 
+                {
+                    btnMenu.gameObject.SetActive(true);
+                    btnMenu.onClick.AddListener(OnMenuClicked);
+                }
             }
             else
             {
-                winnerText.text = SessionManager.Instance.GameOverMessage;
+                // Si NO es la final (es ronda intermedia), ocultamos el botón
+                // porque el Host nos moverá automáticamente al siguiente mapa
+                if (btnMenu != null) btnMenu.gameObject.SetActive(false);
             }
         }
     }
@@ -29,7 +37,6 @@ public class MatchResultsUI : MonoBehaviour
     {
         if (SessionManager.Instance != null) SessionManager.Instance.GameOverMessage = "";
         
-        // Cerrar conexión de red
         if (NetworkRunnerHandler.Instance != null && NetworkRunnerHandler.Instance.Runner != null)
         {
             NetworkRunnerHandler.Instance.Runner.Shutdown();

@@ -12,32 +12,37 @@ public class PlayerDataNetworked : NetworkBehaviour
     {
         if (Object.HasInputAuthority)
         {
-            if (TeamID != _lastTeamID)
+            if (TeamID != _lastTeamID && TeamID != -1)
             {
                 _lastTeamID = TeamID;
-                if (TeamID != -1)
-                {
-                    SessionManager.Instance?.SetTeam(TeamID);
-                    PlayerPrefs.SetInt("AssignedCharacter", CharacterID);
-                }
+                SessionManager.Instance?.SetTeam(TeamID);
+                PlayerPrefs.SetInt("AssignedCharacter", CharacterID);
             }
         }
     }
 
-    // --- RPC CRUCIAL: RECIBE EL MENSAJE DE GANADOR ---
-    // [Rpc(RpcSources.StateAuthority, RpcTargets.All)] significa:
-    // "El Servidor (StateAuthority) lo llama, y se ejecuta en TODOS (All) los clientes".
+    // --- RPC MEJORADO ---
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_GameFinished(int winningTeamID)
+    public void RPC_RoundFinished(int winningTeamID, int mayaScore, int spanishScore, bool isFinalMatch, string finalWinnerName)
     {
-        string winnerRole = (winningTeamID == 0) ? "IMPERIO MAYA" : "ESPAÑOLES";
-        string mensaje = $"¡VICTORIA PARA {winnerRole}!\n\n(El oponente ha caído)";
+        string roundWinner = (winningTeamID == 0) ? "Maya" : "Español";
+        string mensaje = "";
+
+        if (isFinalMatch)
+        {
+            mensaje = $"👑 ¡GRAN VICTORIA FINAL!\n\nGanador: {finalWinnerName}\nMarcador Final: Maya {mayaScore} - {spanishScore} Español";
+        }
+        else
+        {
+            mensaje = $"Ronda Terminada\nGanador: {roundWinner}\n\nMarcador: Maya {mayaScore} - {spanishScore} Español\n(Siguiente mapa en breve...)";
+        }
         
-        Debug.Log($"🏆 RPC Recibido en cliente: {mensaje}");
+        Debug.Log($"🏆 RPC Info: {mensaje}");
 
         if (SessionManager.Instance != null)
         {
             SessionManager.Instance.GameOverMessage = mensaje;
+            SessionManager.Instance.IsFinalMatch = isFinalMatch;
         }
     }
 }
