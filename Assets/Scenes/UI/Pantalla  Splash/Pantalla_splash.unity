@@ -241,6 +241,8 @@ MonoBehaviour:
   playerNickname: 
   isGuest: 0
   currentTeam: -1
+  WinnerName: 
+  GameOverMessage: 
 --- !u!4 &1228810299
 Transform:
   m_ObjectHideFlags: 0
