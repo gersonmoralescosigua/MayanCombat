@@ -7,21 +7,21 @@ public class MatchResultsUI : MonoBehaviour
 
     void Start()
     {
-        // Forzamos actualización del texto
-        UpdateText();
+        // Intento inicial
+        RefreshText();
     }
 
     void Update()
     {
-        // Opcional: Actualizar en tiempo real por si el RPC llega un poco tarde
-        // (Solo si el texto sigue siendo el default)
+        // Si el texto sigue diciendo "Esperando...", seguimos consultando a SessionManager
+        // Esto arregla el problema de sincronización si el RPC llega después de cargar la escena
         if (winnerText != null && winnerText.text.Contains("Esperando"))
         {
-            UpdateText();
+            RefreshText();
         }
     }
 
-    void UpdateText()
+    void RefreshText()
     {
         if (SessionManager.Instance != null && winnerText != null)
         {
@@ -31,10 +31,8 @@ public class MatchResultsUI : MonoBehaviour
             }
             else
             {
-                winnerText.text = "Esperando resultados del árbitro...";
+                winnerText.text = "Esperando resultados del árbitro...\n(Calculando)";
             }
         }
     }
 }
-
-
