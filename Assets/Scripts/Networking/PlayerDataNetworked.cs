@@ -6,17 +6,14 @@ public class PlayerDataNetworked : NetworkBehaviour
     [Networked] public int TeamID { get; set; } = -1;
     [Networked] public int CharacterID { get; set; } = -1;
     
-    // Variable mágica: -1 = Nadie gana aún. 0 = Gana Maya. 1 = Gana Español.
-    [Networked] public int WinnerTeamID { get; set; } = -1; 
-
+    // Variable auxiliar para detectar cambios locales de equipo al inicio
     private int _lastTeamID = -1;
-    private int _lastWinnerID = -1;
 
     public override void Render()
     {
         if (Object.HasInputAuthority)
         {
-            // Detectar asignación de equipo (Inicio de partida)
+            // Detectar si me asignaron equipo al inicio
             if (TeamID != _lastTeamID)
             {
                 _lastTeamID = TeamID;
@@ -26,22 +23,23 @@ public class PlayerDataNetworked : NetworkBehaviour
                     PlayerPrefs.SetInt("AssignedCharacter", CharacterID);
                 }
             }
+        }
+    }
 
-            // Detectar FINAL DE PARTIDA (Cuando alguien muere)
-            if (WinnerTeamID != -1 && WinnerTeamID != _lastWinnerID)
-            {
-                _lastWinnerID = WinnerTeamID;
-                
-                if (SessionManager.Instance != null)
-                {
-                    // 0 = Maya, 1 = Español
-                    string winnerRole = (WinnerTeamID == 0) ? "IMPERIO MAYA" : "ESPAÑOLES";
-                    
-                    // Mensaje personalizado para todos
-                    SessionManager.Instance.GameOverMessage = $"¡VICTORIA PARA {winnerRole}!\n\n(El oponente ha caído)";
-                    Debug.Log($"🏆 Ganador recibido: {winnerRole}");
-                }
-            }
+    // --- RPC PARA FINALIZAR PARTIDA ---
+    // Esto se ejecuta en TODOS los clientes inmediatamente cuando el Host lo llama.
+    // Garantiza que el mensaje llegue antes del cambio de escena.
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_GameFinished(int winningTeamID)
+    {
+        string winnerRole = (winningTeamID == 0) ? "IMPERIO MAYA" : "ESPAÑOLES";
+        string mensaje = $"¡VICTORIA PARA {winnerRole}!\n\n(El oponente ha caído)";
+        
+        Debug.Log($"🏆 RPC Recibido: {mensaje}");
+
+        if (SessionManager.Instance != null)
+        {
+            SessionManager.Instance.GameOverMessage = mensaje;
         }
     }
 }

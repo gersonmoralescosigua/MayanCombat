@@ -6,19 +6,17 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkTransform))]
 public class PlayerMovementNetworked : NetworkBehaviour
 {
-    [Header("Movimiento Ágil")]
-    public float moveSpeed = 9f;     // Aumentado para que camine rápido
-    public float jumpForce = 16f;    // Aumentado para compensar la Gravity Scale de 3
+    [Header("Configuración de Agilidad")]
+    public float moveSpeed = 9f;     
+    public float jumpForce = 16f;    
 
     [Header("Referencias")]
     public Animator animator;
 
-    // Networked properties
+    // Estado de Red
     [Networked] public float NetSpeed { get; set; }
     [Networked] public bool NetGrounded { get; set; }
-    [Networked] public NetworkBool NetAttacking { get; set; }
     [Networked] public int NetFacingDirection { get; set; }
-
     [Networked] private NetworkBool _wasJumpPressed { get; set; }
     [Networked] private NetworkBool _wasAttackPressed { get; set; }
 
@@ -34,8 +32,10 @@ public class PlayerMovementNetworked : NetworkBehaviour
         if (rb != null) 
         {
             rb.freezeRotation = true;
-            // Interpolate suaviza lo visual, pero la física interna será instantánea
-            rb.interpolation = RigidbodyInterpolation2D.Interpolate; 
+            // CRUCIAL: Desactivamos la interpolación de Unity para que no pelee con NetworkTransform (adiós temblor)
+            rb.interpolation = RigidbodyInterpolation2D.None; 
+            // Forzamos gravedad alta para que caiga rápido
+            rb.gravityScale = 3f; 
         }
     }
 
@@ -45,69 +45,55 @@ public class PlayerMovementNetworked : NetworkBehaviour
         NetFacingDirection = 1;
     }
 
+    // FÍSICA Y LÓGICA (Solo aquí para evitar desincronización)
     public override void FixedUpdateNetwork()
     {
         if (Object == null || !Object.IsValid || Runner == null) return;
 
+        // Detección de suelo física
+        NetGrounded = IsGrounded();
+
         if (GetInput(out NetworkInputData data))
         {
-            ProcessInput(data);
+            // 1. MOVIMIENTO HORIZONTAL DIRECTO
+            rb.linearVelocity = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
+
+            // 2. SALTO
+            if (data.JumpPressed && !_wasJumpPressed)
+            {
+                if (NetGrounded)
+                {
+                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f); // Reset Y
+                    rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+                    if (animator != null) animator.SetTrigger("Saltar");
+                }
+            }
+            _wasJumpPressed = data.JumpPressed;
+
+            // 3. ATAQUE
+            if (data.AttackPressed && !_wasAttackPressed)
+            {
+                if (animator != null) animator.SetTrigger("Atacar");
+            }
+            _wasAttackPressed = data.AttackPressed;
+
+            // 4. DIRECCIÓN
+            if (data.Move.x > 0.1f) NetFacingDirection = 1;
+            else if (data.Move.x < -0.1f) NetFacingDirection = -1;
         }
-        
-        // Actualizar estado de red
-        // Nota: Si usas Unity 6 usa linearVelocity, si es Unity anterior usa velocity
+
+        // Actualizar variable para animaciones
         NetSpeed = Mathf.Abs(rb.linearVelocity.x);
-        NetGrounded = IsGrounded();
     }
 
+    // SOLO LÓGICA VISUAL (Suavizado)
     public override void Render()
     {
-        UpdateVisuals();
-    }
-
-    private void ProcessInput(NetworkInputData data)
-    {
-        // 1. MOVIMIENTO INSTANTÁNEO (Sin aceleración suave)
-        float targetVelocityX = data.Move.x * moveSpeed;
-        rb.linearVelocity = new Vector2(targetVelocityX, rb.linearVelocity.y);
-
-        // 2. SALTO
-        if (data.JumpPressed && !_wasJumpPressed)
-        {
-            if (NetGrounded)
-            {
-                // Reseteamos Y para salto consistente
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
-                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-                
-                if (animator != null) animator.SetTrigger("Saltar");
-            }
-        }
-        _wasJumpPressed = data.JumpPressed;
-
-        // 3. ATAQUE
-        if (data.AttackPressed && !_wasAttackPressed)
-        {
-            NetAttacking = true;
-            if (animator != null) animator.SetTrigger("Atacar");
-        }
-        _wasAttackPressed = data.AttackPressed;
-
-        // 4. DIRECCIÓN
-        if (data.Move.x > 0.1f) NetFacingDirection = 1;
-        else if (data.Move.x < -0.1f) NetFacingDirection = -1;
-    }
-
-    private void UpdateVisuals()
-    {
-        // Volteo visual
+        // Interpolación visual del volteo (Flip)
         Vector3 currentScale = transform.localScale;
         float targetX = Mathf.Abs(currentScale.x) * (NetFacingDirection >= 0 ? 1f : -1f);
-        
-        if (Mathf.Abs(currentScale.x - targetX) > 0.01f)
-        {
-            transform.localScale = new Vector3(targetX, currentScale.y, currentScale.z);
-        }
+        // Lerp suave solo para el flip visual
+        transform.localScale = Vector3.Lerp(currentScale, new Vector3(targetX, currentScale.y, currentScale.z), Time.deltaTime * 20f);
 
         // Animaciones
         if (animator != null)
@@ -120,12 +106,11 @@ public class PlayerMovementNetworked : NetworkBehaviour
 
     private bool IsGrounded()
     {
-        Vector2 origin = (Vector2)transform.position;
+        Vector2 origin = (Vector2)rb.position;
         RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, groundCheckDistance, groundMask);
         return hit.collider != null;
     }
 }
-
 
 
 /*using Fusion;

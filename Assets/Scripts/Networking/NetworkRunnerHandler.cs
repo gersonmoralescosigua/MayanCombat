@@ -78,11 +78,13 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (runner.IsServer)
         {
+            // Spawn de la ficha de datos
             if (playerDataPrefab != null)
             {
                 var playerObj = runner.Spawn(playerDataPrefab, Vector3.zero, Quaternion.identity, player);
                 runner.SetPlayerObject(player, playerObj);
             }
+            // Si estamos llenos, asignamos equipos
             if (runner.ActivePlayers.Count() == maxPlayers) StartCoroutine(AssignTeamsRoutine());
         }
     }
@@ -121,7 +123,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    // --- SPAWN ---
+    // --- SPAWN DE JUEGO ---
     public void OnSceneLoadDone(NetworkRunner runner)
     {
         string currentScene = SceneManager.GetActiveScene().name;
@@ -150,13 +152,12 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         if (_playerCharacters.ContainsKey(player)) { charId = _playerCharacters[player]; team = _playerTeams[player]; }
         else { team = player.RawEncoded % 2; charId = team; }
 
-        // 0=Ixquic, 1=Beatriz
         string prefabPath = $"Prefabs/Characters/pf_{(charId == 0 ? "ixquic" : "beatriz")}";
         Vector3 spawnPos = team == 0 ? new Vector3(-0.39f, -0.382f, 0f) : new Vector3(1.3f, -0.4f, 0f);
         runner.Spawn(Resources.Load<NetworkObject>(prefabPath), spawnPos, Quaternion.identity, player);
     }
 
-    // --- LÓGICA DE MUERTE ---
+    // --- LÓGICA DE MUERTE (Triggered by DeathZone) ---
     public void OnPlayerFellToDeath(GameObject deadPlayerObj)
     {
         if (!_runner.IsServer) return;
@@ -172,17 +173,19 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         // Si perdió el 0, gana el 1.
         int winningTeam = (losingTeam == 0) ? 1 : 0;
 
-        Debug.Log($"💀 Murió team {losingTeam}. Gana team {winningTeam}");
+        Debug.Log($"💀 Fin de partida. Ganador: {winningTeam}");
 
-        // AVISAR A TODOS LOS JUGADORES ACTUALIZANDO SUS DATOS
+        // CRUCIAL: Buscamos CUALQUIER PlayerData para enviar el RPC a todos
         foreach(var player in _runner.ActivePlayers)
         {
             if (_runner.TryGetPlayerObject(player, out var pObj))
             {
-                var data = pObj.GetComponent<PlayerDataNetworked>();
-                if (data != null)
+                var dataScript = pObj.GetComponent<PlayerDataNetworked>();
+                if (dataScript != null)
                 {
-                    data.WinnerTeamID = winningTeam; // Esto dispara el update en el Cliente
+                    // El RPC tiene RpcTargets.All, así que con llamarlo una vez les llega a todos
+                    dataScript.RPC_GameFinished(winningTeam);
+                    break; 
                 }
             }
         }
@@ -192,12 +195,13 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
     IEnumerator FinishMatchRoutine()
     {
-        yield return new WaitForSeconds(1.0f); // Esperar a que el dato se sincronice
+        // Damos 3 segundos para que el RPC llegue y se lea el mensaje
+        yield return new WaitForSeconds(3.0f); 
         int sceneIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{resultsSceneName}.unity");
         if (sceneIndex >= 0) _runner.LoadScene(SceneRef.FromIndex(sceneIndex));
     }
 
-    // Callbacks vacíos
+    // Callbacks vacíos requeridos
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { _playerTeams.Remove(player); _playerCharacters.Remove(player); }
     public void OnConnectedToServer(NetworkRunner runner) { }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
