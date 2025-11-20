@@ -6,14 +6,12 @@ public class PlayerDataNetworked : NetworkBehaviour
     [Networked] public int TeamID { get; set; } = -1;
     [Networked] public int CharacterID { get; set; } = -1;
     
-    // Variable auxiliar para detectar cambios locales de equipo al inicio
     private int _lastTeamID = -1;
 
     public override void Render()
     {
         if (Object.HasInputAuthority)
         {
-            // Detectar si me asignaron equipo al inicio
             if (TeamID != _lastTeamID)
             {
                 _lastTeamID = TeamID;
@@ -26,16 +24,16 @@ public class PlayerDataNetworked : NetworkBehaviour
         }
     }
 
-    // --- RPC PARA FINALIZAR PARTIDA ---
-    // Esto se ejecuta en TODOS los clientes inmediatamente cuando el Host lo llama.
-    // Garantiza que el mensaje llegue antes del cambio de escena.
+    // --- RPC CRUCIAL: RECIBE EL MENSAJE DE GANADOR ---
+    // [Rpc(RpcSources.StateAuthority, RpcTargets.All)] significa:
+    // "El Servidor (StateAuthority) lo llama, y se ejecuta en TODOS (All) los clientes".
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     public void RPC_GameFinished(int winningTeamID)
     {
         string winnerRole = (winningTeamID == 0) ? "IMPERIO MAYA" : "ESPAÑOLES";
         string mensaje = $"¡VICTORIA PARA {winnerRole}!\n\n(El oponente ha caído)";
         
-        Debug.Log($"🏆 RPC Recibido: {mensaje}");
+        Debug.Log($"🏆 RPC Recibido en cliente: {mensaje}");
 
         if (SessionManager.Instance != null)
         {

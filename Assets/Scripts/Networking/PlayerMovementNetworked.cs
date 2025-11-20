@@ -32,9 +32,9 @@ public class PlayerMovementNetworked : NetworkBehaviour
         if (rb != null) 
         {
             rb.freezeRotation = true;
-            // CRUCIAL: Desactivamos la interpolación de Unity para que no pelee con NetworkTransform (adiós temblor)
+            // Esto debe estar en None para evitar peleas con Fusion (quita el temblor)
             rb.interpolation = RigidbodyInterpolation2D.None; 
-            // Forzamos gravedad alta para que caiga rápido
+            // Gravedad alta para caer rápido
             rb.gravityScale = 3f; 
         }
     }
@@ -45,17 +45,15 @@ public class PlayerMovementNetworked : NetworkBehaviour
         NetFacingDirection = 1;
     }
 
-    // FÍSICA Y LÓGICA (Solo aquí para evitar desincronización)
     public override void FixedUpdateNetwork()
     {
         if (Object == null || !Object.IsValid || Runner == null) return;
 
-        // Detección de suelo física
         NetGrounded = IsGrounded();
 
         if (GetInput(out NetworkInputData data))
         {
-            // 1. MOVIMIENTO HORIZONTAL DIRECTO
+            // 1. MOVIMIENTO
             rb.linearVelocity = new Vector2(data.Move.x * moveSpeed, rb.linearVelocity.y);
 
             // 2. SALTO
@@ -63,7 +61,7 @@ public class PlayerMovementNetworked : NetworkBehaviour
             {
                 if (NetGrounded)
                 {
-                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f); // Reset Y
+                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
                     rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
                     if (animator != null) animator.SetTrigger("Saltar");
                 }
@@ -77,23 +75,24 @@ public class PlayerMovementNetworked : NetworkBehaviour
             }
             _wasAttackPressed = data.AttackPressed;
 
-            // 4. DIRECCIÓN
+            // 4. DIRECCIÓN (Logica simple: 1 derecha, -1 izquierda)
             if (data.Move.x > 0.1f) NetFacingDirection = 1;
             else if (data.Move.x < -0.1f) NetFacingDirection = -1;
         }
 
-        // Actualizar variable para animaciones
         NetSpeed = Mathf.Abs(rb.linearVelocity.x);
     }
 
-    // SOLO LÓGICA VISUAL (Suavizado)
     public override void Render()
     {
-        // Interpolación visual del volteo (Flip)
-        Vector3 currentScale = transform.localScale;
-        float targetX = Mathf.Abs(currentScale.x) * (NetFacingDirection >= 0 ? 1f : -1f);
-        // Lerp suave solo para el flip visual
-        transform.localScale = Vector3.Lerp(currentScale, new Vector3(targetX, currentScale.y, currentScale.z), Time.deltaTime * 20f);
+        // --- CORRECCIÓN AQUÍ: ELIMINADO EL LERP QUE HACÍA DESAPARECER AL PERSONAJE ---
+        // Simplemente asignamos la escala directamente. Si es -1, mira a la izquierda.
+        if (NetFacingDirection != 0)
+        {
+            Vector3 scale = transform.localScale;
+            scale.x = Mathf.Abs(scale.x) * NetFacingDirection;
+            transform.localScale = scale;
+        }
 
         // Animaciones
         if (animator != null)
@@ -111,8 +110,6 @@ public class PlayerMovementNetworked : NetworkBehaviour
         return hit.collider != null;
     }
 }
-
-
 /*using Fusion;
 using UnityEngine;
 
