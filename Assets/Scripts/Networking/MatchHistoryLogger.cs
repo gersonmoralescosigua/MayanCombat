@@ -1,58 +1,47 @@
 using UnityEngine;
-using Firebase.Database; // Cambiado de Firestore a Database
-using System.Collections.Generic;
-using System;
+using TMPro;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-public static class MatchHistoryLogger
+public class MatchResultsUI : MonoBehaviour
 {
-    // Ya no son necesarios los atributos de Firestore.
-    // Mantenemos la estructura limpia.
-    public struct MatchResultData
+    public TMP_Text winnerText;
+    public Button btnMenu;
+    public GameObject loadingSpinner; // Opcional, si quieres poner algo que gire
+
+    void Start()
     {
-        public string winner { get; set; }
-        public string loser { get; set; }
-        public string score { get; set; }
-        public string date { get; set; }
-        public string played_maps { get; set; }
+        if (SessionManager.Instance != null && winnerText != null)
+        {
+            winnerText.text = SessionManager.Instance.GameOverMessage;
+            
+            // Si ES la final, mostramos el botón de salir
+            if (SessionManager.Instance.IsFinalMatch)
+            {
+                if (btnMenu != null) 
+                {
+                    btnMenu.gameObject.SetActive(true);
+                    btnMenu.onClick.AddListener(OnMenuClicked);
+                }
+            }
+            else
+            {
+                // Si NO es la final (es ronda intermedia), ocultamos el botón
+                // porque el Host nos moverá automáticamente al siguiente mapa
+                if (btnMenu != null) btnMenu.gameObject.SetActive(false);
+            }
+        }
     }
 
-    public static async void SaveMatch(string winnerTeam, string loserTeam, int winnerScore, int loserScore, List<string> mapsPlayed)
+    void OnMenuClicked()
     {
-        if (!FirebaseInitializer.IsReady)
+        if (SessionManager.Instance != null) SessionManager.Instance.GameOverMessage = "";
+        
+        if (NetworkRunnerHandler.Instance != null && NetworkRunnerHandler.Instance.Runner != null)
         {
-            Debug.LogError("❌ Firebase no está listo.");
-            return;
+            NetworkRunnerHandler.Instance.Runner.Shutdown();
         }
-
-        // Obtenemos la referencia a la base de datos (Root)
-        DatabaseReference dbRef = FirebaseDatabase.DefaultInstance.RootReference;
-
-        // Preparamos los datos.
-        // Nota: Para Realtime Database en Unity, lo más seguro y robusto es pasar los datos
-        // como un Diccionario <string, object> para evitar problemas de serialización con propiedades {get; set;}
-        var matchData = new Dictionary<string, object>
-        {
-            { "winner", winnerTeam },
-            { "loser", loserTeam },
-            { "score", $"{winnerScore}-{loserScore}" },
-            { "date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") },
-            { "played_maps", string.Join(", ", mapsPlayed) }
-        };
-
-        try
-        {
-            // 1. Accedemos al nodo "match_history" (se crea si no existe)
-            // 2. Usamos .Push() para generar un ID único automáticamente (igual que el ID del documento en Firestore)
-            DatabaseReference newMatchRef = dbRef.Child("match_history").Push();
-
-            // 3. Guardamos los datos
-            await newMatchRef.SetValueAsync(matchData);
-
-            Debug.Log($"✅ Historial guardado en Realtime Database ID: {newMatchRef.Key}");
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"❌ Error guardando en Firebase: {ex.Message}");
-        }
+        
+        SceneManager.LoadScene("Menu");
     }
 }
