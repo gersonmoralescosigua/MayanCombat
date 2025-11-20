@@ -1,8 +1,8 @@
 using UnityEngine;
 using Firebase.Auth;
-using UnityEngine.SceneManagement;
-using System;
+using UnityEngine.SceneManagement; 
 using System.Collections;
+using System;
 
 public class SessionManager : MonoBehaviour
 {
@@ -11,15 +11,20 @@ public class SessionManager : MonoBehaviour
     // Datos de Jugador
     public string playerEmail;
     public string playerNickname;
-    public int currentTeam = -1; 
+    public int currentTeam = -1; // 0: Maya, 1: Español
     public bool isGuest;
 
-    // Datos de Flujo
-    public string GameOverMessage = ""; 
-    public bool IsFinalMatch = false;
-    public string VideoSceneToLoad = "";
-    public int RoundIndex = 0;
-    public string WinnerName = "";
+    // --- DATOS CLAVE PARA UI Y VIDEO ---
+    public string GameOverMessage = "Esperando confirmación..."; 
+    
+    // --- LA VARIABLE QUE FALTABA ---
+    public bool IsFinalMatch = false; 
+    
+    // -1: Nadie, 0: Maya, 1: Español
+    public int FinalWinnerTeam = -1; 
+
+    // Nombre de la escena única de videos
+    public string VideoSceneName = "Winners";
 
     // Internals
     private FirebaseAuth auth;
@@ -45,6 +50,31 @@ public class SessionManager : MonoBehaviour
     {
         DetachFirebase();
     }
+
+    public void SetSession(string email, string nickname, bool guest = false)
+    {
+        playerEmail = email;
+        playerNickname = nickname;
+        isGuest = guest;
+    }
+
+    public void SetTeam(int team) => currentTeam = team;
+
+    // --- FUNCIÓN DE SALIDA ---
+    public void GoToVideoScene()
+    {
+        StartCoroutine(LoadVideoSceneRoutine());
+    }
+
+    IEnumerator LoadVideoSceneRoutine()
+    {
+        Debug.Log("🎬 SessionManager: Cargando escena de videos...");
+        yield return new WaitForSeconds(0.5f); 
+        SceneManager.LoadScene(VideoSceneName);
+    }
+
+    // ... (Mantén aquí abajo tus métodos de Firebase Auth, SignOut, etc.) ...
+    // ... (Copia tus funciones TryAttachFirebase, OnAuthStateChanged, etc.) ...
 
     // Llamar desde FirebaseInitializer o Start cuando quieras forzar re-check
     public void TryAttachFirebase()
@@ -102,14 +132,6 @@ public class SessionManager : MonoBehaviour
         Debug.Log($"[SessionManager] Cargado desde Firebase: {playerNickname} ({playerEmail}) guest={isGuest}");
     }
 
-    public void SetSession(string email, string nickname, bool guest = false)
-    {
-        playerEmail = email;
-        playerNickname = nickname;
-        isGuest = guest;
-        Debug.Log($"[SessionManager] Sesión (manual) iniciada: {nickname} ({(guest ? "Invitado" : email)})");
-    }
-
     public void ClearSession()
     {
         playerEmail = "";
@@ -141,34 +163,4 @@ public class SessionManager : MonoBehaviour
     }
 
     public bool HasActiveSession() => !string.IsNullOrEmpty(playerNickname);
-
-    public void SetTeam(int team)
-    {
-        currentTeam = team;
-        Debug.Log($"[SessionManager] Team asignado: {(team == 0 ? "Maya" : "Español")}");
-    }
-
-    // --- FUNCIÓN SEGURA PARA CARGAR VIDEO ---
-    public void LoadFinalVideoScene(string sceneName)
-    {
-        VideoSceneToLoad = sceneName;
-        StartCoroutine(DisconnectAndLoad());
-    }
-
-    IEnumerator DisconnectAndLoad()
-    {
-        Debug.Log($"🎬 SessionManager: Preparando transición a {VideoSceneToLoad}...");
-        
-        yield return new WaitForSeconds(1.0f);
-
-        if (!string.IsNullOrEmpty(VideoSceneToLoad))
-        {
-            SceneManager.LoadScene(VideoSceneToLoad);
-        }
-        else
-        {
-            Debug.LogError("❌ No hay escena de video asignada. Volviendo al Menu.");
-            SceneManager.LoadScene("Menu");
-        }
-    }
 }

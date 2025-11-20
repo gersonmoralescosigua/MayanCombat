@@ -30,6 +30,9 @@ EditorBuildSettings:
     path: Assets/Scenes/UI/HUD de Partida/HUD_Partida.unity
     guid: 59ff0eb98887cb44cacc15f9d24bb3b7
   - enabled: 1
+    path: Assets/Scenes/UI/Winners/Winners.unity
+    guid: 977ce55ca2609bc46aa76012ca9c7fdb
+  - enabled: 1
     path: Assets/Scenes/UI/Pantalla de Ajustes/Settings.unity
     guid: de3355255f21158469ebbbf8076ca0c1
   - enabled: 1

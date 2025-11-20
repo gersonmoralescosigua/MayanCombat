@@ -15,9 +15,8 @@ public class PlayerDataNetworked : NetworkBehaviour
         {
             string myNick = "Jugador";
             if (SessionManager.Instance != null && !string.IsNullOrEmpty(SessionManager.Instance.playerNickname))
-            {
                 myNick = SessionManager.Instance.playerNickname;
-            }
+            
             RPC_SetNickname(myNick);
         }
     }
@@ -30,7 +29,6 @@ public class PlayerDataNetworked : NetworkBehaviour
             {
                 _lastTeamID = TeamID;
                 SessionManager.Instance?.SetTeam(TeamID);
-                PlayerPrefs.SetInt("AssignedCharacter", CharacterID);
             }
         }
     }
@@ -39,35 +37,60 @@ public class PlayerDataNetworked : NetworkBehaviour
     public void RPC_SetNickname(string name)
     {
         PlayerName = name;
-        Debug.Log($"🏷️ Servidor guardando nombre: {name}");
-        
-        // --- IMPORTANTE: Guardamos en el diccionario del Handler ---
-        if (NetworkRunnerHandler.Instance != null)
-        {
-            NetworkRunnerHandler.Instance.RegisterPlayerName(Object.InputAuthority, name);
-        }
+        // Guardar en el Handler del Servidor
+        if (NetworkRunnerHandler.Instance != null) NetworkRunnerHandler.Instance.RegisterPlayerName(Object.InputAuthority, name);
     }
 
+    // --- RPC 1: RECIBIR RESULTADOS Y CONSTRUIR TEXTO ---
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_UpdateMatchResults(string message, bool isFinal)
+    public void RPC_SyncResults(int roundWinnerID, int mayaScore, int spanishScore, bool isFinal)
     {
-        Debug.Log($"📩 Mensaje UI: {message}");
+        // Construimos el mensaje LOCALMENTE para evitar errores de red
+        string wName = (roundWinnerID == 0) ? "Maya" : "Español";
+        string msg = "";
+
+        if (isFinal)
+        {
+            string globalW = (mayaScore > spanishScore) ? "IMPERIO MAYA" : "ESPAÑOLES";
+            msg = $"👑 ¡FIN DEL TORNEO!\n\nGanador Global: {globalW}\nMarcador: Maya {mayaScore} - {spanishScore} Español";
+        }
+        else
+        {
+            msg = $"Ronda Terminada\nGanador Ronda: {wName}\n\nGlobal: Maya {mayaScore} - {spanishScore} Español";
+        }
+
+        Debug.Log($"📝 Mensaje Construido Localmente: {msg}");
+
         if (SessionManager.Instance != null)
         {
-            SessionManager.Instance.GameOverMessage = message;
+            SessionManager.Instance.GameOverMessage = msg;
             SessionManager.Instance.IsFinalMatch = isFinal;
         }
     }
 
+    // --- RPC 2: PREPARAR VIDEO ---
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_GoToVideoScene(string sceneName)
+    public void RPC_PrepareForVideo(int finalWinnerID)
     {
-        Debug.Log($"🎬 Orden Video: {sceneName}");
-        if (SessionManager.Instance != null) SessionManager.Instance.VideoSceneToLoad = sceneName;
-        
-        if (NetworkRunnerHandler.Instance != null)
+        if (SessionManager.Instance != null)
         {
-            NetworkRunnerHandler.Instance.ExecuteVideoTransition();
+            SessionManager.Instance.FinalWinnerTeam = finalWinnerID;
+        }
+    }
+
+    // --- RPC 3: DESCONECTAR Y CARGAR ESCENA ---
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_DisconnectAndLoadVideo()
+    {
+        Debug.Log("👋 RPC Recibido: Desconectar e ir a Winners.");
+        
+        // Apagar Fusion
+        if (Runner != null) Runner.Shutdown();
+
+        // Decirle al SessionManager que cargue la escena
+        if (SessionManager.Instance != null)
+        {
+            SessionManager.Instance.GoToVideoScene();
         }
     }
 }

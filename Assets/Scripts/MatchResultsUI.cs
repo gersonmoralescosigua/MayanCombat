@@ -7,16 +7,17 @@ public class MatchResultsUI : MonoBehaviour
 
     void Update()
     {
-        // Actualizar constantemente para atrapar el mensaje apenas llegue
         if (SessionManager.Instance != null && winnerText != null)
         {
-            if (!string.IsNullOrEmpty(SessionManager.Instance.GameOverMessage))
+            // Actualizamos siempre, así atrapamos el mensaje cuando llegue
+            if (!string.IsNullOrEmpty(SessionManager.Instance.GameOverMessage) && 
+                SessionManager.Instance.GameOverMessage != "Cargando resultados...")
             {
                 winnerText.text = SessionManager.Instance.GameOverMessage;
             }
             else
             {
-                winnerText.text = "Calculando resultados del combate...";
+                winnerText.text = "Esperando datos del árbitro...\n(No cierres el juego)";
             }
         }
     }
