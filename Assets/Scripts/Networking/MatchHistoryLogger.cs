@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-﻿using UnityEngine;
+using UnityEngine;
 using Firebase.Database; // Cambiado de Firestore a Database
 using System.Collections.Generic;
 using System;
@@ -57,21 +56,3 @@ public static class MatchHistoryLogger
         }
     }
 }
-=======
-using UnityEngine;
-
-public class MatchHistoryLogger : MonoBehaviour
-{
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-}
->>>>>>> b4a878d00abe10a65524d271a40a3813f34c5ab1
