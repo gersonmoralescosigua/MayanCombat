@@ -15,13 +15,13 @@ public class VideoResultManager : MonoBehaviour
 
     void Start()
     {
-        // Si entramos a esta escena sin SessionManager (pruebas), salimos
+        // Validación de seguridad
         if (SessionManager.Instance == null) return;
 
         int myTeam = SessionManager.Instance.currentTeam;     // 0 o 1
-        int winnerTeam = SessionManager.Instance.FinalWinnerTeam; // Quién ganó el torneo
+        int winnerTeam = SessionManager.Instance.FinalWinnerTeam; // Quién ganó
 
-        Debug.Log($"🎬 Iniciando Video. Soy Team {myTeam}. Ganó Team {winnerTeam}.");
+        Debug.Log($"🎬 PLAY VIDEO: Soy Team {myTeam}. Ganó {winnerTeam}.");
 
         VideoClip clipToPlay = null;
         bool iWon = (myTeam == winnerTeam);
@@ -39,19 +39,14 @@ public class VideoResultManager : MonoBehaviour
         {
             videoPlayer.clip = clipToPlay;
             videoPlayer.Play();
-            
-            // Ir al ranking o menú cuando termine el video
             StartCoroutine(WaitAndExit((float)clipToPlay.length));
         }
     }
 
     IEnumerator WaitAndExit(float duration)
     {
-        // Esperamos la duración del video + 1 segundo de margen
         yield return new WaitForSeconds(duration + 1f);
-        
-        // Cargar siguiente escena (Ranking o Menu)
-        // Asegúrate de que esta escena exista en Build Settings
+        // Regresar al menú o ranking
         SceneManager.LoadScene("Menu"); 
     }
 }

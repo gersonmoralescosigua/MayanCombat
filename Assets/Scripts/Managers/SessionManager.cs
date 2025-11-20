@@ -14,17 +14,13 @@ public class SessionManager : MonoBehaviour
     public int currentTeam = -1; // 0: Maya, 1: Español
     public bool isGuest;
 
-    // --- DATOS CLAVE PARA UI Y VIDEO ---
-    public string GameOverMessage = "Esperando confirmación..."; 
+    // --- DATOS DE FLUJO (AGREGADOS PARA QUE FUNCIONE) ---
+    public string GameOverMessage = "Esperando resultados..."; 
+    public bool IsFinalMatch = false; // Faltaba esta
+    public int FinalWinnerTeam = -1;  // Faltaba esta
     
-    // --- LA VARIABLE QUE FALTABA ---
-    public bool IsFinalMatch = false; 
-    
-    // -1: Nadie, 0: Maya, 1: Español
-    public int FinalWinnerTeam = -1; 
-
-    // Nombre de la escena única de videos
-    public string VideoSceneName = "Winners";
+    // Nombre fijo de la escena de video
+    public string VideoSceneName = "Winners"; 
 
     // Internals
     private FirebaseAuth auth;
@@ -61,20 +57,21 @@ public class SessionManager : MonoBehaviour
     public void SetTeam(int team) => currentTeam = team;
 
     // --- FUNCIÓN DE SALIDA ---
-    public void GoToVideoScene()
+    public void LoadFinalVideoScene()
     {
         StartCoroutine(LoadVideoSceneRoutine());
     }
 
     IEnumerator LoadVideoSceneRoutine()
     {
-        Debug.Log("🎬 SessionManager: Cargando escena de videos...");
+        Debug.Log("🎬 SessionManager: Cargando escena de videos (Winners)...");
         yield return new WaitForSeconds(0.5f); 
         SceneManager.LoadScene(VideoSceneName);
     }
 
-    // ... (Mantén aquí abajo tus métodos de Firebase Auth, SignOut, etc.) ...
-    // ... (Copia tus funciones TryAttachFirebase, OnAuthStateChanged, etc.) ...
+    // ... (Tus métodos de Firebase Auth, OnAuthStateChanged, etc. mantenlos aquí abajo) ...
+    // ... (Copia y pega tus funciones TryAttachFirebase, etc. del script anterior) ...
+    // ... (Es importante que NO borres tu lógica de Auth que ya tenías) ...
 
     // Llamar desde FirebaseInitializer o Start cuando quieras forzar re-check
     public void TryAttachFirebase()

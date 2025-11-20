@@ -37,60 +37,32 @@ public class PlayerDataNetworked : NetworkBehaviour
     public void RPC_SetNickname(string name)
     {
         PlayerName = name;
-        // Guardar en el Handler del Servidor
         if (NetworkRunnerHandler.Instance != null) NetworkRunnerHandler.Instance.RegisterPlayerName(Object.InputAuthority, name);
     }
 
-    // --- RPC 1: RECIBIR RESULTADOS Y CONSTRUIR TEXTO ---
+    // --- RPC 1: RECIBIR MENSAJE LITERAL PARA UI ---
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_SyncResults(int roundWinnerID, int mayaScore, int spanishScore, bool isFinal)
+    public void RPC_SetUIMessage(string exactMessage, bool isFinal, int finalWinnerID)
     {
-        // Construimos el mensaje LOCALMENTE para evitar errores de red
-        string wName = (roundWinnerID == 0) ? "Maya" : "Español";
-        string msg = "";
-
-        if (isFinal)
-        {
-            string globalW = (mayaScore > spanishScore) ? "IMPERIO MAYA" : "ESPAÑOLES";
-            msg = $"👑 ¡FIN DEL TORNEO!\n\nGanador Global: {globalW}\nMarcador: Maya {mayaScore} - {spanishScore} Español";
-        }
-        else
-        {
-            msg = $"Ronda Terminada\nGanador Ronda: {wName}\n\nGlobal: Maya {mayaScore} - {spanishScore} Español";
-        }
-
-        Debug.Log($"📝 Mensaje Construido Localmente: {msg}");
+        Debug.Log($"📩 Texto UI Recibido: {exactMessage}");
 
         if (SessionManager.Instance != null)
         {
-            SessionManager.Instance.GameOverMessage = msg;
+            SessionManager.Instance.GameOverMessage = exactMessage; 
             SessionManager.Instance.IsFinalMatch = isFinal;
+            if (isFinal) SessionManager.Instance.FinalWinnerTeam = finalWinnerID;
         }
     }
 
-    // --- RPC 2: PREPARAR VIDEO ---
+    // --- RPC 2: ORDEN DE IR A VIDEO ---
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_PrepareForVideo(int finalWinnerID)
+    public void RPC_OrderVideoTransition()
     {
-        if (SessionManager.Instance != null)
-        {
-            SessionManager.Instance.FinalWinnerTeam = finalWinnerID;
-        }
-    }
-
-    // --- RPC 3: DESCONECTAR Y CARGAR ESCENA ---
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_DisconnectAndLoadVideo()
-    {
-        Debug.Log("👋 RPC Recibido: Desconectar e ir a Winners.");
+        Debug.Log("🎬 Orden RPC: Desconectar e ir a Winners.");
         
-        // Apagar Fusion
-        if (Runner != null) Runner.Shutdown();
-
-        // Decirle al SessionManager que cargue la escena
-        if (SessionManager.Instance != null)
+        if (NetworkRunnerHandler.Instance != null)
         {
-            SessionManager.Instance.GoToVideoScene();
+            NetworkRunnerHandler.Instance.ExecuteLocalVideoTransition();
         }
     }
 }
