@@ -16,7 +16,7 @@ public class PlayerDataNetworked : NetworkBehaviour
             string myNick = "Jugador";
             if (SessionManager.Instance != null && !string.IsNullOrEmpty(SessionManager.Instance.playerNickname))
                 myNick = SessionManager.Instance.playerNickname;
-            
+
             RPC_SetNickname(myNick);
         }
     }
@@ -40,29 +40,18 @@ public class PlayerDataNetworked : NetworkBehaviour
         if (NetworkRunnerHandler.Instance != null) NetworkRunnerHandler.Instance.RegisterPlayerName(Object.InputAuthority, name);
     }
 
-    // --- RPC 1: RECIBIR MENSAJE LITERAL PARA UI ---
+    // --- ESTA ES LA CLAVE PARA EL PROBLEMA DE UI ---
+    // Recibe el texto del servidor y lo guarda en el SessionManager local.
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     public void RPC_SetUIMessage(string exactMessage, bool isFinal, int finalWinnerID)
     {
-        Debug.Log($"📩 Texto UI Recibido: {exactMessage}");
+        Debug.Log($"📩 Datos de partida recibidos: {exactMessage}");
 
         if (SessionManager.Instance != null)
         {
-            SessionManager.Instance.GameOverMessage = exactMessage; 
+            SessionManager.Instance.GameOverMessage = exactMessage;
             SessionManager.Instance.IsFinalMatch = isFinal;
             if (isFinal) SessionManager.Instance.FinalWinnerTeam = finalWinnerID;
-        }
-    }
-
-    // --- RPC 2: ORDEN DE IR A VIDEO ---
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_OrderVideoTransition()
-    {
-        Debug.Log("🎬 Orden RPC: Desconectar e ir a Winners.");
-        
-        if (NetworkRunnerHandler.Instance != null)
-        {
-            NetworkRunnerHandler.Instance.ExecuteLocalVideoTransition();
         }
     }
 }
