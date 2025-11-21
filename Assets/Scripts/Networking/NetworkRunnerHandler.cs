@@ -13,7 +13,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkRunner _runner;
     public NetworkRunner Runner => _runner;
 
-    [Header("Nombres EXACTOS de las Escenas (Tal cual en Build Settings)")]
+    [Header("Nombres EXACTOS de las Escenas")]
     public string matchmakingSceneName = "Matchmaking";
     public string loadingSceneName = "LoadingAssignment";
     public string resultsSceneName = "MatchResults";
@@ -111,12 +111,12 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    // --- AQUÍ ESTÁ LA MAGIA: LA PAUSA OBLIGATORIA ---
+    // --- SOLUCIÓN DEFINITIVA AQUÍ ---
     public void OnPlayerFellToDeath(GameObject deadPlayerObj)
     {
         if (!_runner.IsServer || !_roundIsActive) return;
 
-        _roundIsActive = false; // Bloqueamos para que no entre dos veces
+        _roundIsActive = false;
 
         NetworkObject netObj = deadPlayerObj.GetComponent<NetworkObject>();
         if (netObj == null) return;
@@ -135,14 +135,26 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         if (matchEnded) msg = $"👑 ¡FIN DEL TORNEO!\n\nGanador Global: {winnerName}\nMarcador: Maya {_mayaWins} - {_spanishWins} Español";
         else msg = $"Ronda Terminada\nGanador Ronda: {roundWinner}\n\nGlobal: Maya {_mayaWins} - {_spanishWins} Español";
 
-        Debug.Log($"📝 ENVIANDO RPC A TODOS: {msg}");
+        Debug.Log($"📝 DATA ACTUALIZADA: {msg}. GanadorID: {winningTeam}");
 
-        // 1. ENVIAR EL MENSAJE (RPC)
+        // --- 0. ACTUALIZACIÓN INMEDIATA LOCAL (ESTO ES LO QUE FALTABA) ---
+        // El Host actualiza su propio SessionManager AQUI MISMO. 
+        // No espera al RPC.
+        if (SessionManager.Instance != null)
+        {
+            SessionManager.Instance.GameOverMessage = msg;
+            SessionManager.Instance.IsFinalMatch = matchEnded;
+            // Si terminó el match, guardamos el ganador FINAL. Si no, da igual (-1).
+            if (matchEnded) SessionManager.Instance.FinalWinnerTeam = winningTeam;
+        }
+
+        // 1. ENVIAR EL MENSAJE (RPC) PARA LOS CLIENTES
         foreach (var p in _runner.ActivePlayers)
         {
             if (_runner.TryGetPlayerObject(p, out var obj))
             {
                 var pd = obj.GetComponent<PlayerDataNetworked>();
+                // Enviamos mensaje a clientes.
                 if (pd != null) pd.RPC_SetUIMessage(msg, matchEnded, matchEnded ? winningTeam : -1);
             }
         }
@@ -151,21 +163,22 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         if (matchEnded) SaveToFirebaseCorrectly(winningTeam == 0 ? "Maya" : "Español");
         else _currentMapIndex++;
 
-        // 3. ¡¡¡ESPERAR!!! (La solución definitiva)
+        // 3. ESPERAR (Para que los clientes reciban el RPC antes del cambio de escena)
         StartCoroutine(WaitAndSwitchScene(matchEnded));
     }
 
     IEnumerator WaitAndSwitchScene(bool matchEnded)
     {
-        // Esperamos 1.5 segundos REALES. Esto da tiempo a que el RPC viaje por internet,
-        // llegue al PlayerDataNetworked del cliente y actualice el SessionManager.
+        // Esperamos 1.5 segundos.
+        // El Host YA tiene los datos (paso 0), así que el video le funcionará seguro.
+        // Los Clientes aprovecharán este tiempo para recibir el RPC.
         yield return new WaitForSeconds(1.5f);
 
         if (matchEnded) SafeLoadScene(winnersSceneName);
         else SafeLoadScene(resultsSceneName);
     }
 
-    // --- CARGA SEGURA DE ESCENAS ---
+    // --- CARGA SEGURA ---
     private void SafeLoadScene(string sceneName)
     {
         if (!_runner.IsServer) return;
@@ -194,7 +207,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             foreach (var p in runner.ActivePlayers) SpawnPlayer(runner, p);
             if (!_mapsPlayedHistory.Contains(currentScene)) _mapsPlayedHistory.Add(currentScene);
         }
-        else if (currentScene == winnersSceneName) StartCoroutine(WaitVideoAndLoadFinalResults(12f)); // 12 seg para el video
+        else if (currentScene == winnersSceneName) StartCoroutine(WaitVideoAndLoadFinalResults(12f));
         else if (currentScene == resultsSceneName)
         {
             bool matchEnded = (_mayaWins >= 2 || _spanishWins >= 2 || _currentMapIndex >= mapRotation.Length);
