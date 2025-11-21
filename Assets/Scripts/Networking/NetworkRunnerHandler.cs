@@ -13,29 +13,28 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     private NetworkRunner _runner;
     public NetworkRunner Runner => _runner;
 
-    [Header("Escenas")]
+    [Header("Nombres EXACTOS de las Escenas (Tal cual en Build Settings)")]
     public string matchmakingSceneName = "Matchmaking";
     public string loadingSceneName = "LoadingAssignment";
     public string resultsSceneName = "MatchResults";
     public string winnersSceneName = "Winners";
     public string menuSceneName = "Menu";
 
+    // Asegúrate de que estos nombres coincidan con tus escenas de mapas
     public string[] mapRotation = new string[] { "Map_Tikal_Base", "Map_Atitlan_Base", "Map_Volcan_Base" };
 
     [Header("Configuración")]
     public int maxPlayers = 2;
     public NetworkObject playerDataPrefab;
 
-    // Estado
+    // Estado interno
     private int _mayaWins = 0;
     private int _spanishWins = 0;
     private int _currentMapIndex = 0;
     private bool _roundIsActive = true;
     private List<string> _mapsPlayedHistory = new List<string>();
-
     private Dictionary<PlayerRef, int> _playerTeams = new Dictionary<PlayerRef, int>();
     private Dictionary<PlayerRef, string> _playerNames = new Dictionary<PlayerRef, string>();
-
     private bool _joining = false;
 
     private void Awake()
@@ -45,7 +44,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         DontDestroyOnLoad(gameObject);
     }
 
-    // --- MATCHMAKING (Intacto) ---
+    // --- MATCHMAKING ---
     public void StartMatchmaking()
     {
         _mayaWins = 0; _spanishWins = 0; _currentMapIndex = 0;
@@ -61,10 +60,14 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         SessionInfo availableSession = sessionList.FirstOrDefault(s => s.PlayerCount < maxPlayers && s.IsOpen);
         var sceneManager = gameObject.GetComponent<NetworkSceneManagerDefault>() ?? gameObject.AddComponent<NetworkSceneManagerDefault>();
         _joining = false;
-        if (availableSession != null) await runner.StartGame(new StartGameArgs() { GameMode = GameMode.Client, SessionName = availableSession.Name, SceneManager = sceneManager, Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex) });
-        else await runner.StartGame(new StartGameArgs() { GameMode = GameMode.Host, SessionName = System.Guid.NewGuid().ToString(), PlayerCount = maxPlayers, SceneManager = sceneManager, Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex) });
+
+        if (availableSession != null)
+            await runner.StartGame(new StartGameArgs() { GameMode = GameMode.Client, SessionName = availableSession.Name, SceneManager = sceneManager, Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex) });
+        else
+            await runner.StartGame(new StartGameArgs() { GameMode = GameMode.Host, SessionName = System.Guid.NewGuid().ToString(), PlayerCount = maxPlayers, SceneManager = sceneManager, Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex) });
     }
 
+    // --- CONTROL DE JUGADORES ---
     public void RegisterPlayerName(PlayerRef player, string nickname)
     {
         if (_playerNames.ContainsKey(player)) _playerNames[player] = nickname;
@@ -89,7 +92,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         yield return new WaitForSeconds(0.5f);
         AssignTeams();
         yield return new WaitForSeconds(1.0f);
-        _runner.LoadScene(SceneRef.FromIndex(SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{loadingSceneName}.unity")));
+        SafeLoadScene(loadingSceneName); // USAMOS LA FUNCIÓN SEGURA
     }
 
     private void AssignTeams()
@@ -112,13 +115,96 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    // --- CONTROL DE ESCENAS Y FLUJO (CORREGIDO) ---
+    // --- LÓGICA DE MUERTE Y PUNTUACIÓN ---
+    public void OnPlayerFellToDeath(GameObject deadPlayerObj)
+    {
+        if (!_runner.IsServer || !_roundIsActive) return;
+
+        // Bloqueamos inmediatamente para que si el otro cae 0.1s después, no cuente doble
+        _roundIsActive = false;
+
+        NetworkObject netObj = deadPlayerObj.GetComponent<NetworkObject>();
+        if (netObj == null) return;
+
+        int losingTeam = _playerTeams.ContainsKey(netObj.InputAuthority) ? _playerTeams[netObj.InputAuthority] : -1;
+        int winningTeam = (losingTeam == 0) ? 1 : 0; // Si pierde 0, gana 1. Si pierde 1, gana 0.
+
+        if (winningTeam == 0) _mayaWins++; else _spanishWins++;
+
+        // Analizamos estado del torneo
+        bool matchEnded = (_mayaWins >= 2 || _spanishWins >= 2 || _currentMapIndex >= mapRotation.Length - 1);
+        string winnerName = (_mayaWins > _spanishWins) ? "IMPERIO MAYA" : "ESPAÑOLES";
+
+        // Mensaje para UI
+        string msg = "";
+        string roundWinner = (winningTeam == 0) ? "Maya" : "Español";
+
+        if (matchEnded) msg = $"👑 ¡FIN DEL TORNEO!\n\nGanador Global: {winnerName}\nMarcador: Maya {_mayaWins} - {_spanishWins} Español";
+        else msg = $"Ronda Terminada\nGanador Ronda: {roundWinner}\n\nGlobal: Maya {_mayaWins} - {_spanishWins} Español";
+
+        Debug.Log($"📝 ENVIANDO RESULTADOS: {msg}");
+
+        // 1. ENVIAR RPC (CRÍTICO: HACERLO ANTES DE CAMBIAR ESCENA)
+        foreach (var p in _runner.ActivePlayers)
+        {
+            if (_runner.TryGetPlayerObject(p, out var obj))
+            {
+                var pd = obj.GetComponent<PlayerDataNetworked>();
+                if (pd != null) pd.RPC_SetUIMessage(msg, matchEnded, matchEnded ? winningTeam : -1);
+            }
+        }
+
+        // 2. FIREBASE
+        if (matchEnded) SaveToFirebaseCorrectly(winningTeam == 0 ? "Maya" : "Español");
+        else _currentMapIndex++;
+
+        // 3. CAMBIO DE ESCENA SEGURO
+        if (matchEnded) StartCoroutine(LoadSceneDelayed(winnersSceneName, 3f));
+        else StartCoroutine(LoadSceneDelayed(resultsSceneName, 3f));
+    }
+
+    // --- NUEVO SISTEMA DE CARGA DE ESCENAS (EVITA EL ERROR ROJO) ---
+
+    private void SafeLoadScene(string sceneName)
+    {
+        if (!_runner.IsServer) return;
+
+        int buildIndex = GetSceneIndex(sceneName);
+        if (buildIndex != -1)
+        {
+            Debug.Log($"🔄 Cargando escena: {sceneName} (Index: {buildIndex})");
+            _runner.LoadScene(SceneRef.FromIndex(buildIndex));
+        }
+        else
+        {
+            Debug.LogError($"⛔ ERROR FATAL: La escena '{sceneName}' no está en Build Settings o está mal escrito el nombre. El juego no puede continuar.");
+        }
+    }
+
+    private int GetSceneIndex(string sceneName)
+    {
+        // Intentamos buscar por ruta (lo más seguro si está en build settings)
+        int index = SceneUtility.GetBuildIndexByScenePath(sceneName);
+
+        // Si devuelve -1, intentamos buscar si está en alguna subcarpeta común
+        if (index == -1) index = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{sceneName}.unity");
+        if (index == -1) index = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/Maps/{GetFolder(sceneName)}/{sceneName}.unity");
+
+        return index;
+    }
+
+    IEnumerator LoadSceneDelayed(string sceneName, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SafeLoadScene(sceneName);
+    }
+
+    // --- CONTROL DE FLUJO AL LLEGAR A UNA ESCENA ---
     public void OnSceneLoadDone(NetworkRunner runner)
     {
-        string currentScene = SceneManager.GetActiveScene().name;
-
-        // Solo el servidor decide qué pasa después de cargar una escena
         if (!runner.IsServer) return;
+        string currentScene = SceneManager.GetActiveScene().name;
+        Debug.Log($"📍 Escena cargada: {currentScene}");
 
         if (currentScene == loadingSceneName)
         {
@@ -132,24 +218,18 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
         else if (currentScene == winnersSceneName)
         {
-            // SI ESTAMOS EN EL VIDEO: Esperamos 10 segundos y vamos a Resultados FINALES
+            // Esperar 10s de video y luego ir a resultados finales
             StartCoroutine(WaitVideoAndLoadFinalResults(10f));
         }
         else if (currentScene == resultsSceneName)
         {
-            // SI ESTAMOS EN RESULTADOS:
-            // Verificamos si el match terminó globalmente
+            // Si llegamos a resultados, verificamos si hay que seguir jugando
             bool matchEnded = (_mayaWins >= 2 || _spanishWins >= 2 || _currentMapIndex >= mapRotation.Length);
 
             if (!matchEnded)
             {
-                // Si NO terminó, es intermedio: Cargamos siguiente mapa
+                // Si NO terminó, cargar siguiente mapa en 5s
                 StartCoroutine(AutoLoadNextMap(5f));
-            }
-            else
-            {
-                // Si SI terminó (venimos del video), NO hacemos nada automático.
-                // Nos quedamos aquí esperando que el jugador pulse "Volver al Menú".
             }
         }
     }
@@ -169,7 +249,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     IEnumerator WaitVideoAndLoadFinalResults(float delay)
     {
         yield return new WaitForSeconds(delay);
-        _runner.LoadScene(SceneRef.FromIndex(SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{resultsSceneName}.unity")));
+        SafeLoadScene(resultsSceneName);
     }
 
     private void LoadCurrentMap()
@@ -177,84 +257,24 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         if (_currentMapIndex < mapRotation.Length)
         {
             string mapToLoad = mapRotation[_currentMapIndex];
-            int idx = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/Maps/{GetFolder(mapToLoad)}/{mapToLoad}.unity");
-            if (idx < 0) idx = SceneUtility.GetBuildIndexByScenePath(mapToLoad);
-            if (idx >= 0) _runner.LoadScene(SceneRef.FromIndex(idx));
+            SafeLoadScene(mapToLoad);
         }
     }
+
     private string GetFolder(string map) { if (map.Contains("Tikal")) return "Tikal"; if (map.Contains("Atitlan")) return "Atitlan"; return "Volcan"; }
 
+    // --- UTILS ---
     private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
         int team = _playerTeams.ContainsKey(player) ? _playerTeams[player] : player.RawEncoded % 2;
         string prefabPath = $"Prefabs/Characters/pf_{(team == 0 ? "ixquic" : "beatriz")}";
-        Vector3 spawnPos = Vector3.zero;
-        string sPoint = (team == 0) ? "Spawn_Maya" : "Spawn_Spanish";
-        GameObject pt = GameObject.Find(sPoint);
+        Vector3 spawnPos = (team == 0) ? new Vector3(-2, 2, 0) : new Vector3(2, 2, 0);
+
+        // Intentar buscar punto de spawn
+        GameObject pt = GameObject.Find(team == 0 ? "Spawn_Maya" : "Spawn_Spanish");
         if (pt != null) spawnPos = pt.transform.position;
-        else spawnPos = (team == 0) ? new Vector3(-2, 2, 0) : new Vector3(2, 2, 0);
 
         runner.Spawn(Resources.Load<NetworkObject>(prefabPath), spawnPos, Quaternion.identity, player);
-    }
-
-    // --- LÓGICA DE MUERTE Y PUNTUACIÓN (CORREGIDA) ---
-    public void OnPlayerFellToDeath(GameObject deadPlayerObj)
-    {
-        if (!_runner.IsServer || !_roundIsActive) return;
-        _roundIsActive = false;
-
-        NetworkObject netObj = deadPlayerObj.GetComponent<NetworkObject>();
-        if (netObj == null) return;
-
-        int losingTeam = _playerTeams.ContainsKey(netObj.InputAuthority) ? _playerTeams[netObj.InputAuthority] : -1;
-        int winningTeam = (losingTeam == 0) ? 1 : 0;
-
-        if (winningTeam == 0) _mayaWins++; else _spanishWins++;
-
-        // Verificar fin del torneo
-        bool matchEnded = (_mayaWins >= 2 || _spanishWins >= 2 || _currentMapIndex >= mapRotation.Length - 1);
-        string winnerName = (_mayaWins > _spanishWins) ? "IMPERIO MAYA" : "ESPAÑOLES";
-
-        // Crear mensaje
-        string msg = "";
-        string roundWinner = (winningTeam == 0) ? "Maya" : "Español";
-
-        if (matchEnded) msg = $"👑 ¡FIN DEL TORNEO!\n\nGanador Global: {winnerName}\nMarcador: Maya {_mayaWins} - {_spanishWins} Español";
-        else msg = $"Ronda Terminada\nGanador Ronda: {roundWinner}\n\nGlobal: Maya {_mayaWins} - {_spanishWins} Español";
-
-        Debug.Log($"📝 Actualizando UI en clientes: {msg}");
-
-        // 1. ENVIAR RPC PARA ACTUALIZAR UI
-        foreach (var p in _runner.ActivePlayers)
-        {
-            if (_runner.TryGetPlayerObject(p, out var obj))
-            {
-                var pd = obj.GetComponent<PlayerDataNetworked>();
-                if (pd != null) pd.RPC_SetUIMessage(msg, matchEnded, matchEnded ? winningTeam : -1);
-            }
-        }
-
-        // 2. FIREBASE (Solo al final)
-        if (matchEnded) SaveToFirebaseCorrectly(winningTeam == 0 ? "Maya" : "Español");
-        else _currentMapIndex++;
-
-        // 3. DECIDIR SIGUIENTE ESCENA
-        if (matchEnded)
-        {
-            // Vamos al Video primero
-            StartCoroutine(LoadSceneDelayed(winnersSceneName, 3f));
-        }
-        else
-        {
-            // Vamos a Resultados Intermedios
-            StartCoroutine(LoadSceneDelayed(resultsSceneName, 3f));
-        }
-    }
-
-    IEnumerator LoadSceneDelayed(string sceneName, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        _runner.LoadScene(SceneRef.FromIndex(SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/UI/{sceneName}.unity")));
     }
 
     private void SaveToFirebaseCorrectly(string winnerTeam)
