@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.Video;
-using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class VideoResultManager : MonoBehaviour
@@ -15,11 +14,12 @@ public class VideoResultManager : MonoBehaviour
 
     void Start()
     {
-        // Validación de seguridad
+        // Si el SessionManager aún no tiene datos, es un error grave, 
+        // pero con la pausa de 1.5s en el Handler, esto YA NO debería pasar.
         if (SessionManager.Instance == null) return;
 
-        int myTeam = SessionManager.Instance.currentTeam;     // 0 o 1
-        int winnerTeam = SessionManager.Instance.FinalWinnerTeam; // Quién ganó
+        int myTeam = SessionManager.Instance.currentTeam;
+        int winnerTeam = SessionManager.Instance.FinalWinnerTeam; // Ahora esto SÍ tendrá valor
 
         Debug.Log($"🎬 PLAY VIDEO: Soy Team {myTeam}. Ganó {winnerTeam}.");
 
@@ -39,14 +39,9 @@ public class VideoResultManager : MonoBehaviour
         {
             videoPlayer.clip = clipToPlay;
             videoPlayer.Play();
-            StartCoroutine(WaitAndExit((float)clipToPlay.length));
+            // IMPORTANTE: Eliminé la línea que cargaba el menú aquí.
+            // El NetworkRunnerHandler (Servidor) se encargará de cambiarnos de escena
+            // cuando acabe el tiempo del video.
         }
-    }
-
-    IEnumerator WaitAndExit(float duration)
-    {
-        yield return new WaitForSeconds(duration + 1f);
-        // Regresar al menú o ranking
-        SceneManager.LoadScene("Menu"); 
     }
 }
