@@ -195,7 +195,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     private IEnumerator WaitAndSwitchScene(bool matchEnded)
     {
         Debug.Log($"⏳ Esperando 5 segundos antes de cambiar escena...");
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(10f);
 
         Debug.Log($"🔄 Cambiando a escena: {(matchEnded ? winnersSceneName : resultsSceneName)}");
         if (matchEnded) SafeLoadScene(winnersSceneName);
