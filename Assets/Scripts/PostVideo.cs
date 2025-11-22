@@ -23,15 +23,21 @@ public class PostVideo : MonoBehaviour
     }
 
     void SelectCorrectVideo()
+{
+    Debug.Log($"🎬 CLIENTE: Iniciando SelectCorrectVideo()");
+    
+    if (SessionManager.Instance != null)
     {
-        if (SessionManager.Instance != null && SessionManager.Instance.FinalWinnerTeam != -1)
+        Debug.Log($"🎬 CLIENTE: SessionManager encontrado - FinalWinnerTeam: {SessionManager.Instance.FinalWinnerTeam}, currentTeam: {SessionManager.Instance.currentTeam}");
+        
+        if (SessionManager.Instance.FinalWinnerTeam != -1)
         {
             if (SessionManager.Instance.FinalWinnerTeam == 0) // Maya gana
             {
                 if (videoMayaWins != null)
                 {
                     vp.clip = videoMayaWins;
-                    Debug.Log("🏆 Reproduciendo video: MAYA GANA");
+                    Debug.Log($"🏆 CLIENTE: Reproduciendo video MAYA GANA - Soy team {SessionManager.Instance.currentTeam}");
                 }
             }
             else // Español gana
@@ -39,15 +45,23 @@ public class PostVideo : MonoBehaviour
                 if (videoSpanishWins != null)
                 {
                     vp.clip = videoSpanishWins;
-                    Debug.Log("🏆 Reproduciendo video: ESPAÑOL GANA");
+                    Debug.Log($"🏆 CLIENTE: Reproduciendo video ESPAÑOL GANA - Soy team {SessionManager.Instance.currentTeam}");
                 }
             }
         }
         else
         {
-            Debug.LogWarning("⚠️ No se pudo determinar el ganador, usando video por defecto");
+            Debug.LogWarning($"⚠️ CLIENTE: FinalWinnerTeam es -1 - No se pudo determinar ganador");
         }
     }
+    else
+    {
+        Debug.LogError($"❌ CLIENTE: SessionManager es NULL - No se puede seleccionar video");
+    }
+
+    // DEBUG FINAL
+    Debug.Log($"🎬 CLIENTE: Video seleccionado: {(vp.clip != null ? vp.clip.name : "NULL")}");
+}
 
     void OnVideoEnd(VideoPlayer vp)
     {
