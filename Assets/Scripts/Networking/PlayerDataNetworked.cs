@@ -40,29 +40,36 @@ public class PlayerDataNetworked : NetworkBehaviour
         if (NetworkRunnerHandler.Instance != null) NetworkRunnerHandler.Instance.RegisterPlayerName(Object.InputAuthority, name);
     }
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+[Rpc(RpcSources.StateAuthority, RpcTargets.All)]
 public void RPC_SetUIMessage(string exactMessage, bool isFinal, int finalWinnerID, RpcInfo info = default)
 {
-    // DEBUG DETALLADO
-    Debug.Log($"📩 CLIENTE {Object.InputAuthority}: RPC recibido - Message: '{exactMessage}', IsFinal: {isFinal}, WinnerID: {finalWinnerID}");
+    // DEBUG DETALLADO - INCLUIR EL PlayerRef DEL REMITENTE
+    Debug.Log($"📩 [{Object.InputAuthority}] RPC recibido de [{info.Source}] - Message: '{exactMessage}', IsFinal: {isFinal}, WinnerID: {finalWinnerID}");
 
     if (SessionManager.Instance != null)
     {
+        // VERIFICAR SI LOS DATOS SON DIFERENTES A LOS ACTUALES
+        bool messageChanged = (SessionManager.Instance.GameOverMessage != exactMessage);
+        bool finalChanged = (SessionManager.Instance.IsFinalMatch != isFinal);
+        bool winnerChanged = (SessionManager.Instance.FinalWinnerTeam != finalWinnerID);
+        
         SessionManager.Instance.GameOverMessage = exactMessage;
         SessionManager.Instance.IsFinalMatch = isFinal;
         if (isFinal) 
         {
             SessionManager.Instance.FinalWinnerTeam = finalWinnerID;
-            Debug.Log($"✅ CLIENTE {Object.InputAuthority}: FINAL WinnerTeam guardado: {SessionManager.Instance.FinalWinnerTeam}");
+            Debug.Log($"✅ [{Object.InputAuthority}] FINAL WinnerTeam guardado: {SessionManager.Instance.FinalWinnerTeam} (cambiado: {winnerChanged})");
         }
         else
         {
-            Debug.Log($"✅ CLIENTE {Object.InputAuthority}: Datos de ronda guardados (no es final)");
+            Debug.Log($"✅ [{Object.InputAuthority}] Datos de ronda guardados (no es final)");
         }
+        
+        Debug.Log($"💾 [{Object.InputAuthority}] SessionManager actualizado - MessageChanged: {messageChanged}, FinalChanged: {finalChanged}");
     }
     else
     {
-        Debug.LogError($"❌ CLIENTE {Object.InputAuthority}: SessionManager es NULL - NO se guardaron datos");
+        Debug.LogError($"❌ [{Object.InputAuthority}] SessionManager es NULL - NO se guardaron datos");
     }
 }
 

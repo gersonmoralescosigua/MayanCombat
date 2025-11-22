@@ -111,7 +111,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    public void OnPlayerFellToDeath(GameObject deadPlayerObj)
+public void OnPlayerFellToDeath(GameObject deadPlayerObj)
 {
     if (!_runner.IsServer || !_roundIsActive) return;
 
@@ -154,8 +154,24 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         Debug.Log($"✅ HOST: SessionManager actualizado - FinalWinnerTeam: {SessionManager.Instance.FinalWinnerTeam}");
     }
 
-    // --- 1. ENVIAR RPC CON MÁS INFORMACIÓN ---
+    // --- 1. ENVIAR RPC - SOLUCIÓN DEFINITIVA ---
     int rpcSentCount = 0;
+    
+    // MÉTODO ALTERNATIVO: Buscar TODOS los objetos PlayerDataNetworked en la escena
+    var allPlayerData = FindObjectsByType<PlayerDataNetworked>(FindObjectsSortMode.None);
+    Debug.Log($"🔍 Encontrados {allPlayerData.Length} objetos PlayerDataNetworked en escena");
+    
+    foreach (var playerData in allPlayerData)
+    {
+        if (playerData != null && playerData.Object != null)
+        {
+            playerData.RPC_SetUIMessage(msg, matchEnded, matchEnded ? winningTeam : -1);
+            rpcSentCount++;
+            Debug.Log($"📤 RPC enviado a PlayerData: {playerData.Object.Id}, InputAuthority: {playerData.Object.InputAuthority}");
+        }
+    }
+
+    // MÉTODO ORIGINAL COMO BACKUP
     foreach (var p in _runner.ActivePlayers)
     {
         if (_runner.TryGetPlayerObject(p, out var obj))
@@ -165,10 +181,19 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             {
                 pd.RPC_SetUIMessage(msg, matchEnded, matchEnded ? winningTeam : -1);
                 rpcSentCount++;
-                Debug.Log($"📤 RPC enviado a Player: {p}");
+                Debug.Log($"📤 RPC (método original) enviado a Player: {p}");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ No se encontró PlayerDataNetworked para Player: {p}");
             }
         }
+        else
+        {
+            Debug.LogWarning($"⚠️ No se pudo obtener PlayerObject para Player: {p}");
+        }
     }
+    
     Debug.Log($"📨 TOTAL RPCs ENVIADOS: {rpcSentCount}");
 
     // 2. GUARDAR EN FIREBASE
@@ -179,10 +204,11 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     StartCoroutine(WaitAndSwitchScene(matchEnded));
 }
 
-IEnumerator WaitAndSwitchScene(bool matchEnded)
+// AGREGA ESTE MÉTODO QUE FALTABA
+private IEnumerator WaitAndSwitchScene(bool matchEnded)
 {
     Debug.Log($"⏳ Esperando 5 segundos antes de cambiar escena...");
-    yield return new WaitForSeconds(5f); // AUMENTADO A 5 SEGUNDOS
+    yield return new WaitForSeconds(5f);
 
     Debug.Log($"🔄 Cambiando a escena: {(matchEnded ? winnersSceneName : resultsSceneName)}");
     if (matchEnded) SafeLoadScene(winnersSceneName);
