@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 
-public class MatchResultsUI : MonoBehaviour
+public class MatchResults : MonoBehaviour
 {
     public TMP_Text resultsText;
     public GameObject loadingIcon;
@@ -12,44 +12,53 @@ public class MatchResultsUI : MonoBehaviour
 
     void Start()
     {
-        Debug.Log($"🎯 MatchResults iniciado - Buscando datos en SessionManager");
+        Debug.Log("🎯 MatchResults INICIADO - Configurando botones...");
         
         // Mostrar mensaje
         if (SessionManager.Instance != null)
         {
-            Debug.Log($"🎯 SessionManager encontrado - GameOverMessage: '{SessionManager.Instance.GameOverMessage}', IsFinalMatch: {SessionManager.Instance.IsFinalMatch}");
-            
             resultsText.text = SessionManager.Instance.GameOverMessage;
             
-            // Si es la final, mostrar botones. Si no, mostrar loading
+            Debug.Log($"🔍 SessionManager - IsFinalMatch: {SessionManager.Instance.IsFinalMatch}, GameOverMessage: {SessionManager.Instance.GameOverMessage}");
+            
+            // --- LÓGICA CRÍTICA DE BOTONES ---
             if (SessionManager.Instance.IsFinalMatch)
             {
+                // ✅ ES FINAL: Mostrar botones, ocultar loading
                 loadingIcon.SetActive(false);
                 menuButton.gameObject.SetActive(true);
                 rankingButton.gameObject.SetActive(true);
-                Debug.Log($"🎯 MOSTRANDO BOTONES FINALES - Partida terminada");
+                Debug.Log("🎯 MOSTRANDO BOTONES - Es partida final");
             }
             else
             {
+                // ❌ NO ES FINAL: Mostrar loading, ocultar botones  
                 loadingIcon.SetActive(true);
                 menuButton.gameObject.SetActive(false);
                 rankingButton.gameObject.SetActive(false);
-                Debug.Log($"🎯 MOSTRANDO LOADING - Aún no es final");
+                Debug.Log("🎯 MOSTRANDO LOADING - No es partida final");
             }
         }
         else
         {
-            Debug.LogError($"❌ MatchResults: SessionManager es NULL");
+            Debug.LogError("❌ SessionManager es NULL - Usando configuración por defecto");
+            // Por defecto: mostrar loading, ocultar botones
+            loadingIcon.SetActive(true);
+            menuButton.gameObject.SetActive(false);
+            rankingButton.gameObject.SetActive(false);
         }
 
-        // Configurar botones
+        // Configurar botones (SIEMPRE, aunque estén ocultos)
         menuButton.onClick.AddListener(() => {
-            Debug.Log("🔙 Saliendo al menú...");
+            Debug.Log("🔙 Botón Menú presionado");
             SceneManager.LoadScene("Menu");
         });
+        
         rankingButton.onClick.AddListener(() => {
-            Debug.Log("📊 Yendo a ranking...");
+            Debug.Log("📊 Botón Ranking presionado");
             SceneManager.LoadScene("Ranking");
         });
+        
+        Debug.Log("✅ MatchResults configurado correctamente");
     }
 }
