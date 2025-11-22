@@ -285,9 +285,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSoundEvents
   audioSource: {fileID: 0}
-  walkClip: {fileID: 0}
-  jumpClip: {fileID: 0}
-  attackClip: {fileID: 0}
+  walkClip: {fileID: 8300000, guid: 9abbac1187600c94687ec2dcf133fd09, type: 3}
+  jumpClip: {fileID: 8300000, guid: b3c89240278f79d489c8f4943481e98b, type: 3}
+  attackClip: {fileID: 8300000, guid: 0a60f4ee1ab56114fa84066a02e3c503, type: 3}
   mayaDeathClip: {fileID: 0}
   spanishDeathClip: {fileID: 0}
   isMaya: 0
