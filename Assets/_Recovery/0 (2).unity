@@ -368,12 +368,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SessionManager
   playerEmail: 
   playerNickname: 
-  isGuest: 0
   currentTeam: -1
+  isGuest: 0
   GameOverMessage: 
   IsFinalMatch: 0
-  RoundIndex: 0
-  WinnerName: 
+  FinalWinnerTeam: -1
+  VideoSceneName: Winners
 --- !u!4 &1228810299
 Transform:
   m_ObjectHideFlags: 0
