@@ -40,18 +40,36 @@ public class PlayerDataNetworked : NetworkBehaviour
         if (NetworkRunnerHandler.Instance != null) NetworkRunnerHandler.Instance.RegisterPlayerName(Object.InputAuthority, name);
     }
 
-    // --- ESTA ES LA CLAVE PARA EL PROBLEMA DE UI ---
-    // Recibe el texto del servidor y lo guarda en el SessionManager local.
+    // --- RPC MEJORADO CON CONFIRMACIÓN ---
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void RPC_SetUIMessage(string exactMessage, bool isFinal, int finalWinnerID)
+    public void RPC_SetUIMessage(string exactMessage, bool isFinal, int finalWinnerID, RpcInfo info = default)
     {
-        Debug.Log($"📩 Datos de partida recibidos: {exactMessage}");
+        Debug.Log($"📩 CLIENTE {Object.InputAuthority}: Datos recibidos - {exactMessage}");
 
         if (SessionManager.Instance != null)
         {
             SessionManager.Instance.GameOverMessage = exactMessage;
             SessionManager.Instance.IsFinalMatch = isFinal;
             if (isFinal) SessionManager.Instance.FinalWinnerTeam = finalWinnerID;
+            
+            // CONFIRMAR RECEPCIÓN
+            Debug.Log($"✅ CLIENTE {Object.InputAuthority}: Datos guardados en SessionManager");
         }
+        else
+        {
+            Debug.LogError($"❌ CLIENTE {Object.InputAuthority}: SessionManager es NULL");
+        }
+
+        // Enviar confirmación al servidor (opcional)
+        if (Object.HasStateAuthority) // Solo el servidor procesa confirmaciones
+        {
+            RPC_ConfirmMessageReceived(info.Source);
+        }
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_ConfirmMessageReceived(PlayerRef player)
+    {
+        Debug.Log($"✅ Confirmación recibida del jugador: {player}");
     }
 }

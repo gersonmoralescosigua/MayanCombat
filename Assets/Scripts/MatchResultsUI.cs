@@ -1,57 +1,39 @@
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
-using UnityEngine.UI; // Necesario para el Botón
 
-public class MatchResultsUI : MonoBehaviour
+public class MatchResults : MonoBehaviour
 {
-    public TMP_Text winnerText;
-    public Button btnBackToMenu; // ASIGNA ESTO EN EL INSPECTOR
+    public TMP_Text resultsText;
+    public GameObject loadingIcon;
+    public Button menuButton;
+    public Button rankingButton;
 
     void Start()
     {
-        if (btnBackToMenu != null)
+        // Mostrar mensaje
+        if (SessionManager.Instance != null)
         {
-            btnBackToMenu.onClick.AddListener(OnBackToMenuClicked);
-            // Lo ocultamos por defecto para que no salga en las rondas intermedias
-            btnBackToMenu.gameObject.SetActive(false);
-        }
-    }
-
-    void Update()
-    {
-        if (SessionManager.Instance != null && winnerText != null)
-        {
-            // 1. Mostrar texto (Ahora sí funciona porque el RPC actualizó el SessionManager)
-            if (!string.IsNullOrEmpty(SessionManager.Instance.GameOverMessage))
+            resultsText.text = SessionManager.Instance.GameOverMessage;
+            
+            // Si es la final, mostrar botones. Si no, mostrar loading
+            if (SessionManager.Instance.IsFinalMatch)
             {
-                winnerText.text = SessionManager.Instance.GameOverMessage;
+                loadingIcon.SetActive(false);
+                menuButton.gameObject.SetActive(true);
+                rankingButton.gameObject.SetActive(true);
             }
             else
             {
-                winnerText.text = "Recibiendo datos del árbitro...";
-            }
-
-            // 2. Mostrar botón SOLO si es la final
-            if (SessionManager.Instance.IsFinalMatch && btnBackToMenu != null)
-            {
-                if (!btnBackToMenu.gameObject.activeSelf)
-                {
-                    btnBackToMenu.gameObject.SetActive(true);
-                }
+                loadingIcon.SetActive(true);
+                menuButton.gameObject.SetActive(false);
+                rankingButton.gameObject.SetActive(false);
             }
         }
-    }
 
-    void OnBackToMenuClicked()
-    {
-        Debug.Log("🔙 Volviendo al Menú Principal...");
-        if (NetworkRunnerHandler.Instance != null)
-        {
-            NetworkRunnerHandler.Instance.ShutdownAndMenu();
-        }
-        else
-        {
-            UnityEngine.SceneManagement.SceneManager.LoadScene("Menu");
-        }
+        // Configurar botones
+        menuButton.onClick.AddListener(() => SceneManager.LoadScene("Menu"));
+        rankingButton.onClick.AddListener(() => SceneManager.LoadScene("Ranking"));
     }
 }

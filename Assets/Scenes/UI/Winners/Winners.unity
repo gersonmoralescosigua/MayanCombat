@@ -368,7 +368,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1339641488}
   - component: {fileID: 1339641487}
-  - component: {fileID: 1339641486}
+  - component: {fileID: 1339641489}
   m_Layer: 0
   m_Name: VideoManager
   m_TagString: Untagged
@@ -376,23 +376,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1339641486
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1339641485}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc6520e3b0498ee48a7215eea72e589a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VideoResultManager
-  videoPlayer: {fileID: 1339641487}
-  ganaMaya: {fileID: 32900000, guid: ae24195614066d64788d9397946eebe6, type: 3}
-  pierdeMaya: {fileID: 32900000, guid: d80c0578c6528984b82a2f17f4dac2f9, type: 3}
-  ganaSpanish: {fileID: 32900000, guid: 037b623c01534ac478a30dd5cf6ea1ba, type: 3}
-  pierdeSpanish: {fileID: 32900000, guid: d80c0578c6528984b82a2f17f4dac2f9, type: 3}
 --- !u!328 &1339641487
 VideoPlayer:
   m_ObjectHideFlags: 0
@@ -444,6 +427,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1339641489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339641485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b001a0af9ae0814394a62bbec85e1ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PostVideo
+  vp: {fileID: 1339641487}
+  videoMayaWins: {fileID: 32900000, guid: ae24195614066d64788d9397946eebe6, type: 3}
+  videoSpanishWins: {fileID: 32900000, guid: 037b623c01534ac478a30dd5cf6ea1ba, type: 3}
+  nombreDeLaSiguienteEscena: MatchResults
 --- !u!1 &1397644265
 GameObject:
   m_ObjectHideFlags: 0
