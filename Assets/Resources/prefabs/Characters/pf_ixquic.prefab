@@ -17,7 +17,6 @@ GameObject:
   - component: {fileID: -2786232082339343840}
   - component: {fileID: -1743126012839077415}
   - component: {fileID: 1798397546162453611}
-  - component: {fileID: -7143676013467488550}
   m_Layer: 7
   m_Name: pf_ixquic
   m_TagString: Player
@@ -213,7 +212,6 @@ MonoBehaviour:
   - {fileID: -2786232082339343840}
   - {fileID: -1743126012839077415}
   - {fileID: 1798397546162453611}
-  - {fileID: -7143676013467488550}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &-2786232082339343840
 MonoBehaviour:
@@ -272,22 +270,3 @@ MonoBehaviour:
   SyncParent: 0
   _autoAOIOverride: 1
   DisableSharedModeInterpolation: 0
---- !u!114 &-7143676013467488550
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6659101267618422738}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 188410843b42d9849b7892929042dc18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerSoundEvents
-  audioSource: {fileID: 0}
-  walkClip: {fileID: 8300000, guid: 9abbac1187600c94687ec2dcf133fd09, type: 3}
-  jumpClip: {fileID: 8300000, guid: b3c89240278f79d489c8f4943481e98b, type: 3}
-  attackClip: {fileID: 8300000, guid: 0a60f4ee1ab56114fa84066a02e3c503, type: 3}
-  mayaDeathClip: {fileID: 0}
-  spanishDeathClip: {fileID: 0}
-  isMaya: 0
