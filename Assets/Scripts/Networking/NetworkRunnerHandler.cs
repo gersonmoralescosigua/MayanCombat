@@ -111,79 +111,72 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
+    // --- SOLUCIÓN DEFINITIVA AQUÍ ---
     public void OnPlayerFellToDeath(GameObject deadPlayerObj)
-{
-    if (!_runner.IsServer || !_roundIsActive) return;
-
-    _roundIsActive = false;
-
-    NetworkObject netObj = deadPlayerObj.GetComponent<NetworkObject>();
-    if (netObj == null) return;
-
-    int losingTeam = _playerTeams.ContainsKey(netObj.InputAuthority) ? _playerTeams[netObj.InputAuthority] : -1;
-    int winningTeam = (losingTeam == 0) ? 1 : 0;
-
-    if (winningTeam == 0) _mayaWins++; else _spanishWins++;
-
-    bool matchEnded = (_mayaWins >= 2 || _spanishWins >= 2 || _currentMapIndex >= mapRotation.Length - 1);
-    string winnerName = (_mayaWins > _spanishWins) ? "IMPERIO MAYA" : "ESPAÑOLES";
-
-    string msg = "";
-    string roundWinner = (winningTeam == 0) ? "Maya" : "Español";
-
-    if (matchEnded) 
-        msg = $"👑 ¡FIN DEL TORNEO!\n\nGanador Global: {winnerName}\nMarcador: Maya {_mayaWins} - {_spanishWins} Español";
-    else 
-        msg = $"Ronda Terminada\nGanador Ronda: {roundWinner}\n\nGlobal: Maya {_mayaWins} - {_spanishWins} Español";
-
-    Debug.Log($"📝 DATA ACTUALIZADA: {msg}. GanadorID: {winningTeam}");
-
-    // --- 0. ACTUALIZACIÓN INMEDIATA LOCAL ---
-    if (SessionManager.Instance != null)
     {
-        SessionManager.Instance.GameOverMessage = msg;
-        SessionManager.Instance.IsFinalMatch = matchEnded;
-        if (matchEnded) SessionManager.Instance.FinalWinnerTeam = winningTeam;
-    }
+        if (!_runner.IsServer || !_roundIsActive) return;
 
-    // --- 1. ENVIAR RPC Y ESPERAR CONFIRMACIÓN ---
-    StartCoroutine(SendRPCAndWaitForConfirmation(msg, matchEnded, winningTeam, matchEnded));
-}
+        _roundIsActive = false;
 
-private IEnumerator SendRPCAndWaitForConfirmation(string message, bool isFinal, int winnerTeam, bool matchEnded)
-{
-    // Contador de confirmaciones
-    int confirmationsReceived = 0;
-    int totalPlayers = _runner.ActivePlayers.Count();
+        NetworkObject netObj = deadPlayerObj.GetComponent<NetworkObject>();
+        if (netObj == null) return;
 
-    // Enviar RPC a todos los jugadores
-    foreach (var p in _runner.ActivePlayers)
-    {
-        if (_runner.TryGetPlayerObject(p, out var obj))
+        int losingTeam = _playerTeams.ContainsKey(netObj.InputAuthority) ? _playerTeams[netObj.InputAuthority] : -1;
+        int winningTeam = (losingTeam == 0) ? 1 : 0;
+
+        if (winningTeam == 0) _mayaWins++; else _spanishWins++;
+
+        bool matchEnded = (_mayaWins >= 2 || _spanishWins >= 2 || _currentMapIndex >= mapRotation.Length - 1);
+        string winnerName = (_mayaWins > _spanishWins) ? "IMPERIO MAYA" : "ESPAÑOLES";
+
+        string msg = "";
+        string roundWinner = (winningTeam == 0) ? "Maya" : "Español";
+
+        if (matchEnded) msg = $"👑 ¡FIN DEL TORNEO!\n\nGanador Global: {winnerName}\nMarcador: Maya {_mayaWins} - {_spanishWins} Español";
+        else msg = $"Ronda Terminada\nGanador Ronda: {roundWinner}\n\nGlobal: Maya {_mayaWins} - {_spanishWins} Español";
+
+        Debug.Log($"📝 DATA ACTUALIZADA: {msg}. GanadorID: {winningTeam}");
+
+        // --- 0. ACTUALIZACIÓN INMEDIATA LOCAL (ESTO ES LO QUE FALTABA) ---
+        // El Host actualiza su propio SessionManager AQUI MISMO. 
+        // No espera al RPC.
+        if (SessionManager.Instance != null)
         {
-            var pd = obj.GetComponent<PlayerDataNetworked>();
-            if (pd != null) 
+            SessionManager.Instance.GameOverMessage = msg;
+            SessionManager.Instance.IsFinalMatch = matchEnded;
+            // Si terminó el match, guardamos el ganador FINAL. Si no, da igual (-1).
+            if (matchEnded) SessionManager.Instance.FinalWinnerTeam = winningTeam;
+        }
+
+        // 1. ENVIAR EL MENSAJE (RPC) PARA LOS CLIENTES
+        foreach (var p in _runner.ActivePlayers)
+        {
+            if (_runner.TryGetPlayerObject(p, out var obj))
             {
-                // Enviar RPC y esperar confirmación
-                pd.RPC_SetUIMessage(message, isFinal, winnerTeam);
-                confirmationsReceived++;
+                var pd = obj.GetComponent<PlayerDataNetworked>();
+                // Enviamos mensaje a clientes.
+                if (pd != null) pd.RPC_SetUIMessage(msg, matchEnded, matchEnded ? winningTeam : -1);
             }
         }
+
+        // 2. GUARDAR EN FIREBASE
+        if (matchEnded) SaveToFirebaseCorrectly(winningTeam == 0 ? "Maya" : "Español");
+        else _currentMapIndex++;
+
+        // 3. ESPERAR (Para que los clientes reciban el RPC antes del cambio de escena)
+        StartCoroutine(WaitAndSwitchScene(matchEnded));
     }
 
-    Debug.Log($"📤 Enviados {confirmationsReceived}/{totalPlayers} RPCs. Esperando confirmación...");
+    IEnumerator WaitAndSwitchScene(bool matchEnded)
+    {
+        // Esperamos 1.5 segundos.
+        // El Host YA tiene los datos (paso 0), así que el video le funcionará seguro.
+        // Los Clientes aprovecharán este tiempo para recibir el RPC.
+        yield return new WaitForSeconds(4f);
 
-    // ESPERAR MÁS TIEMPO PARA CLIENTES - 3 SEGUNDOS EN LUGAR DE 1.5
-    yield return new WaitForSeconds(3f);
-
-    Debug.Log($"✅ Todos los RPCs procesados. Cambiando escena...");
-
-    // Cambiar escena
-    if (matchEnded) 
-        SafeLoadScene(winnersSceneName);
-    else 
-        SafeLoadScene(resultsSceneName);
-}
+        if (matchEnded) SafeLoadScene(winnersSceneName);
+        else SafeLoadScene(resultsSceneName);
+    }
 
     // --- CARGA SEGURA ---
     private void SafeLoadScene(string sceneName)
