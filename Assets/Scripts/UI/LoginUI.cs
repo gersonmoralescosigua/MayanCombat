@@ -56,7 +56,7 @@ public class LoginUI : MonoBehaviour
         {
             Debug.Log("LoginUI: Firebase NO listo, entrando en modo local.");
             SessionManager.Instance?.SetSession(email, email.Split('@')[0]);
-            SceneManager.LoadScene("Menu");
+            SceneManager.LoadScene("introduccion");
             return;
         }
 
@@ -68,7 +68,7 @@ public class LoginUI : MonoBehaviour
             {
                 string nickname = string.IsNullOrEmpty(user.DisplayName) ? user.Email.Split('@')[0] : user.DisplayName;
                 SessionManager.Instance?.SetSession(user.Email, nickname);
-                SceneManager.LoadScene("Menu");
+                SceneManager.LoadScene("introduccion");
             }
             else MostrarError("Error inesperado en autenticación.");
         }
@@ -120,20 +120,20 @@ public class LoginUI : MonoBehaviour
                 {
                     var user = t.Result.User;
                     SessionManager.Instance?.SetSession(user.UserId ?? "guest", "Invitado", true);
-                    SceneManager.LoadScene("Menu");
+                    SceneManager.LoadScene("introduccion");
                 }
                 else
                 {
                     Debug.LogWarning("LoginUI: Error signInAnonymously");
                     SessionManager.Instance?.SetSession("guest@mayancombat", "Invitado", true);
-                    SceneManager.LoadScene("Menu");
+                    SceneManager.LoadScene("introduccion");
                 }
             });
         }
         else
         {
             SessionManager.Instance?.SetSession("guest@mayancombat", "Invitado", true);
-            SceneManager.LoadScene("Menu");
+            SceneManager.LoadScene("introduccion");
         }
     }
 

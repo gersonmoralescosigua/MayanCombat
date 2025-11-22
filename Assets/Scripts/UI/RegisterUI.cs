@@ -64,7 +64,7 @@ public class RegisterUI : MonoBehaviour
         {
             Debug.LogWarning("Firebase no está listo, modo local.");
             SessionManager.Instance?.SetSession(email, nickname);
-            SceneManager.LoadScene("Menu");
+            SceneManager.LoadScene("introduccion");
             return;
         }
 
@@ -75,7 +75,7 @@ public class RegisterUI : MonoBehaviour
             await user.UpdateUserProfileAsync(new UserProfile { DisplayName = nickname });
             SessionManager.Instance?.SetSession(email, nickname);
             Debug.Log($"✅ Usuario creado: {email}");
-            SceneManager.LoadScene("Menu");
+            SceneManager.LoadScene("introduccion");
         }
         catch (FirebaseException fex)
         {

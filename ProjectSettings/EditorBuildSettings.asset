@@ -36,6 +36,9 @@ EditorBuildSettings:
     path: Assets/Scenes/UI/Pantalla de Ajustes/Settings.unity
     guid: de3355255f21158469ebbbf8076ca0c1
   - enabled: 1
+    path: Assets/Scenes/UI/introduccion.unity
+    guid: 6a3920cf715c75f47be65e14c45914e4
+  - enabled: 1
     path: "Assets/Scenes/UI/Pantalla de Creaci\xF3n de Equipo/CreateTeam.unity"
     guid: d07bf4b177e20e7438300e74d4318540
   - enabled: 1

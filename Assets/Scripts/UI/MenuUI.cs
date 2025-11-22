@@ -23,7 +23,7 @@ public class MenuUI : MonoBehaviour
         if (btnUnirseRapida != null) btnUnirseRapida.onClick.AddListener(() => LoadSceneSafe("Matchmaking"));
         if (btnCrearEquipo != null) btnCrearEquipo.onClick.AddListener(() => LoadSceneSafe("CreateTeam"));
         if (btnAmistades != null) btnAmistades.onClick.AddListener(() => LoadSceneSafe("Friends"));
-        if (btnRanking != null) btnRanking.onClick.AddListener(() => LoadSceneSafe("GlobalRanking"));
+        if (btnRanking != null) btnRanking.onClick.AddListener(() => LoadSceneSafe("ranking"));
         if (btnAjustes != null) btnAjustes.onClick.AddListener(() => LoadSceneSafe("Settings"));
         if (btnSalir != null) btnSalir.onClick.AddListener(OnSalirClicked);
 
