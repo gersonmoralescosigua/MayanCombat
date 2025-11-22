@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 4244448824186598198}
   - component: {fileID: 2317041465194639473}
   - component: {fileID: -7924143872835205272}
+  - component: {fileID: 8613658289702405176}
   m_Layer: 7
   m_Name: pf_beatriz
   m_TagString: Player
@@ -139,6 +140,7 @@ MonoBehaviour:
   - {fileID: 6166838384249402642}
   - {fileID: 2317041465194639473}
   - {fileID: -7924143872835205272}
+  - {fileID: 8613658289702405176}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &6166838384249402642
 MonoBehaviour:
@@ -248,8 +250,6 @@ MonoBehaviour:
   animator: {fileID: 369483802363440233}
   _NetSpeed: 0
   _NetGrounded: 0
-  _NetAttacking:
-    _value: 0
   _NetFacingDirection: 0
   groundCheckDistance: 0.6
   groundMask:
@@ -272,3 +272,22 @@ MonoBehaviour:
   SyncParent: 0
   _autoAOIOverride: 1
   DisableSharedModeInterpolation: 0
+--- !u!114 &8613658289702405176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392798922818354650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 188410843b42d9849b7892929042dc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSoundEvents
+  audioSource: {fileID: 0}
+  walkClip: {fileID: 0}
+  jumpClip: {fileID: 0}
+  attackClip: {fileID: 0}
+  mayaDeathClip: {fileID: 0}
+  spanishDeathClip: {fileID: 0}
+  isMaya: 0
