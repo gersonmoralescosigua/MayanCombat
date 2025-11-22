@@ -271,7 +271,7 @@ Transform:
   m_GameObject: {fileID: 446261838}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.54, y: 0.21, z: 0}
+  m_LocalPosition: {x: 0.707, y: 0.202, z: 0}
   m_LocalScale: {x: 0.19150692, y: 0.15296835, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1009,7 +1009,7 @@ Transform:
   m_GameObject: {fileID: 1944240096}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.75, y: 0.63, z: 0}
+  m_LocalPosition: {x: -0.52, y: 0.678, z: 0}
   m_LocalScale: {x: 0.21581316, y: 0.19411859, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1540,6 +1540,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2942617421191135791, guid: d9ea73604ab565640b55afa96944399c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.245
+      objectReference: {fileID: 0}
+    - target: {fileID: 2942617421191135791, guid: d9ea73604ab565640b55afa96944399c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.492
+      objectReference: {fileID: 0}
     - target: {fileID: 4540071489180961973, guid: d9ea73604ab565640b55afa96944399c, type: 3}
       propertyPath: m_Name
       value: Pickups
@@ -1583,6 +1591,10 @@ PrefabInstance:
     - target: {fileID: 8500056821222577652, guid: d9ea73604ab565640b55afa96944399c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9021541991927247411, guid: d9ea73604ab565640b55afa96944399c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.241
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
