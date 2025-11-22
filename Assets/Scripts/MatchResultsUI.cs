@@ -8,7 +8,6 @@ public class MatchResults : MonoBehaviour
     public TMP_Text resultsText;
     public GameObject loadingIcon;
     public Button menuButton;
-    public Button rankingButton;
 
     void Start()
     {
@@ -27,7 +26,6 @@ public class MatchResults : MonoBehaviour
                 // ✅ ES FINAL: Mostrar botones, ocultar loading
                 loadingIcon.SetActive(false);
                 menuButton.gameObject.SetActive(true);
-                rankingButton.gameObject.SetActive(true);
                 Debug.Log("🎯 MOSTRANDO BOTONES - Es partida final");
             }
             else
@@ -35,7 +33,6 @@ public class MatchResults : MonoBehaviour
                 // ❌ NO ES FINAL: Mostrar loading, ocultar botones  
                 loadingIcon.SetActive(true);
                 menuButton.gameObject.SetActive(false);
-                rankingButton.gameObject.SetActive(false);
                 Debug.Log("🎯 MOSTRANDO LOADING - No es partida final");
             }
         }
@@ -45,7 +42,6 @@ public class MatchResults : MonoBehaviour
             // Por defecto: mostrar loading, ocultar botones
             loadingIcon.SetActive(true);
             menuButton.gameObject.SetActive(false);
-            rankingButton.gameObject.SetActive(false);
         }
 
         // Configurar botones (SIEMPRE, aunque estén ocultos)
@@ -54,10 +50,6 @@ public class MatchResults : MonoBehaviour
             SceneManager.LoadScene("Menu");
         });
         
-        rankingButton.onClick.AddListener(() => {
-            Debug.Log("📊 Botón Ranking presionado");
-            SceneManager.LoadScene("Ranking");
-        });
         
         Debug.Log("✅ MatchResults configurado correctamente");
     }

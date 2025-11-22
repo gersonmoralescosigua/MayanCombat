@@ -128,8 +128,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 176846013}
-  - component: {fileID: 176846012}
   - component: {fileID: 176846011}
+  - component: {fileID: 176846014}
   m_Layer: 0
   m_Name: results
   m_TagString: Untagged
@@ -155,22 +155,6 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours: []
   ForceRemoteRenderTimeframe: 0
---- !u!114 &176846012
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 176846010}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 022546aafb2ffb8429a5b6cd2b5d9abe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MatchResultsUI
-  resultsText: {fileID: 1073343471}
-  loadingIcon: {fileID: 835334374}
-  menuButton: {fileID: 1795631125}
-  rankingButton: {fileID: 0}
 --- !u!4 &176846013
 Transform:
   m_ObjectHideFlags: 0
@@ -186,6 +170,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &176846014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 176846010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 022546aafb2ffb8429a5b6cd2b5d9abe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MatchResults
+  resultsText: {fileID: 1073343471}
+  loadingIcon: {fileID: 835334374}
+  menuButton: {fileID: 1795631125}
 --- !u!1 &251601520
 GameObject:
   m_ObjectHideFlags: 0
