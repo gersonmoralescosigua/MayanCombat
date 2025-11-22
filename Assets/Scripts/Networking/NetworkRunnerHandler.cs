@@ -36,6 +36,10 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     private Dictionary<PlayerRef, string> _playerNames = new Dictionary<PlayerRef, string>();
     private bool _joining = false;
 
+    // 🔥 AGREGADO EXACTO: Lista de referencias PlayerDataNetworked
+    private List<PlayerDataNetworked> _allPlayerData = new List<PlayerDataNetworked>();
+
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -71,6 +75,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         else _playerNames.Add(player, nickname);
     }
 
+    // 🔥 MODIFICADO EXACTO — SOLO AGREGADO GUARDADO DE REFERENCIAS
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         if (runner.IsServer)
@@ -79,10 +84,21 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             {
                 var pObj = runner.Spawn(playerDataPrefab, Vector3.zero, Quaternion.identity, player);
                 runner.SetPlayerObject(player, pObj);
+
+                // Guardar referencia PlayerDataNetworked
+                var playerData = pObj.GetComponent<PlayerDataNetworked>();
+                if (playerData != null)
+                {
+                    _allPlayerData.Add(playerData);
+                    Debug.Log($"💾 Guardada referencia PlayerData para Player: {player}");
+                }
             }
-            if (runner.ActivePlayers.Count() == maxPlayers) StartCoroutine(AssignTeamsRoutine());
+
+            if (runner.ActivePlayers.Count() == maxPlayers) 
+                StartCoroutine(AssignTeamsRoutine());
         }
     }
+
 
     IEnumerator AssignTeamsRoutine()
     {
@@ -111,111 +127,82 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-public void OnPlayerFellToDeath(GameObject deadPlayerObj)
-{
-    if (!_runner.IsServer || !_roundIsActive) return;
 
-    _roundIsActive = false;
-
-    NetworkObject netObj = deadPlayerObj.GetComponent<NetworkObject>();
-    if (netObj == null) return;
-
-    int losingTeam = _playerTeams.ContainsKey(netObj.InputAuthority) ? _playerTeams[netObj.InputAuthority] : -1;
-    int winningTeam = (losingTeam == 0) ? 1 : 0;
-
-    if (winningTeam == 0) _mayaWins++; else _spanishWins++;
-
-    bool matchEnded = (_mayaWins >= 2 || _spanishWins >= 2 || _currentMapIndex >= mapRotation.Length - 1);
-    string winnerName = (_mayaWins > _spanishWins) ? "IMPERIO MAYA" : "ESPAÑOLES";
-
-    string msg = "";
-    string roundWinner = (winningTeam == 0) ? "Maya" : "Español";
-
-    if (matchEnded) 
-        msg = $"👑 ¡FIN DEL TORNEO!\n\nGanador Global: {winnerName}\nMarcador: Maya {_mayaWins} - {_spanishWins} Español";
-    else 
-        msg = $"Ronda Terminada\nGanador Ronda: {roundWinner}\n\nGlobal: Maya {_mayaWins} - {_spanishWins} Español";
-
-    Debug.Log($"📝 DATA ACTUALIZADA: {msg}. GanadorID: {winningTeam}");
-
-    // --- DEBUG CRÍTICO: Verificar qué jugadores están activos ---
-    Debug.Log($"👥 JUGADORES ACTIVOS: {_runner.ActivePlayers.Count()}");
-    foreach (var p in _runner.ActivePlayers)
+    // 🔥 REEMPLAZADO EXACTO — NUEVA VERSIÓN QUE USA _allPlayerData
+    public void OnPlayerFellToDeath(GameObject deadPlayerObj)
     {
-        Debug.Log($"   - Player: {p}, InputAuthority: {p}");
-    }
+        if (!_runner.IsServer || !_roundIsActive) return;
 
-    // --- 0. ACTUALIZACIÓN INMEDIATA LOCAL ---
-    if (SessionManager.Instance != null)
-    {
-        SessionManager.Instance.GameOverMessage = msg;
-        SessionManager.Instance.IsFinalMatch = matchEnded;
-        if (matchEnded) SessionManager.Instance.FinalWinnerTeam = winningTeam;
-        Debug.Log($"✅ HOST: SessionManager actualizado - FinalWinnerTeam: {SessionManager.Instance.FinalWinnerTeam}");
-    }
+        _roundIsActive = false;
 
-    // --- 1. ENVIAR RPC - SOLUCIÓN DEFINITIVA ---
-    int rpcSentCount = 0;
-    
-    // MÉTODO ALTERNATIVO: Buscar TODOS los objetos PlayerDataNetworked en la escena
-    var allPlayerData = FindObjectsByType<PlayerDataNetworked>(FindObjectsSortMode.None);
-    Debug.Log($"🔍 Encontrados {allPlayerData.Length} objetos PlayerDataNetworked en escena");
-    
-    foreach (var playerData in allPlayerData)
-    {
-        if (playerData != null && playerData.Object != null)
-        {
-            playerData.RPC_SetUIMessage(msg, matchEnded, matchEnded ? winningTeam : -1);
-            rpcSentCount++;
-            Debug.Log($"📤 RPC enviado a PlayerData: {playerData.Object.Id}, InputAuthority: {playerData.Object.InputAuthority}");
-        }
-    }
+        NetworkObject netObj = deadPlayerObj.GetComponent<NetworkObject>();
+        if (netObj == null) return;
 
-    // MÉTODO ORIGINAL COMO BACKUP
-    foreach (var p in _runner.ActivePlayers)
-    {
-        if (_runner.TryGetPlayerObject(p, out var obj))
-        {
-            var pd = obj.GetComponent<PlayerDataNetworked>();
-            if (pd != null) 
-            {
-                pd.RPC_SetUIMessage(msg, matchEnded, matchEnded ? winningTeam : -1);
-                rpcSentCount++;
-                Debug.Log($"📤 RPC (método original) enviado a Player: {p}");
-            }
-            else
-            {
-                Debug.LogWarning($"⚠️ No se encontró PlayerDataNetworked para Player: {p}");
-            }
-        }
+        int losingTeam = _playerTeams.ContainsKey(netObj.InputAuthority) ? _playerTeams[netObj.InputAuthority] : -1;
+        int winningTeam = (losingTeam == 0) ? 1 : 0;
+
+        if (winningTeam == 0) _mayaWins++; else _spanishWins++;
+
+        bool matchEnded = (_mayaWins >= 2 || _spanishWins >= 2 || _currentMapIndex >= mapRotation.Length - 1);
+        string winnerName = (_mayaWins > _spanishWins) ? "IMPERIO MAYA" : "ESPAÑOLES";
+
+        string msg = "";
+        string roundWinner = (winningTeam == 0) ? "Maya" : "Español";
+
+        if (matchEnded)
+            msg = $"👑 ¡FIN DEL TORNEO!\n\nGanador Global: {winnerName}\nMarcador: Maya {_mayaWins} - {_spanishWins} Español";
         else
+            msg = $"Ronda Terminada\nGanador Ronda: {roundWinner}\n\nGlobal: Maya {_mayaWins} - {_spanishWins} Español";
+
+        Debug.Log($"📝 DATA ACTUALIZADA: {msg}. GanadorID: {winningTeam}");
+
+        // 0. Sesión local
+        if (SessionManager.Instance != null)
         {
-            Debug.LogWarning($"⚠️ No se pudo obtener PlayerObject para Player: {p}");
+            SessionManager.Instance.GameOverMessage = msg;
+            SessionManager.Instance.IsFinalMatch = matchEnded;
+            if (matchEnded) SessionManager.Instance.FinalWinnerTeam = winningTeam;
         }
+
+        // 1. Enviar RPC usando referencias guardadas
+        int rpcSentCount = 0;
+
+        Debug.Log($"🔍 Usando {_allPlayerData.Count} referencias guardadas de PlayerDataNetworked");
+
+        foreach (var playerData in _allPlayerData)
+        {
+            if (playerData != null && playerData.Object != null && playerData.Object.IsValid)
+            {
+                playerData.RPC_SetUIMessage(msg, matchEnded, matchEnded ? winningTeam : -1);
+                rpcSentCount++;
+                Debug.Log($"📤 RPC enviado a PlayerData: {playerData.Object.Id}, InputAuthority: {playerData.Object.InputAuthority}");
+            }
+        }
+
+        Debug.Log($"📨 TOTAL RPCs ENVIADOS: {rpcSentCount}");
+
+        // 2. Firebase
+        if (matchEnded) 
+            SaveToFirebaseCorrectly(winningTeam == 0 ? "Maya" : "Español");
+        else 
+            _currentMapIndex++;
+
+        StartCoroutine(WaitAndSwitchScene(matchEnded));
     }
-    
-    Debug.Log($"📨 TOTAL RPCs ENVIADOS: {rpcSentCount}");
 
-    // 2. GUARDAR EN FIREBASE
-    if (matchEnded) SaveToFirebaseCorrectly(winningTeam == 0 ? "Maya" : "Español");
-    else _currentMapIndex++;
 
-    // 3. ESPERAR MÁS TIEMPO - 5 SEGUNDOS
-    StartCoroutine(WaitAndSwitchScene(matchEnded));
-}
 
-// AGREGA ESTE MÉTODO QUE FALTABA
-private IEnumerator WaitAndSwitchScene(bool matchEnded)
-{
-    Debug.Log($"⏳ Esperando 5 segundos antes de cambiar escena...");
-    yield return new WaitForSeconds(5f);
+    private IEnumerator WaitAndSwitchScene(bool matchEnded)
+    {
+        Debug.Log($"⏳ Esperando 5 segundos antes de cambiar escena...");
+        yield return new WaitForSeconds(5f);
 
-    Debug.Log($"🔄 Cambiando a escena: {(matchEnded ? winnersSceneName : resultsSceneName)}");
-    if (matchEnded) SafeLoadScene(winnersSceneName);
-    else SafeLoadScene(resultsSceneName);
-}
+        Debug.Log($"🔄 Cambiando a escena: {(matchEnded ? winnersSceneName : resultsSceneName)}");
+        if (matchEnded) SafeLoadScene(winnersSceneName);
+        else SafeLoadScene(resultsSceneName);
+    }
 
-    // --- CARGA SEGURA ---
+
     private void SafeLoadScene(string sceneName)
     {
         if (!_runner.IsServer) return;
@@ -289,8 +276,24 @@ private IEnumerator WaitAndSwitchScene(bool matchEnded)
     public void ShutdownAndMenu() { StartCoroutine(ShutdownRoutine()); }
     IEnumerator ShutdownRoutine() { if (_runner != null) _runner.Shutdown(); yield return new WaitForSeconds(1f); SceneManager.LoadScene(menuSceneName); }
 
-    // Callbacks vacíos...
-    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { _playerTeams.Remove(player); _playerNames.Remove(player); }
+    
+    // 🔥 REEMPLAZADO EXACTO — OnPlayerLeft con limpieza de referencias
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        _playerTeams.Remove(player);
+        _playerNames.Remove(player);
+
+        // eliminar PlayerDataNetworked del jugador que salió
+        _allPlayerData.RemoveAll(pd =>
+            pd != null &&
+            pd.Object != null &&
+            pd.Object.InputAuthority == player
+        );
+
+        Debug.Log($"🧹 PlayerData limpiado para Player {player}");
+    }
+
+
     public void OnConnectedToServer(NetworkRunner runner) { }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
     public void OnSceneLoadStart(NetworkRunner runner) { }
